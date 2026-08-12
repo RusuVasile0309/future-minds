@@ -1,0 +1,26 @@
+{
+  "name": "@fm/server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "migrate": "npx tsx src/database/migrate.ts"
+  },
+  "dependencies": {
+    "@fm/shared": "*",
+    "@neondatabase/serverless": "^0.10.4",
+    "aws4fetch": "^1.0.20",
+    "bcryptjs": "^3.0.3",
+    "resend": "^6.12.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.14.12",
+    "@types/pg": "^8.11.6",
+    "pg": "^8.21.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.5.4"
+  }
+}

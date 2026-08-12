@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Sistem alb elegant — mapat pe scara de albastruri FutureMinds */
+    --background: 0 0% 100%;
+    --foreground: 219 63% 13%;        /* #0C1A34 aprox. */
+
+    --card: 0 0% 100%;
+    --card-foreground: 219 63% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 219 63% 13%;
+
+    --primary: 220 80% 44%;           /* brand #1650C8 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 60% 96%;         /* albastru foarte deschis */
+    --secondary-foreground: 220 83% 26%;
+
+    --muted: 214 40% 96%;
+    --muted-foreground: 218 16% 46%;
+
+    --accent: 214 100% 96%;
+    --accent-foreground: 220 83% 26%; /* brand #0B2F7A */
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 216 45% 92%;
+    --input: 216 45% 90%;
+    --ring: 217 91% 60%;              /* brand electric #3B82F6 */
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 220 55% 8%;
+    --foreground: 213 60% 95%;
+
+    --card: 221 47% 13%;
+    --card-foreground: 213 60% 95%;
+    --popover: 221 47% 13%;
+    --popover-foreground: 213 60% 95%;
+
+    --primary: 217 100% 77%;          /* brand light #8AB4FF pe fundal închis */
+    --primary-foreground: 220 83% 15%;
+
+    --secondary: 221 40% 18%;
+    --secondary-foreground: 213 60% 95%;
+
+    --muted: 221 35% 18%;
+    --muted-foreground: 216 20% 65%;
+
+    --accent: 221 40% 20%;
+    --accent-foreground: 213 60% 95%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 219 35% 22%;
+    --input: 219 35% 24%;
+    --ring: 217 91% 68%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Titlu editorial serif cu un cuvânt-cheie accentuat */
+  .display-title {
+    @apply font-serif font-medium tracking-tight text-foreground;
+  }
+  /* Eyebrow / etichetă mono */
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.22em] text-primary;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "future-minds",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @fm/web",
+    "build": "npm run build -w @fm/web",
+    "start": "npm run start -w @fm/web",
+    "lint": "npm run lint -w @fm/web",
+    "migrate": "npm run migrate -w @fm/server"
+  }
+}
