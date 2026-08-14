@@ -73,6 +73,20 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Respectă preferința de mișcare redusă: neutralizează global orice
+     animație/tranziție, indiferent unde e declarată. Elementele cu fill-mode
+     `both` sar direct la starea finală (rămân vizibile, fără mișcare). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {

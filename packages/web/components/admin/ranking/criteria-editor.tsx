@@ -130,7 +130,7 @@ export function CriteriaEditor({
 
           {c.kind === "boolean" && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Bonus la bifare — mărimea influenței e dată de pondere.
+              Bonus la bifare, mărimea influenței e dată de pondere.
             </p>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { ApplicationsService, FilesService, ApplicationError } from "@fm/server"
+import { ApplicationsService, FilesService, AuthService, ApplicationError } from "@fm/server"
 import { requireAuth } from "@/lib/api-auth"
 import type { ApiResponse } from "@fm/shared"
 
@@ -11,7 +11,10 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
 
   const application = await ApplicationsService.getOrCreateDraft(guard.userId)
   const files = await FilesService.listForApplication(application.id)
-  return NextResponse.json({ success: true, data: { ...application, files } })
+  // Datele de cont (email/telefon) pentru pre-completarea formularului.
+  const user = await AuthService.getUserById(guard.userId)
+  const account = { email: user?.email ?? null, phone: user?.phone ?? null }
+  return NextResponse.json({ success: true, data: { ...application, files, account } })
 }
 
 const saveSchema = z.object({ answers: z.record(z.string(), z.any()) })

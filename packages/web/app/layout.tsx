@@ -28,7 +28,7 @@ const spectral = Spectral({
 
 export const metadata: Metadata = {
   title: {
-    default: "FutureMinds — burse integrale pentru studii de IT și inginerie",
+    default: "FutureMinds: burse integrale pentru studii de IT și inginerie",
     template: "%s · FutureMinds",
   },
   description:

@@ -18,6 +18,8 @@ export interface FieldOption {
 export interface FieldValidation {
   min?: number
   max?: number
+  // Valoarea trebuie să fie un număr întreg (ex.: nr. frați/surori).
+  integer?: boolean
   minLength?: number
   maxLength?: number
   regex?: string

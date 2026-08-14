@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { GraduationCap } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
+import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default function DesprePage() {
             Potențialul nu așteaptă <span className="text-primary">permisiune</span>.
           </>
         }
-        lead="FutureMinds identifică tineri cu competențe reale și interes pentru informatică și inginerie, apoi le deschide accesul la învățământul superior — indiferent de contextul din care provin."
+        lead="FutureMinds identifică tineri cu competențe reale și interes pentru informatică și inginerie, apoi le deschide accesul la învățământul superior, indiferent de contextul din care provin."
       />
 
       {/* Problema & soluția */}
@@ -73,7 +74,7 @@ export default function DesprePage() {
         <article>
           <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Soluția</h2>
           <p className="mt-4 font-serif text-2xl leading-snug text-foreground">
-            Un parcurs educațional structurat, cu studiile acoperite integral pe 3–4 ani.
+            Un parcurs educațional structurat, cu studiile acoperite integral pe 3-4 ani.
           </p>
           <p className="mt-4 text-muted-foreground">
             Identificăm tinerii cu competențe reale și îi sprijinim să se specializeze în IT și inginerie, cu
@@ -88,9 +89,12 @@ export default function DesprePage() {
         <div className="container py-16 md:py-20">
           <p className="eyebrow">Cum funcționează parteneriatul</p>
           <h2 className="display-title mt-4 text-3xl sm:text-4xl">Obligațiile părților</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <Reveal className="mt-10 grid gap-6 md:grid-cols-3">
             {OBLIGATIONS.map((o) => (
-              <div key={o.party} className="rounded-2xl border border-border bg-card p-7">
+              <div
+                key={o.party}
+                className="rounded-2xl border border-border bg-card p-7 transition duration-300 hover:-translate-y-1 hover:border-brand-light/60 hover:shadow-md"
+              >
                 <h3 className="font-serif text-xl font-medium text-brand-deep dark:text-primary">{o.party}</h3>
                 <ul className="mt-4 space-y-3">
                   {o.items.map((item, i) => (
@@ -102,7 +106,7 @@ export default function DesprePage() {
                 </ul>
               </div>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -114,8 +118,8 @@ export default function DesprePage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/aplica">
-              Aplică acum <ArrowRight className="size-4" />
+            <Link href="/aplica" data-apply-cta>
+              Vreau bursă <GraduationCap className="size-4" />
             </Link>
           </Button>
           <Button asChild size="lg" variant="secondary">

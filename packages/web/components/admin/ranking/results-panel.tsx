@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import type { ScoredApplication } from "@fm/shared"
 
 function fmtIncome(v: number | null): string {
-  if (v === null) return "—"
+  if (v === null) return "-"
   return `${v.toLocaleString("ro-RO", { maximumFractionDigits: 0 })} RON`
 }
 
@@ -68,7 +68,7 @@ function RowGroup({ r, isOpen, onToggle }: { r: ScoredApplication; isOpen: boole
             <span className="font-mono font-semibold">{r.rank}</span>
           ) : (
             <span className="text-muted-foreground" title="Neeligibil">
-              —
+              -
             </span>
           )}
         </td>
@@ -76,7 +76,7 @@ function RowGroup({ r, isOpen, onToggle }: { r: ScoredApplication; isOpen: boole
           <Link href={`/admin/candidati/${r.applicationId}`} className="font-medium hover:underline">
             {r.fullName}
           </Link>
-          <span className="block text-xs text-muted-foreground">{r.email ?? "—"}</span>
+          <span className="block text-xs text-muted-foreground">{r.email ?? "-"}</span>
           {!r.eligible && (
             <span className="mt-1 inline-flex items-center gap-1 text-xs text-destructive">
               <AlertTriangle className="size-3" /> {r.failedRules.join("; ")}

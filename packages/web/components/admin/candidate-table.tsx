@@ -26,7 +26,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 const STATUS_ORDER: ApplicationStatus[] = ["submitted", "under_review", "waitlist", "accepted", "rejected", "draft"]
 
 function formatDate(d: Date | string | null): string {
-  if (!d) return "—"
+  if (!d) return "-"
   return new Date(d).toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "numeric" })
 }
 
@@ -155,12 +155,16 @@ export function CandidateTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {rows.map((a) => (
-                <tr key={a.id} className="group transition-colors hover:bg-secondary/40">
+              {rows.map((a, i) => (
+                <tr
+                  key={a.id}
+                  className="group transition-colors hover:bg-secondary/40 motion-safe:animate-fade-rise"
+                  style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
+                >
                   <td className="px-5 py-4">
                     <Link href={`/admin/candidati/${a.id}`} className="block">
                       <span className="font-medium text-foreground">{a.fullName}</span>
-                      <span className="block text-xs text-muted-foreground">{a.applicant.email ?? "—"}</span>
+                      <span className="block text-xs text-muted-foreground">{a.applicant.email ?? "-"}</span>
                     </Link>
                   </td>
                   <td className="px-5 py-4">
@@ -251,7 +255,7 @@ function ScoreCell({ scored, loading, error }: { scored?: ScoredApplication; loa
   )
 }
 
-function NoScore({ reason, label = "—" }: { reason: string; label?: string }) {
+function NoScore({ reason, label = "-" }: { reason: string; label?: string }) {
   return (
     <span className="inline-flex flex-col" title={reason}>
       <span className="font-medium text-muted-foreground">{label}</span>

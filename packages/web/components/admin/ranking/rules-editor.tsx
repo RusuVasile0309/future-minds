@@ -99,7 +99,7 @@ export function EligibilityEditor({
           </div>
         ))}
         {rules.length === 0 && (
-          <p className="text-sm text-muted-foreground">Fără praguri — toți candidații sunt eligibili.</p>
+          <p className="text-sm text-muted-foreground">Fără praguri, toți candidații sunt eligibili.</p>
         )}
       </div>
       <button
@@ -160,7 +160,7 @@ export function TieBreakerEditor({
           </div>
         ))}
         {tieBreakers.length === 0 && (
-          <p className="text-sm text-muted-foreground">Fără departajări — la egalitate se folosește ordinea alfabetică.</p>
+          <p className="text-sm text-muted-foreground">Fără departajări; la egalitate se folosește ordinea alfabetică.</p>
         )}
       </div>
       <button

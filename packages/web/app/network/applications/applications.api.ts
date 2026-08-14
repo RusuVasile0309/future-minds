@@ -1,7 +1,11 @@
 import { apiRequest } from "../utils/request"
 import type { Application, ApplicationFile, AnswerValue } from "@fm/shared"
 
-export type MyApplication = Application & { files: ApplicationFile[] }
+export type MyApplication = Application & {
+  files: ApplicationFile[]
+  /** Datele de cont pentru pre-completarea formularului (email/telefon). */
+  account?: { email: string | null; phone: string | null }
+}
 
 export const applicationsApi = {
   getMine: () => apiRequest<MyApplication>("/api/applications/me"),

@@ -21,7 +21,7 @@ const ROLE_BADGE: Record<UserRole, string> = {
 
 function fullName(u: User): string {
   const composed = [u.lastName, u.firstName].filter(Boolean).join(" ")
-  return composed || u.name || "—"
+  return composed || u.name || "-"
 }
 
 export function UsersManager({ currentUserId, canManage }: { currentUserId: string; canManage: boolean }) {
@@ -103,7 +103,7 @@ export function UsersManager({ currentUserId, canManage }: { currentUserId: stri
                         {fullName(u)}
                         {isSelf ? <span className="ml-2 text-xs text-muted-foreground">(tu)</span> : null}
                       </span>
-                      <span className="block text-xs text-muted-foreground">{u.email ?? "—"}</span>
+                      <span className="block text-xs text-muted-foreground">{u.email ?? "-"}</span>
                     </td>
                     <td className="px-5 py-4">
                       {canManage && !isSelf ? (

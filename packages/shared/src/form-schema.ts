@@ -300,7 +300,7 @@ const SECTIONS: SectionSpec[] = [
         type: "number",
         required: true,
         helpText: "Intră în calculul venitului pe membru de familie.",
-        validation: { min: 0 },
+        validation: { min: 0, integer: true },
       },
     ],
   },
@@ -520,4 +520,60 @@ export function isFieldVisible(field: FormField, answers: Record<string, unknown
   if (w.all && !w.all.every((c) => conditionMet(c, answers))) return false
   if (w.any && !w.any.some((c) => conditionMet(c, answers))) return false
   return true
+}
+
+// ── Validări de format / interval ─────────────────────────────────────────────
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Telefon românesc: prefix +40 / 0040 / 0, urmat de 9 cifre (mobil sau fix).
+const RO_PHONE_REGEX = /^(?:\+40|0040|0)\d{9}$/
+
+export function isValidEmail(v: string): boolean {
+  return EMAIL_REGEX.test(v.trim())
+}
+
+export function isValidRoPhone(v: string): boolean {
+  return RO_PHONE_REGEX.test(v.replace(/[\s.\-()]/g, ""))
+}
+
+/**
+ * Validează valoarea DEJA introdusă a unui câmp (format/interval). Nu verifică
+ * dacă e obligatoriu (vezi `missingRequired`). Returnează un mesaj de eroare în
+ * română sau `null` dacă valoarea e validă (sau goală).
+ */
+export function validateFieldValue(field: FormField, value: unknown): string | null {
+  if (value === null || value === undefined || value === "") return null
+
+  if (field.type === "email") {
+    if (typeof value !== "string" || !isValidEmail(value)) return "Adresă de email invalidă."
+    return null
+  }
+  if (field.type === "phone") {
+    if (typeof value !== "string" || !isValidRoPhone(value))
+      return "Număr de telefon invalid (format românesc, ex.: 07XXXXXXXX)."
+    return null
+  }
+  if (field.type === "number") {
+    const n = toNumber(value)
+    if (n === null) return "Introdu un număr valid."
+    if (field.validation?.integer && !Number.isInteger(n)) return "Introdu un număr întreg."
+    const { min, max } = field.validation ?? {}
+    if (min !== undefined && n < min) return `Valoarea trebuie să fie cel puțin ${min}.`
+    if (max !== undefined && n > max) return `Valoarea trebuie să fie cel mult ${max}.`
+  }
+  return null
+}
+
+/**
+ * Reguli automate pentru părinți: dacă un părinte e decedat, nu poate susține
+ * financiar → forțează `*_supports = false` și golește venitul aferent. Mutează
+ * `answers` pe loc. Se aplică la fiecare editare și la încărcarea draft-ului.
+ */
+export function applyParentRules(answers: Record<string, unknown>): void {
+  for (const p of ["mother", "father"] as const) {
+    if (answers[`${p}_deceased`] === true) {
+      answers[`${p}_supports`] = false
+      delete answers[`${p}_income`]
+    }
+  }
 }

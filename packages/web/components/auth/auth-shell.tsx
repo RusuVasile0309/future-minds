@@ -20,7 +20,7 @@ export function AuthShell({
       />
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex justify-center">
-          <Link href="/" aria-label="Acasă — FutureMinds">
+          <Link href="/" aria-label="Acasă FutureMinds">
             <FutureMindsLogo variant="stacked" size={40} />
           </Link>
         </div>

@@ -62,7 +62,7 @@ export function FieldInput({
           disabled={disabled}
           min={field.validation?.min}
           max={field.validation?.max}
-          step="any"
+          step={field.validation?.integer ? "1" : "any"}
         />
       )
 

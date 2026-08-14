@@ -1,7 +1,7 @@
 import { sql } from "../../database/db"
 import { SettingsService } from "../settings/settings.service"
 import { FilesService } from "../files/files.service"
-import { FORM_SCHEMA, isFieldVisible } from "@fm/shared"
+import { FORM_SCHEMA, isFieldVisible, validateFieldValue } from "@fm/shared"
 import type {
   Application,
   ApplicationStatus,
@@ -152,6 +152,11 @@ export class ApplicationsService {
       throw new ApplicationError(`Completează câmpurile obligatorii: ${missing.join(", ")}`, 400)
     }
 
+    const invalid = this.invalidValues(FORM_SCHEMA, app.answers)
+    if (invalid.length > 0) {
+      throw new ApplicationError(`Valori invalide: ${invalid.join(", ")}`, 400)
+    }
+
     const [row] = await sql`
       UPDATE applications
       SET status = 'submitted', submitted_at = NOW(), updated_at = NOW()
@@ -194,6 +199,18 @@ export class ApplicationsService {
       }
     }
     return missing
+  }
+
+  // Câmpuri completate cu valori invalide (format email/telefon, interval note etc.).
+  private static invalidValues(sections: FormSection[], answers: Record<string, AnswerValue>): string[] {
+    const invalid: string[] = []
+    for (const section of sections) {
+      for (const field of section.fields) {
+        if (field.derived || !isFieldVisible(field, answers)) continue
+        if (validateFieldValue(field, answers[field.key] ?? null)) invalid.push(field.label)
+      }
+    }
+    return invalid
   }
 
   // ── Admin ────────────────────────────────────────────────────────────────────

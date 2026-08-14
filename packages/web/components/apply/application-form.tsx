@@ -9,7 +9,13 @@ import { Label } from "@/components/ui/label"
 import { FieldInput } from "@/components/apply/field-input"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { clearDependentAnswers } from "@/lib/content/form-options"
-import { applyComputedFields, getFormSchema, isFieldVisible } from "@fm/shared"
+import {
+  applyComputedFields,
+  applyParentRules,
+  getFormSchema,
+  isFieldVisible,
+  validateFieldValue,
+} from "@fm/shared"
 import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField, FormSection } from "@fm/shared"
 
 // Schema formularului este STATICĂ (definită în @fm/shared).
@@ -36,11 +42,20 @@ export function ApplicationForm() {
   useEffect(() => {
     if (application && !initialized.current) {
       const init = { ...(application.answers ?? {}) }
+      // Pre-completează email/telefon din contul elevului (dacă nu există deja).
+      const account = application.account
+      if (account?.email && !init.email) init.email = account.email
+      if (account?.phone && !init.phone) init.phone = account.phone
       applyComputedFields(init) // ex.: media Bac, dacă notele există deja în draft
+      applyParentRules(init) // ex.: părinte decedat → nu susține financiar
       setAnswers(init)
+      // Persistă pre-completarea dacă a adăugat ceva (email/telefon din cont).
+      if (isDraft && JSON.stringify(init) !== JSON.stringify(application.answers ?? {})) {
+        dirty.current = true
+      }
       initialized.current = true
     }
-  }, [application])
+  }, [application, isDraft])
 
   // Auto-save debounce (doar în draft, doar după o editare).
   useEffect(() => {
@@ -78,6 +93,8 @@ export function ApplicationForm() {
       clearDependentAnswers(next, key)
       // Recalculează câmpurile derivate (ex.: media Bac din cele 3 note).
       applyComputedFields(next)
+      // Reguli părinți: decedat → nu susține financiar (câmp dezactivat).
+      applyParentRules(next)
       return next
     })
   }
@@ -109,6 +126,9 @@ export function ApplicationForm() {
 
   const section = sections[step]
   const isLast = step === sections.length - 1
+  // Nu se poate avansa / trimite până când toate câmpurile obligatorii vizibile
+  // din pasul curent sunt completate și valide.
+  const stepComplete = isStepComplete(section, answers, files)
 
   return (
     <div>
@@ -140,17 +160,21 @@ export function ApplicationForm() {
         <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12">
           {section.fields
             .filter((field) => !field.derived && isFieldVisible(field, answers))
-            .map((field) => (
-              <FieldRow key={field.id} field={field}>
-                <FieldInput
-                  field={field}
-                  value={answers[field.key] ?? null}
-                  onChange={(v) => update(field.key, v)}
-                  files={files}
-                  answers={answers}
-                />
-              </FieldRow>
-            ))}
+            .map((field) => {
+              const value = answers[field.key] ?? null
+              return (
+                <FieldRow key={field.id} field={field} error={validateFieldValue(field, value)}>
+                  <FieldInput
+                    field={field}
+                    value={value}
+                    onChange={(v) => update(field.key, v)}
+                    files={files}
+                    answers={answers}
+                    disabled={isFieldDisabled(field, answers)}
+                  />
+                </FieldRow>
+              )
+            })}
         </div>
       </div>
 
@@ -166,12 +190,12 @@ export function ApplicationForm() {
         </Button>
 
         {isLast ? (
-          <Button onClick={handleSubmit} disabled={submit.isPending}>
+          <Button onClick={handleSubmit} disabled={submit.isPending || !stepComplete}>
             {submit.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             Trimite aplicația
           </Button>
         ) : (
-          <Button onClick={goNext}>
+          <Button onClick={goNext} disabled={!stepComplete}>
             Continuă <ArrowRight className="size-4" />
           </Button>
         )}
@@ -190,7 +214,60 @@ const COL_SPAN: Record<number, string> = {
   12: "sm:col-span-12",
 }
 
-function FieldRow({ field, children }: { field: FormField; children: React.ReactNode }) {
+// Un câmp este „gol" (necompletat) pentru validarea de obligativitate.
+function isEmpty(field: FormField, value: AnswerValue): boolean {
+  return (
+    value === undefined ||
+    value === null ||
+    value === "" ||
+    (Array.isArray(value) && value.length === 0) ||
+    (field.type === "boolean" && typeof value !== "boolean")
+  )
+}
+
+// Câmp dezactivat prin reguli (ex.: „mă susține financiar" când părintele e decedat).
+function isFieldDisabled(field: FormField, answers: Record<string, AnswerValue>): boolean {
+  if (field.key === "mother_supports") return answers.mother_deceased === true
+  if (field.key === "father_supports") return answers.father_deceased === true
+  return false
+}
+
+// Toate câmpurile obligatorii VIZIBILE din secțiune sunt completate și valide?
+function isStepComplete(
+  section: FormSection,
+  answers: Record<string, AnswerValue>,
+  files: ApplicationFile[]
+): boolean {
+  const fileKeys = new Set(files.map((f) => f.fieldKey))
+  for (const field of section.fields) {
+    if (field.derived || !isFieldVisible(field, answers)) continue
+    const value = answers[field.key] ?? null
+    if (field.required) {
+      if (field.type === "file") {
+        if (!fileKeys.has(field.key)) return false
+        continue
+      }
+      if (field.requiredTrue) {
+        if (value !== true) return false
+        continue
+      }
+      if (isEmpty(field, value)) return false
+    }
+    // Câmp completat dar invalid (format/interval) → blochează pasul.
+    if (validateFieldValue(field, value)) return false
+  }
+  return true
+}
+
+function FieldRow({
+  field,
+  error,
+  children,
+}: {
+  field: FormField
+  error?: string | null
+  children: React.ReactNode
+}) {
   const spanClass = COL_SPAN[field.colSpan ?? 12] ?? "sm:col-span-12"
   return (
     <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
@@ -204,6 +281,7 @@ function FieldRow({ field, children }: { field: FormField; children: React.React
         <div className="mt-1.5" />
       )}
       {children}
+      {error ? <p className="mt-1.5 text-xs text-destructive motion-safe:animate-slide-down">{error}</p> : null}
     </div>
   )
 }
@@ -217,7 +295,7 @@ function SaveIndicator({ saving, savedAt }: { saving: boolean; savedAt: number |
     )
   if (savedAt)
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="flex animate-fade-in items-center gap-1.5 text-xs text-muted-foreground">
         <Check className="size-3 text-emerald-500" /> Salvat
       </span>
     )
@@ -274,9 +352,9 @@ function SubmittedView({
 function formatAnswer(field: FormField, value: AnswerValue, files: ApplicationFile[]): string {
   if (field.type === "file") {
     const mine = files.filter((f) => f.fieldKey === field.key)
-    return mine.length ? mine.map((f) => f.fileName).join(", ") : "—"
+    return mine.length ? mine.map((f) => f.fileName).join(", ") : "-"
   }
-  if (value === null || value === undefined || value === "") return "—"
+  if (value === null || value === undefined || value === "") return "-"
   if (field.type === "boolean") return value ? "Da" : "Nu"
   if (Array.isArray(value)) {
     return value

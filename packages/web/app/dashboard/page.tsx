@@ -62,7 +62,7 @@ export default async function DashboardPage() {
             <div className="mt-6 rounded-2xl border border-brand-light/60 bg-secondary/50 p-7">
               <h2 className="font-serif text-xl font-medium">Portal admin</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ai acces la portalul de administrare — candidați, formular și ranking.
+                Ai acces la portalul de administrare: candidați, formular și ranking.
               </p>
               <Button asChild variant="secondary" className="mt-5">
                 <Link href="/admin">Deschide portalul</Link>

@@ -9,7 +9,7 @@ export default function AdminRankingPage() {
       <p className="eyebrow">Portal admin</p>
       <h1 className="display-title mt-4 text-3xl sm:text-4xl">Algoritm de ranking</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
-        Definește cum se punctează candidații — ponderi, direcții, praguri de eligibilitate și departajări.
+        Definește cum se punctează candidații: ponderi, direcții, praguri de eligibilitate și departajări.
         Previzualizează clasamentul, apoi publică o versiune pentru a-l fixa.
       </p>
       <div className="mt-10">

@@ -34,12 +34,16 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:items-center">
-      <div className="fixed inset-0 bg-brand-deep/40 backdrop-blur-sm" onClick={onClose} aria-hidden />
+      <div
+        className="fixed inset-0 animate-fade-in bg-brand-deep/40 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
       <div
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative z-10 my-8 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl",
+          "relative z-10 my-8 w-full max-w-lg animate-modal-in rounded-2xl border border-border bg-card p-6 shadow-xl",
           className
         )}
       >

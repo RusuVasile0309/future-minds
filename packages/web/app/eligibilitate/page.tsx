@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, GraduationCap, HandCoins, Sparkles, MapPin, BadgeCheck } from "lucide-react"
+import { GraduationCap, HandCoins, Sparkles, MapPin, BadgeCheck } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
+import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ const CRITERIA = [
   {
     icon: GraduationCap,
     title: "Rezultate academice",
-    body: "Media obținută pe parcursul studiilor — reflectă seriozitatea și potențialul academic al candidatului.",
+    body: "Media obținută pe parcursul studiilor, care reflectă seriozitatea și potențialul academic al candidatului.",
   },
   {
     icon: HandCoins,
@@ -52,9 +53,12 @@ export default function EligibilitatePage() {
       />
 
       <section className="container py-16 md:py-20">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {CRITERIA.map((c) => (
-            <div key={c.title} className="rounded-2xl border border-border bg-card p-7">
+            <div
+              key={c.title}
+              className="rounded-2xl border border-border bg-card p-7 transition duration-300 hover:-translate-y-1 hover:border-brand-light/60 hover:shadow-md"
+            >
               <span className="flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
                 <c.icon className="size-5" />
               </span>
@@ -67,17 +71,17 @@ export default function EligibilitatePage() {
             <div>
               <h3 className="font-serif text-xl font-medium">Te încadrezi?</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Nu trebuie să bifezi perfect fiecare criteriu — contează imaginea de ansamblu. Aplică și lasă-ne
+                Nu trebuie să bifezi perfect fiecare criteriu; contează imaginea de ansamblu. Aplică și lasă-ne
                 să te cunoaștem.
               </p>
             </div>
             <Button asChild className="mt-6 w-full">
-              <Link href="/aplica">
-                Începe aplicația <ArrowRight className="size-4" />
+              <Link href="/aplica" data-apply-cta>
+                Vreau bursă <GraduationCap className="size-4" />
               </Link>
             </Button>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <section className="border-t border-border bg-secondary/30">

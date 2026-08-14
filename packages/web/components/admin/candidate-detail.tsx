@@ -23,7 +23,7 @@ const STATUS_ACTIONS: { value: ApplicationStatus; label: string }[] = [
 ]
 
 function formatDate(d: Date | string | null): string {
-  if (!d) return "—"
+  if (!d) return "-"
   return new Date(d).toLocaleString("ro-RO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
 }
 
@@ -175,7 +175,7 @@ function LetterScoring({
 
   return (
     <div className="mt-5 rounded-xl border border-brand-light/60 bg-secondary/40 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evaluarea ta (1–3)</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evaluarea ta (1-3)</p>
       <div className="mt-3 space-y-3">
         {LETTER_SCORES.map(({ key, label }) => {
           const [value, setValue] = values[key]
@@ -228,7 +228,7 @@ function LetterScoring({
 }
 
 function FileList({ applicationId, files }: { applicationId: string; files: ApplicationFile[] }) {
-  if (files.length === 0) return <span className="text-muted-foreground">—</span>
+  if (files.length === 0) return <span className="text-muted-foreground">-</span>
   return (
     <ul className="space-y-1.5">
       {files.map((f) => (
@@ -270,7 +270,7 @@ function FileLink({ applicationId, file }: { applicationId: string; file: Applic
 }
 
 function formatAnswer(field: FormField, value: AnswerValue): string {
-  if (value === null || value === undefined || value === "") return "—"
+  if (value === null || value === undefined || value === "") return "-"
   if (field.type === "boolean") return value ? "Da" : "Nu"
   if (Array.isArray(value)) {
     return value.map((v) => field.options?.find((o) => o.value === v)?.label ?? v).join(", ")
