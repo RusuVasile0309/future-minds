@@ -57,11 +57,9 @@ function client(cfg: R2Config): AwsClient {
   })
 }
 
+// Documentele se acceptă DOAR în format PDF.
 const EXT_BY_TYPE: Record<string, string> = {
   "application/pdf": "pdf",
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
 }
 
 export const ALLOWED_DOC_TYPES = Object.keys(EXT_BY_TYPE)

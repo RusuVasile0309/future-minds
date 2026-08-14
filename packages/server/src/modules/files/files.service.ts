@@ -66,4 +66,22 @@ export class FilesService {
     await deleteObject(file.storageKey)
     await sql`DELETE FROM application_files WHERE id = ${id}`
   }
+
+  // Șterge din R2 toate fișierele aplicațiilor unui user. Rândurile din DB se
+  // curăță separat (ON DELETE CASCADE la ștergerea userului/aplicației). Best-effort:
+  // dacă un obiect nu se poate șterge, continuăm ca să nu blocăm ștergerea userului.
+  static async removeStorageForUser(userId: string): Promise<void> {
+    const rows = await sql`
+      SELECT f.storage_key FROM application_files f
+      JOIN applications a ON a.id = f.application_id
+      WHERE a.user_id = ${userId}
+    `
+    for (const row of rows) {
+      try {
+        await deleteObject(row.storage_key as string)
+      } catch {
+        // ignoră eroarea per fișier (obiect deja lipsă / R2 indisponibil)
+      }
+    }
+  }
 }

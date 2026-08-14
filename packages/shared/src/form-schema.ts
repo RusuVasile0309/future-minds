@@ -79,7 +79,8 @@ interface SectionSpec {
 }
 
 const grade: FieldValidation = { min: 1, max: 10 }
-const docValidation: FieldValidation = { fileTypes: ["pdf", "jpg", "jpeg", "png", "webp"], maxSizeMB: 5 }
+// Toate documentele se acceptă DOAR în format PDF.
+const docValidation: FieldValidation = { fileTypes: ["pdf"], maxSizeMB: 5 }
 const pdfValidation: FieldValidation = { fileTypes: ["pdf"], maxSizeMB: 5 }
 
 const SECTIONS: SectionSpec[] = [
@@ -169,7 +170,7 @@ const SECTIONS: SectionSpec[] = [
         label: "Diploma de Bacalaureat",
         type: "file",
         required: true,
-        helpText: "Atașează o poză sau un scan al diplomei de Bacalaureat.",
+        helpText: "Atașează diploma de Bacalaureat în format PDF (scanată).",
         validation: docValidation,
       },
     ],

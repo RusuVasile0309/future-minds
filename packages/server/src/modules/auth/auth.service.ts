@@ -1,4 +1,5 @@
 import { sql } from "../../database/db"
+import { FilesService } from "../files/files.service"
 import type { User, UserRole, RefreshToken, VerificationToken } from "@fm/shared"
 
 function toUser(row: Record<string, unknown>): User {
@@ -97,6 +98,9 @@ export class AuthService {
   }
 
   static async deleteUser(id: string): Promise<void> {
+    // Întâi curăță fișierele din R2 (cascade-ul din DB nu atinge storage-ul),
+    // apoi șterge userul — CASCADE curăță applications + application_files.
+    await FilesService.removeStorageForUser(id)
     await sql`DELETE FROM users WHERE id = ${id}`
   }
 
