@@ -30,11 +30,11 @@ export default function HomePage() {
               </h1>
               <p className="mt-6 max-w-lg text-lg text-muted-foreground">
                 FutureMinds acoperă integral studiile universitare — taxe, cazare, materiale și laptop — pentru
-                tineri talentați din medii defavorizate, cu integrare profesională la E-Infra la final.
+                tineri talentați din medii defavorizate, cu integrare profesională la Nova Power&Gas la final.
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">
-                  <Link href="/apply">
+                  <Link href="/aplica">
                     Aplică acum <ArrowRight className="size-4" />
                   </Link>
                 </Button>
@@ -85,7 +85,7 @@ export default function HomePage() {
               <Step
                 n="03"
                 title="Studii acoperite"
-                body="Bursierii primesc finanțare integrală, îndrumare din partea Rotaract și oportunități la E-Infra."
+                body="Bursierii primesc finanțare integrală, îndrumare din partea Rotaract și oportunități la Nova Power&Gas."
               />
             </div>
           </div>
@@ -98,11 +98,23 @@ export default function HomePage() {
               Un proiect susținut de
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-lg font-medium text-foreground/80">
-              <span>E-Infra · Nova Power&amp;Gas</span>
+              <a
+                href="https://vreaulanova.ro/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-primary"
+              >
+                Nova Power&amp;Gas
+              </a>
               <span className="text-border">·</span>
-              <span>Rotaract Cluj-Napoca SAMVS</span>
-              <span className="text-border">·</span>
-              <span>Gala Tineri pentru Tineri</span>
+              <a
+                href="https://www.facebook.com/RotaractSamvsCluj/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-primary"
+              >
+                Rotaract Cluj-Napoca SAMVS
+              </a>
             </div>
           </div>
         </section>

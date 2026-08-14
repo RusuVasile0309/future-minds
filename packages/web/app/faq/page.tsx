@@ -20,7 +20,7 @@ const FAQ = [
   },
   {
     q: "Ce obligații am ca beneficiar?",
-    a: "Menținerea unei medii minime de 8.5 (cu maximum o restanță reportată între ani), finalizarea studiilor în termen, o conduită corespunzătoare, comunicarea cu reprezentanții Rotaract și acceptarea oportunităților de stagiu sau angajare la E-Infra.",
+    a: "Menținerea unei medii minime de 8.5 (cu maximum o restanță reportată între ani), finalizarea studiilor în termen, o conduită corespunzătoare, comunicarea cu reprezentanții Rotaract și acceptarea oportunităților de stagiu sau angajare la Nova Power&Gas.",
   },
   {
     q: "La ce universități se aplică programul?",
@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "Ce se întâmplă după ce sunt selectat?",
-    a: "E-Infra achită bursele la termenele stabilite, iar Rotaract îți oferă îndrumare și monitorizează lunar progresul. Vei avea acces la oportunități de angajare și stagii de practică.",
+    a: "Nova Power&Gas achită bursele la termenele stabilite, iar Rotaract îți oferă îndrumare și monitorizează lunar progresul. Vei avea acces la oportunități de angajare și stagii de practică.",
   },
 ]
 
@@ -65,7 +65,7 @@ export default function FaqPage() {
         <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-4 text-center">
           <p className="text-muted-foreground">Ești gata să aplici?</p>
           <Button asChild size="lg">
-            <Link href="/apply">Începe aplicația</Link>
+            <Link href="/aplica">Începe aplicația</Link>
           </Button>
         </div>
       </section>

@@ -20,7 +20,7 @@ export default function SignUpPage({
       footer={
         <>
           Ai deja cont?{" "}
-          <Link href="/auth/sign-in" className="font-medium text-primary hover:underline">
+          <Link href="/autentificare/intra" className="font-medium text-primary hover:underline">
             Autentifică-te
           </Link>
         </>

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { FieldInput } from "@/components/apply/field-input"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { clearDependentAnswers } from "@/lib/content/form-options"
-import { getFormSchema, isFieldVisible } from "@fm/shared"
+import { applyComputedFields, getFormSchema, isFieldVisible } from "@fm/shared"
 import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField, FormSection } from "@fm/shared"
 
 // Schema formularului este STATICĂ (definită în @fm/shared).
@@ -22,6 +22,8 @@ export function ApplicationForm() {
 
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({})
   const [step, setStep] = useState(0)
+  // Direcția tranziției: 1 = înainte, -1 = înapoi. Reglează sensul de alunecare.
+  const [direction, setDirection] = useState<1 | -1>(1)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const initialized = useRef(false)
@@ -33,7 +35,9 @@ export function ApplicationForm() {
 
   useEffect(() => {
     if (application && !initialized.current) {
-      setAnswers(application.answers ?? {})
+      const init = { ...(application.answers ?? {}) }
+      applyComputedFields(init) // ex.: media Bac, dacă notele există deja în draft
+      setAnswers(init)
       initialized.current = true
     }
   }, [application])
@@ -72,6 +76,8 @@ export function ApplicationForm() {
       const next = { ...a, [key]: v }
       // Cascadă / excludere Bac: golește câmpurile dependente când părintele se schimbă.
       clearDependentAnswers(next, key)
+      // Recalculează câmpurile derivate (ex.: media Bac din cele 3 note).
+      applyComputedFields(next)
       return next
     })
   }
@@ -85,10 +91,12 @@ export function ApplicationForm() {
 
   async function goNext() {
     await persist()
+    setDirection(1)
     setStep((s) => Math.min(s + 1, sections.length - 1))
   }
   async function goPrev() {
     await persist()
+    setDirection(-1)
     setStep((s) => Math.max(s - 1, 0))
   }
 
@@ -120,13 +128,18 @@ export function ApplicationForm() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <div
+        key={step}
+        className={`rounded-2xl border border-border bg-card p-6 motion-reduce:animate-none sm:p-8 ${
+          direction === 1 ? "animate-step-in-right" : "animate-step-in-left"
+        }`}
+      >
         <h2 className="font-serif text-2xl font-medium">{section.title}</h2>
         {section.description ? <p className="mt-1 text-muted-foreground">{section.description}</p> : null}
 
-        <div className="mt-8 space-y-7">
+        <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12">
           {section.fields
-            .filter((field) => isFieldVisible(field, answers))
+            .filter((field) => !field.derived && isFieldVisible(field, answers))
             .map((field) => (
               <FieldRow key={field.id} field={field}>
                 <FieldInput
@@ -167,9 +180,20 @@ export function ApplicationForm() {
   )
 }
 
+// Lățimea pe grid-ul de 12 coloane (de la breakpoint-ul `sm`); pe mobil rând întreg.
+const COL_SPAN: Record<number, string> = {
+  3: "sm:col-span-3",
+  4: "sm:col-span-4",
+  6: "sm:col-span-6",
+  8: "sm:col-span-8",
+  9: "sm:col-span-9",
+  12: "sm:col-span-12",
+}
+
 function FieldRow({ field, children }: { field: FormField; children: React.ReactNode }) {
+  const spanClass = COL_SPAN[field.colSpan ?? 12] ?? "sm:col-span-12"
   return (
-    <div>
+    <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
       <Label htmlFor={field.key}>
         {field.label}
         {field.required ? <span className="ml-1 text-primary">*</span> : null}
@@ -230,7 +254,7 @@ function SubmittedView({
             <h3 className="font-serif text-lg font-medium">{section.title}</h3>
             <dl className="mt-4 divide-y divide-border/60">
               {section.fields
-                .filter((field) => isFieldVisible(field, answers))
+                .filter((field) => !field.derived && isFieldVisible(field, answers))
                 .map((field) => (
                   <div key={field.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
                     <dt className="text-sm text-muted-foreground">{field.label}</dt>

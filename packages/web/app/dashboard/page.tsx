@@ -52,7 +52,7 @@ export default async function DashboardPage() {
                 : "Aplicația ta a fost trimisă. O poți vizualiza, dar nu o mai poți edita."}
             </p>
             <Button asChild className="mt-5">
-              <Link href="/apply">
+              <Link href="/aplica">
                 {isDraft ? "Continuă aplicația" : "Vezi aplicația"} <ArrowRight className="size-4" />
               </Link>
             </Button>

@@ -14,7 +14,7 @@ export default function SignInPage() {
       footer={
         <>
           Nu ai încă un cont?{" "}
-          <Link href="/auth/sign-up" className="font-medium text-primary hover:underline">
+          <Link href="/autentificare/inregistrare" className="font-medium text-primary hover:underline">
             Creează unul
           </Link>
         </>

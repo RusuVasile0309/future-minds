@@ -10,6 +10,7 @@ import type {
   ApplicantUser,
   AnswerValue,
   FormSection,
+  LetterScores,
 } from "@fm/shared"
 
 export class ApplicationError extends Error {
@@ -38,6 +39,9 @@ function toApplication(row: Record<string, unknown>): Application {
     cohort: row.cohort as string,
     status: row.status as ApplicationStatus,
     answers: (row.answers as Record<string, AnswerValue>) ?? {},
+    coverLetterScore: row.cover_letter_score != null ? Number(row.cover_letter_score) : null,
+    recommendationLetterScore:
+      row.recommendation_letter_score != null ? Number(row.recommendation_letter_score) : null,
     submittedAt: row.submitted_at ? new Date(row.submitted_at as string) : null,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -165,6 +169,8 @@ export class ApplicationsService {
     const missing: string[] = []
     for (const section of sections) {
       for (const field of section.fields) {
+        // Câmpurile derivate (ex. statut orfan) nu se completează manual.
+        if (field.derived) continue
         if (!field.required) continue
         // Câmpurile ascunse de condiții (ex. venit părinte decedat) nu se cer.
         if (!isFieldVisible(field, answers)) continue
@@ -242,7 +248,7 @@ export class ApplicationsService {
     const cohort = await currentCohort()
     const rows = await sql`
       SELECT
-        a.id, a.status, a.answers,
+        a.id, a.status, a.answers, a.cover_letter_score, a.recommendation_letter_score,
         u.email, u.name AS u_name, u.first_name AS u_first, u.last_name AS u_last
       FROM applications a
       JOIN users u ON u.id = a.user_id
@@ -250,7 +256,11 @@ export class ApplicationsService {
       ORDER BY a.submitted_at DESC NULLS LAST, a.created_at DESC
     `
     return rows.map((row) => {
-      const answers = (row.answers as Record<string, AnswerValue>) ?? {}
+      const answers = { ...((row.answers as Record<string, AnswerValue>) ?? {}) }
+      // Injectează notele manuale ale scrisorilor ca răspunsuri „derivate" pentru scoring.
+      if (row.cover_letter_score != null) answers.cover_letter_score = Number(row.cover_letter_score)
+      if (row.recommendation_letter_score != null)
+        answers.recommendation_letter_score = Number(row.recommendation_letter_score)
       return {
         id: row.id as string,
         fullName: deriveFullName(answers, row),
@@ -265,6 +275,25 @@ export class ApplicationsService {
     if (!STATUSES.includes(status)) throw new ApplicationError(`Status invalid: ${status}`)
     const [row] = await sql`
       UPDATE applications SET status = ${status}, updated_at = NOW() WHERE id = ${id} RETURNING *
+    `
+    if (!row) throw new ApplicationError("Aplicația nu există", 404)
+    return toApplication(row)
+  }
+
+  // Notele manuale (1–3) ale scrisorilor — doar SUPER_USER (impus în rută). `null` = neacordată.
+  static async setLetterScores(id: string, scores: LetterScores): Promise<Application> {
+    const validate = (v: number | null, label: string): number | null => {
+      if (v === null) return null
+      if (!Number.isInteger(v) || v < 1 || v > 3) throw new ApplicationError(`${label} trebuie să fie 1, 2 sau 3`)
+      return v
+    }
+    const cover = validate(scores.coverLetterScore, "Nota scrisorii de intenție")
+    const reco = validate(scores.recommendationLetterScore, "Nota scrisorii de recomandare")
+    const [row] = await sql`
+      UPDATE applications
+      SET cover_letter_score = ${cover}, recommendation_letter_score = ${reco}, updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING *
     `
     if (!row) throw new ApplicationError("Aplicația nu există", 404)
     return toApplication(row)

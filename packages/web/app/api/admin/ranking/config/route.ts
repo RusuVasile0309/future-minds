@@ -38,8 +38,8 @@ const incomeSchema = z.object({
   dependentsKey: z.string(),
   motherDeceasedKey: z.string(),
   fatherDeceasedKey: z.string(),
-  motherNoSupportKey: z.string(),
-  fatherNoSupportKey: z.string(),
+  motherSupportsKey: z.string(),
+  fatherSupportsKey: z.string(),
 })
 
 const configSchema = z.object({

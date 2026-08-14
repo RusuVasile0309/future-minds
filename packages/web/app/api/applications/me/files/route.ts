@@ -5,7 +5,7 @@ import type { ApiResponse } from "@fm/shared"
 
 export const runtime = "nodejs"
 
-const MAX_BYTES = 10 * 1024 * 1024 // 10 MB
+const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
 
 // Upload document pentru un câmp de tip fișier din aplicația proprie.
 export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     )
   }
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ success: false, error: "Fișierul e prea mare (max 10 MB).", code: 400 }, { status: 400 })
+    return NextResponse.json({ success: false, error: "Fișierul e prea mare (max 5 MB).", code: 400 }, { status: 400 })
   }
 
   try {

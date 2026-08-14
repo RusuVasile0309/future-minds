@@ -8,9 +8,15 @@ import type {
   ScoredApplication,
   ApplicationStatus,
 } from "@fm/shared"
+import { applyComputedFields } from "@fm/shared"
 
 // Cheia sintetică a criteriului de venit calculat.
 export const INCOME_KEY = "income_per_member"
+
+// Chei derivate: statutul de orfan nu se mai întreabă în formular, ci se calculează
+// din bifele „decedat" ale părinților. Rămân câmpuri `scorable` în schemă.
+export const ORPHAN_ONE_KEY = "orphan_one_parent"
+export const ORPHAN_BOTH_KEY = "orphan_both_parents"
 
 // Mapare implicită pe cheile din specificația formularului (docs/formular-elevi-campuri.md).
 export const DEFAULT_INCOME_CONFIG: IncomeConfig = {
@@ -20,8 +26,8 @@ export const DEFAULT_INCOME_CONFIG: IncomeConfig = {
   dependentsKey: "dependents_count",
   motherDeceasedKey: "mother_deceased",
   fatherDeceasedKey: "father_deceased",
-  motherNoSupportKey: "mother_no_support",
-  fatherNoSupportKey: "father_no_support",
+  motherSupportsKey: "mother_supports",
+  fatherSupportsKey: "father_supports",
 }
 
 function num(v: AnswerValue | undefined): number {
@@ -51,8 +57,9 @@ export function computeIncomePerMember(
   answers: Record<string, AnswerValue>,
   income: IncomeConfig
 ): number | null {
-  const motherOut = bool(answers[income.motherDeceasedKey]) || bool(answers[income.motherNoSupportKey])
-  const fatherOut = bool(answers[income.fatherDeceasedKey]) || bool(answers[income.fatherNoSupportKey])
+  // Un părinte „iese" din calcul dacă e decedat SAU nu bifează că susține financiar.
+  const motherOut = bool(answers[income.motherDeceasedKey]) || !bool(answers[income.motherSupportsKey])
+  const fatherOut = bool(answers[income.fatherDeceasedKey]) || !bool(answers[income.fatherSupportsKey])
 
   const studentIncome = num(answers[income.studentIncomeKey])
   const motherIncome = motherOut ? 0 : num(answers[income.motherIncomeKey])
@@ -68,6 +75,27 @@ export function computeIncomePerMember(
   if (members <= 0) return null
   const total = studentIncome + motherIncome + fatherIncome
   return Math.round((total / members) * 100) / 100
+}
+
+/**
+ * Adaugă câmpurile derivate consumate la scoring. Statutul de orfan se calculează
+ * din bifele „decedat" ale părinților (nu se mai colectează în formular): un părinte
+ * decedat → orfan de un părinte; ambii → orfan de ambii părinți.
+ */
+export function withDerivedAnswers(
+  answers: Record<string, AnswerValue>,
+  income: IncomeConfig
+): Record<string, AnswerValue> {
+  const deceased =
+    (bool(answers[income.motherDeceasedKey]) ? 1 : 0) + (bool(answers[income.fatherDeceasedKey]) ? 1 : 0)
+  const next: Record<string, AnswerValue> = {
+    ...answers,
+    [ORPHAN_ONE_KEY]: deceased === 1,
+    [ORPHAN_BOTH_KEY]: deceased === 2,
+  }
+  // Recalculează câmpurile calculate (ex.: media Bac) — nu ne bazăm pe valoarea din client.
+  applyComputedFields(next)
+  return next
 }
 
 // Normalizează un criteriu la [0,1] și întoarce și valoarea brută pentru afișare.
@@ -209,10 +237,12 @@ export function rankAll(config: RankingConfig, inputs: ScoreInput[]): ScoredAppl
   const answersById = new Map<string, Record<string, AnswerValue>>()
 
   const scored: ScoredApplication[] = inputs.map((input) => {
-    answersById.set(input.applicationId, input.answers)
-    const incomePerMember = computeIncomePerMember(input.answers, config.income)
-    const failedRules = checkEligibility(config.eligibility, input.answers, incomePerMember)
-    const { total, percent, breakdown } = scoreApplication(config, input.answers, incomePerMember)
+    // Injectează câmpurile derivate (statut orfan din bifele „decedat").
+    const answers = withDerivedAnswers(input.answers, config.income)
+    answersById.set(input.applicationId, answers)
+    const incomePerMember = computeIncomePerMember(answers, config.income)
+    const failedRules = checkEligibility(config.eligibility, answers, incomePerMember)
+    const { total, percent, breakdown } = scoreApplication(config, answers, incomePerMember)
     return {
       applicationId: input.applicationId,
       fullName: input.fullName,

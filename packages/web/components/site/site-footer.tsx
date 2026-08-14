@@ -25,16 +25,16 @@ export function SiteFooter() {
           <FooterCol
             title="Aplică"
             links={[
-              { href: "/apply", label: "Formular de înscriere" },
-              { href: "/auth/sign-in", label: "Autentificare" },
-              { href: "/faq", label: "Întrebări frecvente" },
+              { href: "/aplica", label: "Formular de înscriere" },
+              { href: "/autentificare/intra", label: "Autentificare" },
+              { href: "/intrebari-frecvente", label: "Întrebări frecvente" },
             ]}
           />
           <FooterCol
             title="Parteneri"
             links={[
-              { href: "/despre", label: "E-Infra (Nova Power&Gas)" },
-              { href: "/despre", label: "Rotaract Cluj-Napoca" },
+              { href: "https://vreaulanova.ro/", label: "Nova Power&Gas", external: true },
+              { href: "https://www.facebook.com/RotaractSamvsCluj/", label: "Rotaract Cluj-Napoca", external: true },
             ]}
           />
         </div>
@@ -49,14 +49,25 @@ export function SiteFooter() {
   )
 }
 
-function FooterCol({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string
+  links: { href: string; label: string; external?: boolean }[]
+}) {
   return (
     <div className="space-y-3">
       <h4 className="font-mono text-[11px] uppercase tracking-[0.18em] text-foreground/70">{title}</h4>
       <ul className="space-y-2">
         {links.map((l) => (
           <li key={l.label}>
-            <Link href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <Link
+              href={l.href}
+              target={l.external ? "_blank" : undefined}
+              rel={l.external ? "noopener noreferrer" : undefined}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
               {l.label}
             </Link>
           </li>

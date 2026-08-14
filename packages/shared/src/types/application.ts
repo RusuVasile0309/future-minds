@@ -26,10 +26,20 @@ export interface Application {
   cohort: string
   status: ApplicationStatus
   answers: Record<string, AnswerValue>
+  /** Notă manuală (1–3) a scrisorii de intenție, acordată de SUPER_USER. */
+  coverLetterScore: number | null
+  /** Notă manuală (1–3) a scrisorii de recomandare, acordată de SUPER_USER. */
+  recommendationLetterScore: number | null
   submittedAt: Date | null
   createdAt: Date
   updatedAt: Date
   files?: ApplicationFile[]
+}
+
+/** Notele manuale (1–3) pentru cele două scrisori. `null` = neacordată. */
+export interface LetterScores {
+  coverLetterScore: number | null
+  recommendationLetterScore: number | null
 }
 
 // ── Vedere admin ──────────────────────────────────────────────────────────────

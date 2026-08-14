@@ -2,10 +2,16 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Download, Loader2, Mail, Phone } from "lucide-react"
-import { useCandidate, useUpdateCandidateStatus, adminApplicationsApi } from "@/app/network/admin"
+import { ArrowLeft, Check, Download, Loader2, Mail, Phone } from "lucide-react"
+import {
+  useCandidate,
+  useUpdateCandidateStatus,
+  useSetLetterScores,
+  adminApplicationsApi,
+} from "@/app/network/admin"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { cn } from "@/lib/utils"
+import { isFieldVisible } from "@fm/shared"
 import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField } from "@fm/shared"
 
 const STATUS_ACTIONS: { value: ApplicationStatus; label: string }[] = [
@@ -21,7 +27,7 @@ function formatDate(d: Date | string | null): string {
   return new Date(d).toLocaleString("ro-RO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
 }
 
-export function CandidateDetail({ id }: { id: string }) {
+export function CandidateDetail({ id, canScore = false }: { id: string; canScore?: boolean }) {
   const { data, isLoading, error } = useCandidate(id)
   const updateStatus = useUpdateCandidateStatus(id)
   const [statusError, setStatusError] = useState<string | null>(null)
@@ -102,24 +108,120 @@ export function CandidateDetail({ id }: { id: string }) {
           <div key={section.id} className="rounded-2xl border border-border bg-card p-6">
             <h2 className="font-serif text-lg font-medium">{section.title}</h2>
             <dl className="mt-4 divide-y divide-border/60">
-              {section.fields.map((field) => (
-                <div key={field.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
-                  <dt className="text-sm text-muted-foreground">{field.label}</dt>
-                  <dd className="text-sm text-foreground sm:col-span-2">
-                    {field.type === "file" ? (
-                      <FileList applicationId={data.id} files={filesByField(field.key)} />
-                    ) : (
-                      formatAnswer(field, data.answers[field.key])
-                    )}
-                  </dd>
-                </div>
-              ))}
-              {section.fields.length === 0 ? (
-                <p className="py-3 text-sm text-muted-foreground">Fără câmpuri.</p>
+              {section.fields
+                .filter((field) => !field.derived && isFieldVisible(field, data.answers))
+                .map((field) => (
+                  <div key={field.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
+                    <dt className="text-sm text-muted-foreground">{field.label}</dt>
+                    <dd className="text-sm text-foreground sm:col-span-2">
+                      {field.type === "file" ? (
+                        <FileList applicationId={data.id} files={filesByField(field.key)} />
+                      ) : (
+                        formatAnswer(field, data.answers[field.key])
+                      )}
+                    </dd>
+                  </div>
+                ))}
+              {section.id === "letters" && canScore ? (
+                <LetterScoring
+                  id={data.id}
+                  coverLetterScore={data.coverLetterScore}
+                  recommendationLetterScore={data.recommendationLetterScore}
+                />
               ) : null}
             </dl>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+const LETTER_SCORES = [
+  { key: "coverLetterScore", label: "Notă scrisoare de intenție" },
+  { key: "recommendationLetterScore", label: "Notă scrisoare de recomandare" },
+] as const
+
+// Panou de notare (1–3) al scrisorilor — vizibil doar pentru SUPER_USER. Notele
+// contează la ranking (câmpuri `scorable` derivate din schemă).
+function LetterScoring({
+  id,
+  coverLetterScore,
+  recommendationLetterScore,
+}: {
+  id: string
+  coverLetterScore: number | null
+  recommendationLetterScore: number | null
+}) {
+  const save = useSetLetterScores(id)
+  const [cover, setCover] = useState<number | null>(coverLetterScore)
+  const [reco, setReco] = useState<number | null>(recommendationLetterScore)
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  const values: Record<string, [number | null, (v: number | null) => void]> = {
+    coverLetterScore: [cover, setCover],
+    recommendationLetterScore: [reco, setReco],
+  }
+  const dirty = cover !== coverLetterScore || reco !== recommendationLetterScore
+
+  async function onSave() {
+    setErr(null)
+    setSaved(false)
+    const res = await save.mutateAsync({ coverLetterScore: cover, recommendationLetterScore: reco })
+    if (res.success) setSaved(true)
+    else setErr(res.error)
+  }
+
+  return (
+    <div className="mt-5 rounded-xl border border-brand-light/60 bg-secondary/40 p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evaluarea ta (1–3)</p>
+      <div className="mt-3 space-y-3">
+        {LETTER_SCORES.map(({ key, label }) => {
+          const [value, setValue] = values[key]
+          return (
+            <div key={key} className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-sm text-foreground">{label}</span>
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => {
+                      setValue(value === n ? null : n)
+                      setSaved(false)
+                    }}
+                    className={cn(
+                      "size-8 rounded-lg border text-sm font-medium transition-colors",
+                      value === n
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={save.isPending || !dirty}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-deep px-3 py-1.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary dark:text-brand-deep"
+        >
+          {save.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+          Salvează notele
+        </button>
+        {saved && !dirty ? (
+          <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
+            <Check className="size-4" /> Salvat
+          </span>
+        ) : null}
+        {err ? <span className="text-sm text-destructive">{err}</span> : null}
       </div>
     </div>
   )

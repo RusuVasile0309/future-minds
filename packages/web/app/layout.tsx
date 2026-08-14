@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s · FutureMinds",
   },
   description:
-    "FutureMinds duce tineri talentați din medii defavorizate spre studii universitare de IT și inginerie, finanțate integral. Un proiect E-Infra & Rotaract Cluj-Napoca.",
+    "FutureMinds duce tineri talentați din medii defavorizate spre studii universitare de IT și inginerie, finanțate integral. Un proiect Nova Power&Gas & Rotaract Cluj-Napoca.",
   icons: { icon: "/futureminds-icon.svg" },
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
 }

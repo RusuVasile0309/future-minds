@@ -60,9 +60,9 @@ export interface IncomeConfig {
   dependentsKey: string
   motherDeceasedKey: string
   fatherDeceasedKey: string
-  /** Venitul unui părinte se anulează și dacă bifează „nu mă susține financiar". */
-  motherNoSupportKey: string
-  fatherNoSupportKey: string
+  /** Venitul unui părinte se ia în calcul doar dacă bifează „mă susține financiar". */
+  motherSupportsKey: string
+  fatherSupportsKey: string
 }
 
 export interface RankingConfig {

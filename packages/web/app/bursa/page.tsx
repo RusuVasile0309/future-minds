@@ -38,10 +38,10 @@ export default function BursaPage() {
             <p className="mt-2 text-lg text-muted-foreground">pe an, per bursier</p>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
               Acordată pe toată durata studiilor de licență (3–4 ani), alături de îndrumare din partea Rotaract și
-              oportunități de stagiu și angajare la E-Infra.
+              oportunități de stagiu și angajare la Nova Power&Gas.
             </p>
             <Button asChild size="lg" className="mt-8 w-full">
-              <Link href="/apply">
+              <Link href="/aplica">
                 Aplică pentru bursă <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -95,7 +95,7 @@ export default function BursaPage() {
           <p className="mt-2 text-muted-foreground">Tu concentrează-te pe studii — de rest ne ocupăm noi.</p>
         </div>
         <Button asChild size="lg">
-          <Link href="/apply">
+          <Link href="/aplica">
             Aplică acum <ArrowRight className="size-4" />
           </Link>
         </Button>

@@ -18,11 +18,11 @@ const OBLIGATIONS = [
       "Finalizarea studiilor în termen și obținerea diplomei de licență.",
       "O conduită corespunzătoare pe toată durata programului.",
       "Menținerea comunicării cu reprezentanții Rotaract și respectarea condițiilor de eligibilitate.",
-      "Acceptarea oportunităților de angajare sau stagii oferite de E-Infra.",
+      "Acceptarea oportunităților de angajare sau stagii oferite de Nova Power&Gas.",
     ],
   },
   {
-    party: "E-Infra",
+    party: "Nova Power&Gas",
     items: [
       "Selectarea beneficiarilor din rândul candidaților identificați de Rotaract.",
       "Achitarea burselor de studiu în cuantumul și la termenele stabilite.",
@@ -34,7 +34,7 @@ const OBLIGATIONS = [
   {
     party: "Rotaract SAMVS",
     items: [
-      "Identificarea candidaților eligibili conform criteriilor stabilite cu E-Infra.",
+      "Identificarea candidaților eligibili conform criteriilor stabilite cu Nova Power&Gas.",
       "Monitorizarea lunară a progresului beneficiarilor.",
       "Colectarea și transmiterea documentelor privind prezența și rezultatele academice.",
       "Distribuirea resurselor materiale alocate (rechizite, materiale, echipament).",
@@ -77,7 +77,7 @@ export default function DesprePage() {
           </p>
           <p className="mt-4 text-muted-foreground">
             Identificăm tinerii cu competențe reale și îi sprijinim să se specializeze în IT și inginerie, cu
-            obiectivul integrării profesionale la E-Infra. Programul acoperă taxe, cazare în cămin, materiale
+            obiectivul integrării profesionale la Nova Power&Gas. Programul acoperă taxe, cazare în cămin, materiale
             didactice și laptop.
           </p>
         </article>
@@ -114,7 +114,7 @@ export default function DesprePage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/apply">
+            <Link href="/aplica">
               Aplică acum <ArrowRight className="size-4" />
             </Link>
           </Button>

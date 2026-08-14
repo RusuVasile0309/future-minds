@@ -37,12 +37,21 @@ export interface FieldCondition {
   equals?: string | number | boolean
   // Afișează când valoarea (booleană) a lui `field` corespunde: true = bifat, false = nebifat.
   truthy?: boolean
+  // Afișează când valoarea (ca număr) a lui `field` este >= această valoare. Ex.: an de studiu.
+  gte?: number
 }
 
 // Vizibilitate condiționată: `all` = ȘI logic, `any` = SAU logic.
 export interface VisibleWhen {
   all?: FieldCondition[]
   any?: FieldCondition[]
+}
+
+// Câmp calculat automat din alte câmpuri (read-only în formular).
+export interface ComputedField {
+  // `average` = media aritmetică a câmpurilor numerice din `from` (ignoră cele goale).
+  kind: "average"
+  from: string[]
 }
 
 export interface FormField {
@@ -67,6 +76,17 @@ export interface FormField {
   visibleWhen?: VisibleWhen
   // Câmp boolean care trebuie să fie `true` pentru a trece validarea (consimțăminte).
   requiredTrue?: boolean
+  // Lățime pe un grid de 12 coloane (implicit 12 = rând întreg). Ex: 9 = 75%, 3 = 25%.
+  colSpan?: number
+  // Câmp calculat automat (read-only) — valoarea se derivă din alte câmpuri.
+  computed?: ComputedField
+  // Câmp derivat: NU se randează în formular și nu se validează, dar rămâne
+  // disponibil pentru scoring (valoarea se calculează la ranking). Ex: statut orfan.
+  derived?: boolean
+  // Aliniere orizontală a câmpului în celula sa (implicit stânga).
+  align?: "center"
+  // Permite încărcarea mai multor fișiere pentru același câmp (doar `type: file`).
+  multiple?: boolean
 }
 
 export interface FormSection {

@@ -19,7 +19,7 @@ export default function AuthErrorPage({ searchParams }: { searchParams: { error?
     <AuthShell title="Ceva n-a mers">
       <p className="text-center text-sm text-muted-foreground">{message}</p>
       <Button asChild size="lg" className="mt-6 w-full">
-        <Link href="/auth/sign-in">Înapoi la autentificare</Link>
+        <Link href="/autentificare/intra">Înapoi la autentificare</Link>
       </Button>
     </AuthShell>
   )

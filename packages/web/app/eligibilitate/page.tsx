@@ -72,7 +72,7 @@ export default function EligibilitatePage() {
               </p>
             </div>
             <Button asChild className="mt-6 w-full">
-              <Link href="/apply">
+              <Link href="/aplica">
                 Începe aplicația <ArrowRight className="size-4" />
               </Link>
             </Button>

@@ -25,7 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const intent = await readAndClearOAuthIntent()
         const existing = user.email ? await AuthService.getUserByEmail(user.email) : null
         if (!existing && intent !== "signup") {
-          return `/auth/sign-up?error=no_account&email=${encodeURIComponent(user.email ?? "")}`
+          return `/autentificare/inregistrare?error=no_account&email=${encodeURIComponent(user.email ?? "")}`
         }
       }
       return true
@@ -80,7 +80,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   pages: {
-    signIn: "/auth/sign-in",
-    error: "/auth/error",
+    signIn: "/autentificare/intra",
+    error: "/autentificare/eroare",
   },
 })

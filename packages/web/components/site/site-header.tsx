@@ -1,15 +1,23 @@
 import Link from "next/link"
 import FutureMindsLogo from "@/components/FutureMindsLogo"
 import { Button } from "@/components/ui/button"
+import { UserMenu } from "@/components/site/user-menu"
+import { auth } from "@/auth"
 
 const NAV = [
   { href: "/despre", label: "Despre" },
   { href: "/eligibilitate", label: "Eligibilitate" },
   { href: "/bursa", label: "Bursă" },
-  { href: "/faq", label: "Întrebări" },
+  { href: "/intrebari-frecvente", label: "Întrebări" },
 ]
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const session = await auth()
+  const user = session?.user
+  const isLoggedIn = !!user
+  const role = session?.role ?? "STUDENT"
+  const isAdmin = role === "ADMIN" || role === "SUPER_USER"
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/80 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
@@ -30,12 +38,23 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link href="/auth/sign-in">Autentificare</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/apply">Aplică acum</Link>
-          </Button>
+          {isLoggedIn ? (
+            <UserMenu
+              name={user.name ?? user.email ?? "Contul meu"}
+              email={user.email ?? ""}
+              image={user.image ?? null}
+              isAdmin={isAdmin}
+            />
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link href="/autentificare/intra">Autentificare</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/aplica">Aplică acum</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

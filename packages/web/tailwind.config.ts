@@ -85,10 +85,21 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // Tranziția pașilor din formular (înainte / înapoi)
+        "step-in-right": {
+          from: { opacity: "0", transform: "translateX(24px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "step-in-left": {
+          from: { opacity: "0", transform: "translateX(-24px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "step-in-right": "step-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+        "step-in-left": "step-in-left 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
       },
     },
   },

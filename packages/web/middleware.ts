@@ -4,8 +4,11 @@ import { NextResponse } from "next/server"
 
 const { auth } = NextAuth(authConfig)
 
-const AUTH_ROUTES = "/auth"
-const PROTECTED_ROUTES = ["/apply", "/dashboard"]
+// Rutele publice sunt în română (folderele din `app/` rămân în engleză —
+// vezi maparea din next.config.js). Middleware rulează după redirects și
+// înainte de rewrites, deci vede întotdeauna URL-ul românesc.
+const AUTH_ROUTES = "/autentificare"
+const PROTECTED_ROUTES = ["/aplica", "/contul-meu"]
 const ADMIN_ROUTES = ["/admin"]
 
 export default auth((req) => {
@@ -18,17 +21,17 @@ export default auth((req) => {
 
   // Redirect authenticated users away from auth pages
   if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", nextUrl))
+    return NextResponse.redirect(new URL("/contul-meu", nextUrl))
   }
 
   // Require login for protected pages
   if (isProtected && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/auth/sign-in", nextUrl))
+    return NextResponse.redirect(new URL("/autentificare/intra", nextUrl))
   }
 
   // Require ADMIN or SUPER_USER for /admin
   if (isAdminRoute) {
-    if (!isLoggedIn) return NextResponse.redirect(new URL("/auth/sign-in", nextUrl))
+    if (!isLoggedIn) return NextResponse.redirect(new URL("/autentificare/intra", nextUrl))
     const role = session?.role
     if (role !== "ADMIN" && role !== "SUPER_USER") {
       return NextResponse.redirect(new URL("/", nextUrl))
