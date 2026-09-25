@@ -8,13 +8,23 @@ import type { RankingCriterion, Direction } from "@fm/shared"
 export function CriteriaEditor({
   criteria,
   onChange,
+  percentById = {},
+  hoveredId = null,
+  onHover,
 }: {
   criteria: RankingCriterion[]
   onChange: (next: RankingCriterion[]) => void
+  /** Cât % din scorul final reprezintă fiecare criteriu (după id). */
+  percentById?: Record<string, number>
+  /** Criteriul evidențiat din donut. */
+  hoveredId?: string | null
+  onHover?: (id: string | null) => void
 }) {
   function update(id: string, patch: Partial<RankingCriterion>) {
     onChange(criteria.map((c) => (c.id === id ? { ...c, ...patch } : c)))
   }
+
+  const fmtPct = (n: number) => (Math.round(n * 10) / 10).toString()
 
   if (criteria.length === 0) {
     return (
@@ -27,12 +37,20 @@ export function CriteriaEditor({
 
   return (
     <div className="space-y-3">
-      {criteria.map((c) => (
+      {criteria.map((c) => {
+        const influences = c.enabled && c.weight > 0
+        const pct = percentById[c.id] ?? 0
+        const isHovered = hoveredId === c.id
+        return (
         <div
           key={c.id}
+          id={`criterion-${c.id}`}
+          onMouseEnter={() => onHover?.(c.id)}
+          onMouseLeave={() => onHover?.(null)}
           className={cn(
-            "rounded-xl border p-4 transition-colors",
-            c.enabled ? "border-border bg-card" : "border-border/60 bg-secondary/20 opacity-70"
+            "scroll-mt-24 rounded-xl border p-4 transition-all",
+            c.enabled ? "border-border bg-card" : "border-border/60 bg-secondary/20 opacity-70",
+            isHovered && "border-primary ring-2 ring-primary/40"
           )}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -44,24 +62,47 @@ export function CriteriaEditor({
                 className="size-4 accent-[var(--brand-primary,#1650C8)]"
               />
               <span className="font-medium">{c.label}</span>
-              <span className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
-                {c.kind === "income" ? "calculat" : c.fieldKey}
-              </span>
+              {c.kind === "income" ? (
+                <span className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+                  calculat
+                </span>
+              ) : null}
             </label>
 
-            <div className="flex items-center gap-2">
-              <Label htmlFor={`w-${c.id}`} className="text-xs text-muted-foreground">
-                Pondere
-              </Label>
-              <Input
-                id={`w-${c.id}`}
-                type="number"
-                min={0}
-                step={0.5}
-                value={c.weight}
-                onChange={(e) => update(c.id, { weight: Number(e.target.value) })}
-                className="h-9 w-20"
-              />
+            <div className="flex items-center gap-3">
+              {influences ? (
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors",
+                    isHovered ? "bg-primary text-white" : "bg-primary/10 text-primary"
+                  )}
+                  title="Procent din scorul final"
+                >
+                  {fmtPct(pct)}% din scor
+                </span>
+              ) : (
+                <span className="rounded-full bg-secondary px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                  nu influențează
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                <Label htmlFor={`w-${c.id}`} className="text-xs text-muted-foreground">
+                  Pondere
+                </Label>
+                <Input
+                  id={`w-${c.id}`}
+                  type="number"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={c.weight}
+                  // Ponderile pot lua doar valori întregi de la 1 la 5.
+                  onChange={(e) =>
+                    update(c.id, { weight: Math.max(1, Math.min(5, Math.round(Number(e.target.value) || 1))) })
+                  }
+                  className="h-9 w-20"
+                />
+              </div>
             </div>
           </div>
 
@@ -134,7 +175,8 @@ export function CriteriaEditor({
             </p>
           )}
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

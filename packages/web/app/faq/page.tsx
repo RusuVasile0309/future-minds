@@ -47,7 +47,15 @@ export default function FaqPage() {
       <PageHero
         eyebrow="Întrebări frecvente"
         title="Ai o întrebare? Probabil e aici."
-        lead="Dacă nu găsești răspunsul, scrie-ne, suntem aici să te ajutăm să aplici."
+        lead={
+          <>
+            Dacă nu găsești răspunsul,{" "}
+            <Link href="/contact" className="font-medium text-primary underline underline-offset-4 hover:no-underline">
+              scrie-ne
+            </Link>
+            , suntem aici să te ajutăm să aplici.
+          </>
+        }
       />
 
       <section className="container py-16 md:py-20">

@@ -309,26 +309,26 @@ const SECTIONS: SectionSpec[] = [
     title: "Situații speciale",
     description: "Bifează situațiile care ți se aplică. Fiecare bifă poate aduce punctaj suplimentar.",
     fields: [
-      // Statutul de orfan NU se mai întreabă aici — se derivă din bifele „decedat"
-      // ale părinților (secțiunea „Situație financiară"). Rămân `derived` +
-      // `scorable` ca să conteze la ranking, dar nu se randează în formular.
+      // Situația familială e UN singur criteriu de ranking: 0 = familie întreagă,
+      // 1 = orfan de un părinte SAU familie monoparentală, 2 = orfan de ambii părinți.
+      // Se derivă din bifele „decedat" ale părinților + „familie monoparentală";
+      // nu se randează în formular (`derived`).
       {
-        key: "orphan_one_parent",
-        label: "Orfan de un părinte",
-        type: "boolean",
+        key: "family_status",
+        label: "Situație familială",
+        type: "number",
         scorable: true,
         derived: true,
+        validation: { min: 0, max: 3 },
       },
-      {
-        key: "orphan_both_parents",
-        label: "Orfan de ambii părinți",
-        type: "boolean",
-        scorable: true,
-        derived: true,
-      },
+      // Statutul de orfan rămâne derivat (din bifele „decedat" ale părinților), dar nu
+      // mai e criteriu de ranking separat — intră în „family_status".
+      { key: "orphan_one_parent", label: "Orfan de un părinte", type: "boolean", derived: true },
+      { key: "orphan_both_parents", label: "Orfan de ambii părinți", type: "boolean", derived: true },
       { key: "institutionalized", label: "Instituționalizat / plasament", type: "boolean", scorable: true },
       { key: "disability_certificate", label: "Certificat de handicap", type: "boolean", scorable: true },
-      { key: "single_parent_family", label: "Familie monoparentală", type: "boolean", scorable: true },
+      // Bifă completată de candidat; intră în „family_status", deci nu mai e scorabilă separat.
+      { key: "single_parent_family", label: "Familie monoparentală", type: "boolean" },
     ],
   },
   {

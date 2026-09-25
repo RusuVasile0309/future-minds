@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, Loader2, Save, UploadCloud } from "lucide-react"
+import { Check, Loader2, Save, UploadCloud, X } from "lucide-react"
 import {
   useRankingConfig,
   useSaveRankingConfig,
@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CriteriaEditor } from "./criteria-editor"
+import { CriteriaDonut, DONUT_PALETTE, type DonutSlice } from "./criteria-donut"
 import { EligibilityEditor, TieBreakerEditor, type FieldOption } from "./rules-editor"
 import { ResultsPanel } from "./results-panel"
 import type { RankingConfig, RankingCriterion, EligibilityRule, TieBreaker } from "@fm/shared"
@@ -29,6 +30,7 @@ export function RankingManager() {
   const [dirty, setDirty] = useState(false)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const [publishMsg, setPublishMsg] = useState<string | null>(null)
+  const [hoveredCriterion, setHoveredCriterion] = useState<string | null>(null)
 
   useEffect(() => {
     if (configQ.data && !config) setConfig(configQ.data)
@@ -51,6 +53,27 @@ export function RankingManager() {
     () => [{ value: "total_score", label: "Scor total" }, ...fieldOptions],
     [fieldOptions]
   )
+
+  // Contribuția fiecărui criteriu = pondere / suma ponderilor active (enabled && weight>0).
+  // Identic cu `scoreApplication` din server (weightSum), deci reflectă scorul final real.
+  const { percentById, slices } = useMemo(() => {
+    const active = (config?.criteria ?? []).filter((c) => c.enabled && c.weight > 0)
+    const weightSum = active.reduce((s, c) => s + c.weight, 0)
+    const percentById: Record<string, number> = {}
+    const slices: DonutSlice[] = active.map((c, i) => {
+      const percent = weightSum > 0 ? (c.weight / weightSum) * 100 : 0
+      percentById[c.id] = percent
+      return { id: c.id, label: c.label, percent, color: DONUT_PALETTE[i % DONUT_PALETTE.length] }
+    })
+    return { percentById, slices }
+  }, [config?.criteria])
+
+  function scrollToCriterion(id: string) {
+    const el = document.getElementById(`criterion-${id}`)
+    if (!el) return
+    el.scrollIntoView({ behavior: "smooth", block: "center" })
+    setHoveredCriterion(id)
+  }
 
   if (configQ.isLoading || !config) return <p className="text-muted-foreground">Se încarcă configurarea…</p>
   if (configQ.error) return <p className="text-destructive">Nu am putut încărca configurarea de ranking.</p>
@@ -107,16 +130,37 @@ export function RankingManager() {
 
       {tab === "config" ? (
         <div className="space-y-8">
-          <section>
-            <h2 className="font-serif text-xl font-medium">Criterii de scor</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Fiecare criteriu produce un scor normalizat, înmulțit cu ponderea. Venitul pe membru e criteriul
-              principal (mai mic = scor mai mare).
-            </p>
-            <div className="mt-4">
-              <CriteriaEditor criteria={config.criteria} onChange={(criteria) => patch({ criteria })} />
-            </div>
-          </section>
+          <div className="lg:flex lg:gap-8">
+            <section className="min-w-0 lg:w-[65%]">
+              <h2 className="font-serif text-xl font-medium">Criterii de scor</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Fiecare criteriu produce un scor normalizat, înmulțit cu ponderea. Venitul pe membru e criteriul
+                principal (mai mic = scor mai mare). Procentul de lângă fiecare criteriu arată cât din scorul
+                final reprezintă.
+              </p>
+              <div className="mt-4">
+                <CriteriaEditor
+                  criteria={config.criteria}
+                  onChange={(criteria) => patch({ criteria })}
+                  percentById={percentById}
+                  hoveredId={hoveredCriterion}
+                  onHover={setHoveredCriterion}
+                />
+              </div>
+            </section>
+
+            {/* Donut — desktop: coloană dreapta, sticky, 35% */}
+            <aside className="hidden lg:block lg:w-[35%] lg:shrink-0">
+              <div className="sticky top-4">
+                <CriteriaDonut
+                  slices={slices}
+                  hoveredId={hoveredCriterion}
+                  onHover={setHoveredCriterion}
+                  onSelect={scrollToCriterion}
+                />
+              </div>
+            </aside>
+          </div>
 
           <section>
             <h2 className="font-serif text-xl font-medium">Praguri de eligibilitate</h2>
@@ -146,6 +190,16 @@ export function RankingManager() {
             </div>
           </section>
 
+          {/* Donut — mobil: în josul paginii (click → scroll la criteriu) */}
+          <div className="lg:hidden">
+            <CriteriaDonut
+              slices={slices}
+              hoveredId={hoveredCriterion}
+              onHover={setHoveredCriterion}
+              onSelect={scrollToCriterion}
+            />
+          </div>
+
           {/* Acțiuni */}
           <div className="sticky bottom-4 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-sm backdrop-blur">
             <Button onClick={handleSave} disabled={save.isPending || !dirty}>
@@ -163,7 +217,19 @@ export function RankingManager() {
             ) : dirty ? (
               <span className="text-sm text-amber-600 dark:text-amber-400">Modificări nesalvate</span>
             ) : null}
-            {publishMsg ? <span className="text-sm text-muted-foreground">{publishMsg}</span> : null}
+            {publishMsg ? (
+              <span className="inline-flex items-center gap-2 rounded-lg bg-secondary/60 px-3 py-1.5 text-sm text-muted-foreground">
+                {publishMsg}
+                <button
+                  type="button"
+                  onClick={() => setPublishMsg(null)}
+                  aria-label="Închide"
+                  className="-mr-1 rounded-md p-0.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </span>
+            ) : null}
           </div>
         </div>
       ) : (

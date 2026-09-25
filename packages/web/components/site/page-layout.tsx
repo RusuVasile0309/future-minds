@@ -20,7 +20,7 @@ export function PageHero({
 }: {
   eyebrow: string
   title: React.ReactNode
-  lead?: string
+  lead?: React.ReactNode
 }) {
   return (
     <section className="relative overflow-hidden border-b border-border">

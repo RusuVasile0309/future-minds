@@ -44,6 +44,24 @@ function numericRange(field: FormField): { min: number; max: number } {
 }
 
 // Construiește un config implicit din câmpurile marcate „scorabil" în schemă.
+// Ponderile implicite per câmp (config de start al unei cohorte noi). Orice câmp
+// scorabil care nu apare aici pornește cu pondere 1.
+const DEFAULT_WEIGHTS: Record<string, number> = {
+  [INCOME_KEY]: 4,
+  environment: 2,
+  bac_average: 4,
+  highschool_average: 3,
+  admission_grade: 5,
+  faculty_average: 5,
+  family_status: 2,
+  institutionalized: 3,
+  disability_certificate: 3,
+  cover_letter_score: 3,
+  recommendation_letter_score: 3,
+}
+
+const weightFor = (key: string): number => DEFAULT_WEIGHTS[key] ?? 1
+
 function buildDefaultConfig(sections: FormSection[]): RankingConfig {
   const criteria: RankingCriterion[] = [
     {
@@ -51,7 +69,7 @@ function buildDefaultConfig(sections: FormSection[]): RankingConfig {
       fieldKey: INCOME_KEY,
       label: "Venit net / membru de familie",
       kind: "income",
-      weight: 3,
+      weight: weightFor(INCOME_KEY),
       enabled: true,
       direction: "lower",
       min: 0,
@@ -69,7 +87,7 @@ function buildDefaultConfig(sections: FormSection[]): RankingConfig {
           fieldKey: field.key,
           label: field.label,
           kind: "numeric",
-          weight: 1,
+          weight: weightFor(field.key),
           enabled: true,
           direction: "higher",
           min,
@@ -81,7 +99,7 @@ function buildDefaultConfig(sections: FormSection[]): RankingConfig {
           fieldKey: field.key,
           label: field.label,
           kind: "boolean",
-          weight: 1,
+          weight: weightFor(field.key),
           enabled: true,
           bonus: 1,
         })
@@ -96,7 +114,7 @@ function buildDefaultConfig(sections: FormSection[]): RankingConfig {
           fieldKey: field.key,
           label: field.label,
           kind: "option",
-          weight: 1,
+          weight: weightFor(field.key),
           enabled: true,
           optionScores,
         })
@@ -124,13 +142,22 @@ export class RankingService {
 
   static async saveConfig(config: RankingConfig): Promise<RankingConfig> {
     const cohort = await currentCohort()
-    const json = JSON.stringify(config)
+    // Ponderile pot lua doar valori întregi de la 1 la 5 — se normalizează la salvare,
+    // indiferent de client. Dezactivarea unui criteriu se face prin `enabled`, nu prin pondere 0.
+    const normalized: RankingConfig = {
+      ...config,
+      criteria: config.criteria.map((c) => ({
+        ...c,
+        weight: Math.max(1, Math.min(5, Math.round(Number(c.weight) || 1))),
+      })),
+    }
+    const json = JSON.stringify(normalized)
     await sql`
       INSERT INTO ranking_configs (cohort, config, updated_at)
       VALUES (${cohort}, ${json}::jsonb, NOW())
       ON CONFLICT (cohort) DO UPDATE SET config = ${json}::jsonb, updated_at = NOW()
     `
-    return config
+    return normalized
   }
 
   static async publish(publishedBy: string): Promise<RankingVersion> {

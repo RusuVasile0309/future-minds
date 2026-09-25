@@ -1,10 +1,11 @@
-import Link from "next/link"
-import { GraduationCap, HandCoins, Laptop, Home } from "lucide-react"
-import { SiteHeader } from "@/components/site/site-header"
-import { SiteFooter } from "@/components/site/site-footer"
-import { Reveal } from "@/components/site/reveal"
-import { FloatingApplyGate } from "@/components/site/floating-apply-gate"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import Image from "next/image";
+import { GraduationCap, HandCoins, Laptop, Home } from "lucide-react";
+import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
+import { Reveal } from "@/components/site/reveal";
+import { FloatingApplyGate } from "@/components/site/floating-apply-gate";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
@@ -22,7 +23,8 @@ export default function HomePage() {
             <div>
               <p className="eyebrow inline-flex animate-fade-rise items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Bursă integrală · Specializări IT &amp; Inginerie la UBB și UTCN
+                Bursă integrală pentru studenții de la specializările
+                Inteligență Artificială și Inginerie
               </p>
               <h1
                 className="display-title mt-6 animate-fade-rise text-4xl leading-[1.05] sm:text-5xl lg:text-6xl"
@@ -31,14 +33,18 @@ export default function HomePage() {
                 Ai capacitatea.
                 <br />
                 Noi îți dăm{" "}
-                <em className="not-italic font-serif italic text-primary">contextul</em>.
+                <em className="not-italic font-serif italic text-primary">
+                  contextul
+                </em>
+                .
               </h1>
               <p
                 className="mt-6 max-w-lg animate-fade-rise text-lg text-muted-foreground"
                 style={{ animationDelay: "160ms" }}
               >
-                FutureMinds acoperă integral studiile universitare (taxe, cazare, materiale și laptop) pentru
-                tineri talentați din medii defavorizate, cu integrare profesională la Nova Power&Gas la final.
+                FutureMinds acoperă integral studiile universitare (taxe,
+                cazare, materiale și laptop) pentru tineri talentați cărora le
+                lipsește sprijinul financiar.
               </p>
               <div
                 className="mt-9 flex flex-wrap items-center gap-3 animate-fade-rise"
@@ -59,16 +65,39 @@ export default function HomePage() {
             </div>
 
             {/* Card ilustrativ — ce acoperă bursa */}
-            <div className="relative animate-fade-rise" style={{ animationDelay: "320ms" }}>
+            <div
+              className="relative animate-fade-rise"
+              style={{ animationDelay: "320ms" }}
+            >
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
                 <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                   Ce acoperă bursa
                 </h2>
                 <ul className="mt-5 space-y-4">
-                  <CoverItem icon={<GraduationCap className="size-5" />} title="Taxe de studii" note="Integral, pe 3-4 ani" delay={420} />
-                  <CoverItem icon={<Home className="size-5" />} title="Cazare în cămin" note="Pe toată durata studiilor" delay={490} />
-                  <CoverItem icon={<Laptop className="size-5" />} title="Laptop & materiale" note="Echipament + rechizite" delay={560} />
-                  <CoverItem icon={<HandCoins className="size-5" />} title="Sprijin pentru trai" note="Cheltuieli de zi cu zi" delay={630} />
+                  <CoverItem
+                    icon={<GraduationCap className="size-5" />}
+                    title="Taxe de studii"
+                    note="Integral, pe 3-4 ani"
+                    delay={420}
+                  />
+                  <CoverItem
+                    icon={<Home className="size-5" />}
+                    title="Cazare în cămin"
+                    note="Pe toată durata studiilor"
+                    delay={490}
+                  />
+                  <CoverItem
+                    icon={<Laptop className="size-5" />}
+                    title="Laptop & materiale"
+                    note="Echipament + rechizite"
+                    delay={560}
+                  />
+                  <CoverItem
+                    icon={<HandCoins className="size-5" />}
+                    title="Sprijin pentru trai"
+                    note="Cheltuieli de zi cu zi"
+                    delay={630}
+                  />
                 </ul>
               </div>
             </div>
@@ -81,7 +110,7 @@ export default function HomePage() {
             <Reveal>
               <p className="eyebrow">Cum funcționează</p>
               <h2 className="display-title mt-4 max-w-2xl text-3xl sm:text-4xl">
-                De la aplicație la primul <span className="text-primary">commit</span>.
+                De la formular la <span className="text-primary">bursă</span>.
               </h2>
             </Reveal>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -96,14 +125,14 @@ export default function HomePage() {
                 <Step
                   n="02"
                   title="Evaluare & selecție"
-                  body="Candidații sunt evaluați după criterii clare (rezultate, nevoie financiară, implicare) și clasați transparent."
+                  body="Candidații sunt evaluați după criterii clare (rezultate, situație financiară, implicare) și clasați transparent."
                 />
               </Reveal>
               <Reveal delay={200} className="h-full">
                 <Step
                   n="03"
                   title="Studii acoperite"
-                  body="Bursierii primesc finanțare integrală, îndrumare din partea Rotaract și oportunități la Nova Power&Gas."
+                  body="Bursierii primesc finanțare integrală, îndrumare din partea Rotaract și oportunități de muncă în cadrul companiei Nova Power&Gas."
                 />
               </Reveal>
             </div>
@@ -116,23 +145,38 @@ export default function HomePage() {
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               Un proiect susținut de
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-lg font-medium text-foreground/80">
+            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:gap-x-48">
               <a
                 href="https://vreaulanova.ro/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-primary"
+                aria-label="Nova Power&Gas"
+                className="opacity-80 transition-opacity hover:opacity-100"
               >
-                Nova Power&amp;Gas
+                <span className="inline-flex h-[4.05rem] items-center justify-center bg-white aspect-[1332/388] md:h-[5.4rem]">
+                  <Image
+                    src="/nova-logo.svg"
+                    alt="Nova Power&Gas"
+                    width={400}
+                    height={220}
+                    className="h-[3.75rem] w-auto md:h-20"
+                  />
+                </span>
               </a>
-              <span className="text-border">·</span>
               <a
                 href="https://www.facebook.com/RotaractSamvsCluj/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-primary"
+                aria-label="Rotaract Cluj-Napoca SAMVS"
+                className="opacity-80 transition-opacity hover:opacity-100"
               >
-                Rotaract Cluj-Napoca SAMVS
+                <Image
+                  src="/rac-logo.png"
+                  alt="Rotaract Cluj-Napoca SAMVS"
+                  width={1332}
+                  height={388}
+                  className="h-[4.05rem] w-auto md:h-[5.4rem] md:-translate-y-4"
+                />
               </a>
             </div>
           </Reveal>
@@ -142,7 +186,7 @@ export default function HomePage() {
       <SiteFooter />
       <FloatingApplyGate />
     </div>
-  )
+  );
 }
 
 function CoverItem({
@@ -151,28 +195,37 @@ function CoverItem({
   note,
   delay = 0,
 }: {
-  icon: React.ReactNode
-  title: string
-  note: string
-  delay?: number
+  icon: React.ReactNode;
+  title: string;
+  note: string;
+  delay?: number;
 }) {
   return (
-    <li className="flex animate-fade-rise items-center gap-4" style={delay ? { animationDelay: `${delay}ms` } : undefined}>
-      <span className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">{icon}</span>
+    <li
+      className="flex animate-fade-rise items-center gap-4"
+      style={delay ? { animationDelay: `${delay}ms` } : undefined}
+    >
+      <span className="flex size-10 items-center justify-center rounded-lg bg-secondary text-primary">
+        {icon}
+      </span>
       <span className="flex flex-col">
         <span className="font-medium text-foreground">{title}</span>
         <span className="text-sm text-muted-foreground">{note}</span>
       </span>
     </li>
-  )
+  );
 }
 
 function Step({ n, title, body }: { n: string; title: string; body: string }) {
   return (
     <div className="h-full rounded-2xl border border-border bg-card p-7 transition duration-300 hover:-translate-y-1 hover:border-brand-light/60 hover:shadow-md">
       <span className="font-mono text-sm text-primary">{n}</span>
-      <h3 className="mt-3 font-serif text-xl font-medium text-foreground">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+      <h3 className="mt-3 font-serif text-xl font-medium text-foreground">
+        {title}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        {body}
+      </p>
     </div>
-  )
+  );
 }

@@ -18,6 +18,11 @@ export const INCOME_KEY = "income_per_member"
 export const ORPHAN_ONE_KEY = "orphan_one_parent"
 export const ORPHAN_BOTH_KEY = "orphan_both_parents"
 
+// Situația familială, criteriu unic derivat: 0 = familie întreagă, 1 = orfan de un
+// părinte sau familie monoparentală, 2 = orfan de ambii părinți.
+export const FAMILY_STATUS_KEY = "family_status"
+export const SINGLE_PARENT_KEY = "single_parent_family"
+
 // Mapare implicită pe cheile din specificația formularului (docs/formular-elevi-campuri.md).
 export const DEFAULT_INCOME_CONFIG: IncomeConfig = {
   studentIncomeKey: "student_income",
@@ -88,10 +93,14 @@ export function withDerivedAnswers(
 ): Record<string, AnswerValue> {
   const deceased =
     (bool(answers[income.motherDeceasedKey]) ? 1 : 0) + (bool(answers[income.fatherDeceasedKey]) ? 1 : 0)
+  const singleParent = bool(answers[SINGLE_PARENT_KEY])
+  // 3 = orfan de ambii; 2 = orfan de un părinte SAU monoparentală; 0 = familie întreagă.
+  const familyStatus = deceased === 2 ? 3 : deceased === 1 || singleParent ? 2 : 0
   const next: Record<string, AnswerValue> = {
     ...answers,
     [ORPHAN_ONE_KEY]: deceased === 1,
     [ORPHAN_BOTH_KEY]: deceased === 2,
+    [FAMILY_STATUS_KEY]: familyStatus,
   }
   // Recalculează câmpurile calculate (ex.: media Bac) — nu ne bazăm pe valoarea din client.
   applyComputedFields(next)

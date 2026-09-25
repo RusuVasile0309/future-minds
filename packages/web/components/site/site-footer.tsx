@@ -28,6 +28,7 @@ export function SiteFooter() {
               { href: "/aplica", label: "Formular de înscriere" },
               { href: "/autentificare/intra", label: "Autentificare" },
               { href: "/intrebari-frecvente", label: "Întrebări frecvente" },
+              { href: "/contact", label: "Contact" },
             ]}
           />
           <FooterCol

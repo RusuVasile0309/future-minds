@@ -1,15 +1,21 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { GraduationCap, HandCoins, Sparkles, MapPin, BadgeCheck } from "lucide-react"
-import { PageLayout, PageHero } from "@/components/site/page-layout"
-import { Reveal } from "@/components/site/reveal"
-import { Button } from "@/components/ui/button"
+import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  GraduationCap,
+  HandCoins,
+  Sparkles,
+  MapPin,
+  BadgeCheck,
+} from "lucide-react";
+import { PageLayout, PageHero } from "@/components/site/page-layout";
+import { Reveal } from "@/components/site/reveal";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Criterii de eligibilitate",
   description:
     "Cine poate aplica la FutureMinds: rezultate academice, situație financiară, implicare, zona de proveniență și statutul de student.",
-}
+};
 
 const CRITERIA = [
   {
@@ -20,7 +26,7 @@ const CRITERIA = [
   {
     icon: HandCoins,
     title: "Situație financiară",
-    body: "Accent pe tinerii care au nevoie reală de sprijin pentru a-și putea continua studiile.",
+    body: "Accent pe tinerii care au o nevoie reală de sprijin pentru a-și putea continua studiile.",
   },
   {
     icon: Sparkles,
@@ -37,7 +43,7 @@ const CRITERIA = [
     title: "Statut de student bugetat",
     body: "Prioritate pentru cei înscriși la forma de învățământ cu finanțare de la bugetul de stat.",
   },
-]
+];
 
 export default function EligibilitatePage() {
   return (
@@ -46,7 +52,8 @@ export default function EligibilitatePage() {
         eyebrow="Criterii de eligibilitate"
         title={
           <>
-            Sprijinim tineri <span className="text-primary">motivați și serioși</span>.
+            Sprijinim tineri{" "}
+            <span className="text-primary">motivați și serioși</span>.
           </>
         }
         lead="Bursa se adresează studenților de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca. Selecția se face în urma unui proces atent, bazat pe recomandările cadrelor didactice, ținând cont de cinci criterii principale."
@@ -63,7 +70,9 @@ export default function EligibilitatePage() {
                 <c.icon className="size-5" />
               </span>
               <h3 className="mt-5 font-serif text-xl font-medium">{c.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {c.body}
+              </p>
             </div>
           ))}
 
@@ -71,8 +80,8 @@ export default function EligibilitatePage() {
             <div>
               <h3 className="font-serif text-xl font-medium">Te încadrezi?</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Nu trebuie să bifezi perfect fiecare criteriu; contează imaginea de ansamblu. Aplică și lasă-ne
-                să te cunoaștem.
+                Nu trebuie să bifezi perfect fiecare criteriu; contează imaginea
+                de ansamblu. Aplică și lasă-ne să te cunoaștem.
               </p>
             </div>
             <Button asChild className="mt-6 w-full">
@@ -87,12 +96,13 @@ export default function EligibilitatePage() {
       <section className="border-t border-border bg-secondary/30">
         <div className="container py-14">
           <p className="max-w-3xl text-lg text-muted-foreground">
-            Ne dorim să sprijinim studenți care își doresc să-și continue studiile și să-și atingă potențialul,
-            indiferent de contextul din care provin. Dacă ai capacitatea și motivația, contextul nu ar trebui să
-            te oprească.
+            Ne dorim să sprijinim studenți care își doresc să-și continue
+            studiile și să-și atingă potențialul, indiferent de contextul din
+            care provin. Dacă ai capacitatea și motivația, contextul nu ar
+            trebui să te oprească.
           </p>
         </div>
       </section>
     </PageLayout>
-  )
+  );
 }
