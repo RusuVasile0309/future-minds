@@ -153,6 +153,8 @@ export function FieldInput({
           disabled={disabled}
           minLength={field.validation?.minLength}
           maxLength={field.validation?.maxLength}
+          pattern={field.validation?.regex}
+          title={field.helpText ?? undefined}
         />
       )
   }

@@ -90,7 +90,18 @@ const SECTIONS: SectionSpec[] = [
     fields: [
       { key: "last_name", label: "Nume", type: "text", required: true, colSpan: 6 },
       { key: "first_name", label: "Prenume", type: "text", required: true, colSpan: 6 },
-      { key: "birth_date", label: "Data nașterii", type: "date", required: true },
+      {
+        key: "cnp",
+        label: "CNP",
+        type: "text",
+        required: true,
+        colSpan: 6,
+        helpText: "Cod numeric personal (13 cifre).",
+        validation: { minLength: 13, maxLength: 13, regex: "^[0-9]{13}$" },
+      },
+      { key: "birth_date", label: "Data nașterii", type: "date", required: true, colSpan: 6 },
+      { key: "county", label: "Județ", type: "select", required: true, colSpan: 6, options: opts(COUNTIES) },
+      { key: "city", label: "Localitate", type: "text", required: true, colSpan: 6 },
       { key: "email", label: "Email", type: "email", required: true, helpText: "Prefill din contul tău." },
       { key: "phone", label: "Telefon", type: "phone", required: true, helpText: "Prefill din contul tău." },
     ],
@@ -99,8 +110,6 @@ const SECTIONS: SectionSpec[] = [
     id: "address",
     title: "Adresă",
     fields: [
-      { key: "county", label: "Județ", type: "select", required: true, options: opts(COUNTIES) },
-      { key: "city", label: "Localitate", type: "text", required: true },
       { key: "street", label: "Stradă", type: "text", required: true, colSpan: 9 },
       { key: "street_number", label: "Număr", type: "text", required: true, colSpan: 3 },
       { key: "building", label: "Bloc", type: "text", colSpan: 6 },

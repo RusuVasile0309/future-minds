@@ -1,9 +1,14 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+import Credentials from "next-auth/providers/credentials"
 import authConfig, { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "./auth.config"
 import { createSQLAdapter } from "./lib/auth-adapter"
 import { readAndClearOAuthIntent } from "./lib/oauth-intent"
 import { AuthService } from "@fm/server"
+
+// Limite anti-brute-force pentru login cu parolă.
+const LOGIN_MAX_ATTEMPTS = 8
+const LOGIN_WINDOW_MS = 15 * 60 * 1000 // 15 minute
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: createSQLAdapter(),
@@ -14,6 +19,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+    }),
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Parolă", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = (credentials?.email as string | undefined)?.trim().toLowerCase()
+        const password = credentials?.password as string | undefined
+        if (!email || !password) return null
+
+        const limited = await AuthService.hitRateLimit(
+          `login:${email}`,
+          LOGIN_MAX_ATTEMPTS,
+          LOGIN_WINDOW_MS
+        )
+        if (limited) return null
+
+        const user = await AuthService.verifyCredentials(email, password)
+        if (!user) return null
+
+        await AuthService.clearRateLimit(`login:${email}`)
+        return { id: user.id, email: user.email, name: user.name, image: user.image }
+      },
     }),
   ],
 

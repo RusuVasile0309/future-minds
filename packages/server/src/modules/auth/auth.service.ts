@@ -1,6 +1,9 @@
+import bcrypt from "bcryptjs"
 import { sql } from "../../database/db"
 import { FilesService } from "../files/files.service"
 import type { User, UserRole, RefreshToken, VerificationToken } from "@fm/shared"
+
+const BCRYPT_ROUNDS = 12
 
 function toUser(row: Record<string, unknown>): User {
   return {
@@ -126,6 +129,60 @@ export class AuthService {
               ${account.token_type ?? null}, ${account.scope ?? null}, ${account.id_token ?? null}, ${account.session_state ?? null})
       ON CONFLICT (provider, provider_account_id) DO NOTHING
     `
+  }
+
+  // ── Email + parolă ───────────────────────────────────────────────────────────
+
+  // Creează un cont nou cu email + parolă (parola e stocată hash-uită bcrypt).
+  // Întoarce `null` dacă emailul e deja folosit (Google sau alt cont).
+  static async registerWithPassword(data: {
+    email: string
+    password: string
+    name?: string | null
+  }): Promise<User | null> {
+    const existing = await AuthService.getUserByEmail(data.email)
+    if (existing) return null
+
+    const hashed = await bcrypt.hash(data.password, BCRYPT_ROUNDS)
+    return AuthService.createUser({
+      email: data.email,
+      password: hashed,
+      name: data.name ?? null,
+    })
+  }
+
+  // Verifică email + parolă pentru login. Întoarce userul dacă parola e corectă,
+  // altfel `null`. Conturile fără parolă (ex. doar Google) eșuează controlat.
+  static async verifyCredentials(email: string, password: string): Promise<User | null> {
+    const [row] = await sql`SELECT * FROM users WHERE email = ${email}`
+    if (!row || !row.password) return null
+
+    const ok = await bcrypt.compare(password, row.password as string)
+    return ok ? toUser(row) : null
+  }
+
+  // ── Rate limiting (brute-force login) ────────────────────────────────────────
+
+  // Numără încercările pentru un identificator (ex. `login:<email>`) din ultimele
+  // `windowMs` milisecunde și înregistrează una nouă. Întoarce `true` dacă pragul
+  // a fost depășit (apelantul ar trebui să refuze).
+  static async hitRateLimit(
+    identifier: string,
+    max: number,
+    windowMs: number
+  ): Promise<boolean> {
+    const since = new Date(Date.now() - windowMs).toISOString()
+    const [{ count }] = await sql`
+      SELECT COUNT(*)::int AS count FROM rate_limit_attempts
+      WHERE identifier = ${identifier} AND created_at > ${since}
+    `
+    await sql`INSERT INTO rate_limit_attempts (identifier) VALUES (${identifier})`
+    return (count as number) >= max
+  }
+
+  // Curăță încercările după un login reușit.
+  static async clearRateLimit(identifier: string): Promise<void> {
+    await sql`DELETE FROM rate_limit_attempts WHERE identifier = ${identifier}`
   }
 
   // ── Refresh tokens ──────────────────────────────────────────────────────────

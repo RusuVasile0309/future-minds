@@ -17,6 +17,23 @@ const ROLE_LABEL: Record<string, string> = {
   SUPER_USER: "Administrator principal",
 }
 
+// Câmpuri pre-completate automat din cont — nu contează drept „date introduse".
+const AUTO_PREFILLED_KEYS = new Set(["email", "phone"])
+
+function isEmptyValue(value: unknown): boolean {
+  if (value === null || value === undefined) return true
+  if (typeof value === "string") return value.trim() === ""
+  if (Array.isArray(value)) return value.length === 0
+  return false
+}
+
+// `true` dacă aplicația are cel puțin un răspuns completat de candidat.
+function hasApplicantData(answers: Record<string, unknown>): boolean {
+  return Object.entries(answers).some(
+    ([key, value]) => !AUTO_PREFILLED_KEYS.has(key) && !isEmptyValue(value)
+  )
+}
+
 export default async function DashboardPage() {
   const session = await auth()
   const name = session?.user?.name?.split(" ")[0] ?? "candidat"
@@ -24,6 +41,9 @@ export default async function DashboardPage() {
   const isAdmin = role === "ADMIN" || role === "SUPER_USER"
   const application = session?.user?.id ? await ApplicationsService.getForUser(session.user.id) : null
   const isDraft = !application || application.status === "draft"
+  // „Date inserate" = răspunsuri introduse de candidat, excluzând pre-completarea
+  // automată din cont (email/telefon) și valorile goale.
+  const started = isDraft && application ? hasApplicantData(application.answers) : false
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,13 +67,16 @@ export default async function DashboardPage() {
               {application ? <StatusBadge status={application.status} /> : null}
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              {isDraft
-                ? "Completează formularul de înscriere în mai mulți pași. Îl poți edita oricând cât timp înscrierile sunt deschise."
-                : "Aplicația ta a fost trimisă. O poți vizualiza, dar nu o mai poți edita."}
+              {!isDraft
+                ? "Aplicația ta a fost trimisă. O poți vizualiza, dar nu o mai poți edita."
+                : started
+                  ? "Reia formularul de unde ai rămas. Îl poți edita oricând cât timp înscrierile sunt deschise."
+                  : "Completează formularul de înscriere în mai mulți pași. Îl poți edita oricând cât timp înscrierile sunt deschise."}
             </p>
             <Button asChild className="mt-5">
               <Link href="/aplica">
-                {isDraft ? "Continuă aplicația" : "Vezi aplicația"} <ArrowRight className="size-4" />
+                {!isDraft ? "Vezi aplicația" : started ? "Continuă aplicația" : "Începe aplicația"}{" "}
+                <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>

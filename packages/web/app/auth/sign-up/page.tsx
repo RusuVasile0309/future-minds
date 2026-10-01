@@ -1,6 +1,8 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { AuthShell, GoogleGlyph } from "@/components/auth/auth-shell"
+import { AuthDivider } from "@/components/auth/credentials-form"
+import { SignUpWizard } from "@/components/auth/sign-up-wizard"
 import { Button } from "@/components/ui/button"
 import { googleSignUp } from "@/app/auth/actions"
 
@@ -39,6 +41,10 @@ export default function SignUpPage({
           Continuă cu Google
         </Button>
       </form>
+
+      <AuthDivider />
+
+      <SignUpWizard />
 
       <p className="mt-5 text-center text-xs text-muted-foreground">
         Prin crearea contului ești de acord cu prelucrarea datelor în scopul evaluării candidaturii.

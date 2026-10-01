@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { AuthShell, GoogleGlyph } from "@/components/auth/auth-shell"
+import { CredentialsForm, AuthDivider } from "@/components/auth/credentials-form"
 import { Button } from "@/components/ui/button"
 import { googleSignIn } from "@/app/auth/actions"
 
@@ -26,6 +27,10 @@ export default function SignInPage() {
           Continuă cu Google
         </Button>
       </form>
+
+      <AuthDivider />
+
+      <CredentialsForm />
     </AuthShell>
   )
 }
