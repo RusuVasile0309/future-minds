@@ -61,7 +61,7 @@ export function SiteFooter() {
             title="Parteneri"
             links={[
               { href: "https://vreaulanova.ro/", label: "Nova Power&Gas", external: true },
-              { href: "https://www.facebook.com/RotaractSamvsCluj/", label: "Rotaract Cluj-Napoca", external: true },
+              { href: "https://www.facebook.com/RotaractSamvsCluj/", label: "Rotaract Cluj-Napoca SAMVS", external: true },
             ]}
           />
         </div>
