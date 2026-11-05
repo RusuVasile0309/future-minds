@@ -1,16 +1,42 @@
 import Link from "next/link"
+import Image from "next/image"
 import FutureMindsLogo from "@/components/FutureMindsLogo"
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="container flex flex-col gap-10 py-14 md:flex-row md:items-start md:justify-between">
-        <div className="max-w-sm space-y-4">
-          <FutureMindsLogo variant="horizontal" size={24} />
+        <div className="max-w-sm space-y-5">
+          <FutureMindsLogo variant="horizontal" size={28} />
           <p className="text-sm text-muted-foreground">
             Un program de burse care finanțează integral studiile universitare de IT și inginerie pentru
             tineri talentați din medii defavorizate.
           </p>
+          <div className="space-y-3 pt-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              Un proiect susținut de
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href="https://vreaulanova.ro/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Nova Power&Gas"
+                className="inline-flex items-center rounded-xl bg-white px-3.5 py-2 shadow-sm ring-1 ring-border/60 transition hover:shadow"
+              >
+                <Image src="/nova-logo.svg" alt="Nova Power&Gas" width={400} height={220} className="h-8 w-auto" />
+              </a>
+              <a
+                href="https://www.facebook.com/RotaractSamvsCluj/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Rotaract Cluj-Napoca SAMVS"
+                className="inline-flex items-center rounded-xl bg-white px-3.5 py-2 shadow-sm ring-1 ring-border/60 transition hover:shadow"
+              >
+                <Image src="/rac-logo.png" alt="Rotaract Cluj-Napoca SAMVS" width={1332} height={388} className="h-8 w-auto" />
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">

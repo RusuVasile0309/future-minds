@@ -21,11 +21,6 @@ export default function HomePage() {
           />
           <div className="container relative grid items-center gap-12 py-20 md:grid-cols-2 md:py-28">
             <div>
-              <p className="eyebrow inline-flex animate-fade-rise items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Bursă integrală pentru studenții de la specializările
-                Inteligență Artificială și Inginerie
-              </p>
               <h1
                 className="display-title mt-6 animate-fade-rise text-4xl leading-[1.05] sm:text-5xl lg:text-6xl"
                 style={{ animationDelay: "80ms" }}
@@ -104,6 +99,72 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Parteneri (bandă albă) ───────────────────────── */}
+        <section className="border-y border-border bg-white">
+          <Reveal className="container flex flex-wrap items-center justify-center gap-x-12 gap-y-8 pb-6 pt-[39px] md:gap-x-16 md:pb-7 md:pt-[43px]">
+            <a
+              href="https://www.ubbcluj.ro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Universitatea Babeș-Bolyai"
+              className="opacity-90 transition-opacity hover:opacity-100"
+            >
+              <Image
+                src="/ubb-logo.png"
+                alt="Universitatea Babeș-Bolyai"
+                width={2000}
+                height={1014}
+                className="h-[80px] w-auto md:h-[96px]"
+              />
+            </a>
+            <a
+              href="https://vreaulanova.ro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Nova Power&Gas"
+              className="opacity-90 transition-opacity hover:opacity-100"
+            >
+              <Image
+                src="/nova-logo.svg"
+                alt="Nova Power&Gas"
+                width={400}
+                height={220}
+                className="h-[72px] w-auto md:h-[84px]"
+              />
+            </a>
+            <a
+              href="https://www.facebook.com/RotaractSamvsCluj/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Rotaract Cluj-Napoca SAMVS"
+              className="-translate-y-[15px] opacity-90 transition-opacity hover:opacity-100"
+            >
+              <Image
+                src="/rac-logo.png"
+                alt="Rotaract Cluj-Napoca SAMVS"
+                width={1332}
+                height={388}
+                className="h-[86px] w-auto md:h-[101px]"
+              />
+            </a>
+            <a
+              href="https://www.utcluj.ro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Universitatea Tehnică din Cluj-Napoca"
+              className="opacity-90 transition-opacity hover:opacity-100"
+            >
+              <Image
+                src="/utcn-logo.svg"
+                alt="Universitatea Tehnică din Cluj-Napoca"
+                width={1032}
+                height={709}
+                className="h-[80px] w-auto md:h-[96px]"
+              />
+            </a>
+          </Reveal>
+        </section>
+
         {/* ── Cum funcționează ─────────────────────────────── */}
         <section className="border-t border-border bg-secondary/30">
           <div className="container py-20">
@@ -139,48 +200,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Parteneri ────────────────────────────────────── */}
-        <section className="border-t border-border">
-          <Reveal className="container flex flex-col items-center gap-6 py-14 text-center">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-              Un proiect susținut de
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:gap-x-48">
-              <a
-                href="https://vreaulanova.ro/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Nova Power&Gas"
-                className="opacity-80 transition-opacity hover:opacity-100"
-              >
-                <span className="inline-flex h-[4.05rem] items-center justify-center bg-white aspect-[1332/388] md:h-[5.4rem]">
-                  <Image
-                    src="/nova-logo.svg"
-                    alt="Nova Power&Gas"
-                    width={400}
-                    height={220}
-                    className="h-[3.75rem] w-auto md:h-20"
-                  />
-                </span>
-              </a>
-              <a
-                href="https://www.facebook.com/RotaractSamvsCluj/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Rotaract Cluj-Napoca SAMVS"
-                className="opacity-80 transition-opacity hover:opacity-100"
-              >
-                <Image
-                  src="/rac-logo.png"
-                  alt="Rotaract Cluj-Napoca SAMVS"
-                  width={1332}
-                  height={388}
-                  className="h-[4.05rem] w-auto md:h-[5.4rem] md:-translate-y-4"
-                />
-              </a>
-            </div>
-          </Reveal>
-        </section>
       </main>
 
       <SiteFooter />

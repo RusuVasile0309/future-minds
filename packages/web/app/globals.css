@@ -4,64 +4,69 @@
 
 @layer base {
   :root {
-    /* Sistem alb elegant — mapat pe scara de albastruri FutureMinds */
-    --background: 0 0% 100%;
-    --foreground: 219 63% 13%;        /* #0C1A34 aprox. */
+    /* Sistem FutureMinds — navy & ardezie pe un fundal rece, foarte deschis */
+    --background: 210 40% 98%;        /* off-white rece */
+    --foreground: 210 36% 18%;        /* #1E2F40 — navy profund */
 
     --card: 0 0% 100%;
-    --card-foreground: 219 63% 13%;
+    --card-foreground: 210 36% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 219 63% 13%;
+    --popover-foreground: 210 36% 18%;
 
-    --primary: 220 80% 44%;           /* brand #1650C8 */
+    --primary: 210 28% 42%;           /* #4D6B8A — albastru-ardezie */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 60% 96%;         /* albastru foarte deschis */
-    --secondary-foreground: 220 83% 26%;
+    --secondary: 210 33% 95%;         /* #EEF2F6 */
+    --secondary-foreground: 210 36% 18%;
 
-    --muted: 214 40% 96%;
-    --muted-foreground: 218 16% 46%;
+    --muted: 210 33% 95%;
+    --muted-foreground: 211 23% 35%;  /* #44586D — text secundar */
 
-    --accent: 214 100% 96%;
-    --accent-foreground: 220 83% 26%; /* brand #0B2F7A */
+    --accent: 210 33% 95%;
+    --accent-foreground: 210 36% 18%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 45% 92%;
-    --input: 216 45% 90%;
-    --ring: 217 91% 60%;              /* brand electric #3B82F6 */
+    --border: 210 27% 87%;            /* #D5DEE7 */
+    --input: 210 27% 85%;
+    --ring: 210 28% 42%;
+
+    /* Fundalul de brand (puncte + pete de lumină) */
+    --dot: 210 30% 72%;               /* culoarea punctelor */
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 220 55% 8%;
-    --foreground: 213 60% 95%;
+    --background: 210 35% 11%;
+    --foreground: 210 30% 92%;
 
-    --card: 221 47% 13%;
-    --card-foreground: 213 60% 95%;
-    --popover: 221 47% 13%;
-    --popover-foreground: 213 60% 95%;
+    --card: 210 32% 15%;
+    --card-foreground: 210 30% 92%;
+    --popover: 210 32% 15%;
+    --popover-foreground: 210 30% 92%;
 
-    --primary: 217 100% 77%;          /* brand light #8AB4FF pe fundal închis */
-    --primary-foreground: 220 83% 15%;
+    --primary: 205 40% 76%;           /* #A9C2D9 pe fundal închis */
+    --primary-foreground: 210 36% 15%;
 
-    --secondary: 221 40% 18%;
-    --secondary-foreground: 213 60% 95%;
+    --secondary: 210 28% 20%;
+    --secondary-foreground: 210 30% 92%;
 
-    --muted: 221 35% 18%;
-    --muted-foreground: 216 20% 65%;
+    --muted: 210 25% 20%;
+    --muted-foreground: 210 20% 70%;
 
-    --accent: 221 40% 20%;
-    --accent-foreground: 213 60% 95%;
+    --accent: 210 28% 22%;
+    --accent-foreground: 210 30% 92%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 219 35% 22%;
-    --input: 219 35% 24%;
-    --ring: 217 91% 68%;
+    --border: 210 25% 24%;
+    --input: 210 25% 26%;
+    --ring: 205 40% 76%;
+
+    --dot: 210 25% 42%;
   }
 }
 
@@ -72,6 +77,39 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Fundalul de brand FutureMinds — grilă de puncte + pete de gradient.
+     Fix pe viewport și în spatele conținutului; cardurile albe plutesc deasupra. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(60% 50% at 18% 12%, hsl(210 70% 90% / 0.55), transparent 70%),
+      radial-gradient(45% 45% at 88% 16%, hsl(38 90% 72% / 0.10), transparent 70%),
+      radial-gradient(55% 55% at 82% 88%, hsl(205 60% 86% / 0.45), transparent 70%),
+      radial-gradient(50% 50% at 8% 92%, hsl(214 50% 88% / 0.40), transparent 70%),
+      radial-gradient(hsl(var(--dot) / 0.45) 1px, transparent 1.5px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      22px 22px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  .dark body::before {
+    background-image:
+      radial-gradient(60% 50% at 18% 12%, hsl(210 60% 40% / 0.22), transparent 70%),
+      radial-gradient(45% 45% at 88% 16%, hsl(38 70% 55% / 0.08), transparent 70%),
+      radial-gradient(55% 55% at 82% 88%, hsl(205 55% 45% / 0.20), transparent 70%),
+      radial-gradient(50% 50% at 8% 92%, hsl(214 45% 42% / 0.18), transparent 70%),
+      radial-gradient(hsl(var(--dot) / 0.40) 1px, transparent 1.5px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 22px 22px;
   }
 
   /* Respectă preferința de mișcare redusă: neutralizează global orice
@@ -90,12 +128,12 @@
 }
 
 @layer components {
-  /* Titlu editorial serif cu un cuvânt-cheie accentuat */
+  /* Titlu display (Poppins) cu un cuvânt-cheie accentuat */
   .display-title {
-    @apply font-serif font-medium tracking-tight text-foreground;
+    @apply font-display font-semibold tracking-tight text-foreground;
   }
-  /* Eyebrow / etichetă mono */
+  /* Eyebrow / etichetă — Poppins uppercase, ca în identitatea vizuală */
   .eyebrow {
-    @apply font-mono text-xs uppercase tracking-[0.22em] text-primary;
+    @apply font-display text-xs font-semibold uppercase tracking-[0.2em] text-primary;
   }
 }

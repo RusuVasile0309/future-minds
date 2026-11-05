@@ -23,7 +23,7 @@ export async function SiteHeader() {
   return (
     <StickyHeader>
       <Link href="/" aria-label="Acasă FutureMinds" className="shrink-0 transition-opacity hover:opacity-80">
-        <FutureMindsLogo variant="horizontal" size={26} tagline={false} />
+        <FutureMindsLogo variant="horizontal" size={30} tagline={false} />
       </Link>
 
       <nav className="hidden items-center gap-8 md:flex">

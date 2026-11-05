@@ -19,22 +19,28 @@ const config = {
     },
     extend: {
       fontFamily: {
-        // Titluri & momente editoriale — serif rafinat
-        serif: ["var(--font-serif)", "Iowan Old Style", "Palatino", "Georgia", "serif"],
-        // UI, body — sans curat (Outfit, ca în brand kit)
-        sans: ["var(--font-outfit)", "ui-sans-serif", "system-ui", "sans-serif"],
-        // Etichete, tagline, scoruri, coloane de date
-        mono: ["var(--font-plex-mono)", "ui-monospace", "Menlo", "monospace"],
+        // Text & UI — Inter
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Titluri / display — Poppins
+        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "sans-serif"],
+        // `font-serif` e repointat pe Poppins: accentul italic (ex. „începe") rămâne în familia mărcii
+        serif: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "sans-serif"],
+        // Etichete numerice, scoruri, coloane de date
+        mono: ["var(--font-mono)", "ui-monospace", "Menlo", "monospace"],
       },
       colors: {
-        // Paleta de brand FutureMinds (din kit)
+        // Paleta de brand FutureMinds (din identitatea vizuală)
         brand: {
-          deep: "#0B2F7A",    // text, punct mare
-          primary: "#1650C8", // acțiuni / accent
-          electric: "#3B82F6",// highlight / focus
-          light: "#8AB4FF",   // albastru deschis
-          dot1: "#B9CDF5",    // punct 1 (gradație)
-          dot2: "#6D9BEF",    // punct 2 (gradație)
+          ink: "#1E2F40",     // navy profund — titluri, text principal
+          deep: "#1E2F40",    // (alias istoric) navy
+          slate: "#44586D",   // text secundar
+          primary: "#4D6B8A", // albastru-ardezie — accent / interacțiune
+          steel: "#56697C",   // ardezie neutră
+          sky: "#A9C2D9",     // albastru deschis
+          light: "#A9C2D9",   // (alias istoric) albastru deschis
+          mist: "#D5DEE7",    // borduri, puncte de fundal
+          tint: "#EEF2F6",    // suprafețe foarte deschise
+          amber: "#F2B544",   // accent cald, folosit punctual
         },
         // Sistem shadcn (mapat pe albastruri în globals.css)
         border: "hsl(var(--border))",
