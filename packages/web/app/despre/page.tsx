@@ -4,11 +4,20 @@ import { GraduationCap } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
+import { JsonLd } from "@/components/seo/json-ld"
+import { breadcrumbSchema } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: "Despre",
   description:
     "FutureMinds identifică tineri cu potențial real din medii defavorizate și le acoperă integral studiile de IT și inginerie.",
+  alternates: { canonical: "/despre" },
+  openGraph: {
+    title: "Despre · FutureMinds",
+    description:
+      "FutureMinds identifică tineri cu potențial real din medii defavorizate și le acoperă integral studiile de IT și inginerie.",
+    url: "/despre",
+  },
 }
 
 const OBLIGATIONS = [
@@ -47,6 +56,12 @@ const OBLIGATIONS = [
 export default function DesprePage() {
   return (
     <PageLayout>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Acasă", path: "/" },
+          { name: "Despre", path: "/despre" },
+        ])}
+      />
       <PageHero
         eyebrow="Despre proiect"
         title={

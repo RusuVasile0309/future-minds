@@ -10,11 +10,20 @@ import {
 import { PageLayout, PageHero } from "@/components/site/page-layout";
 import { Reveal } from "@/components/site/reveal";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/seo/json-ld";
+import { breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Criterii de eligibilitate",
   description:
     "Cine poate aplica la FutureMinds: rezultate academice, situație financiară, implicare, zona de proveniență și statutul de student.",
+  alternates: { canonical: "/eligibilitate" },
+  openGraph: {
+    title: "Criterii de eligibilitate · FutureMinds",
+    description:
+      "Cine poate aplica la FutureMinds: rezultate academice, situație financiară, implicare, zona de proveniență și statutul de student.",
+    url: "/eligibilitate",
+  },
 };
 
 const CRITERIA = [
@@ -48,6 +57,12 @@ const CRITERIA = [
 export default function EligibilitatePage() {
   return (
     <PageLayout>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Acasă", path: "/" },
+          { name: "Criterii de eligibilitate", path: "/eligibilitate" },
+        ])}
+      />
       <PageHero
         eyebrow="Criterii de eligibilitate"
         title={

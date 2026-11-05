@@ -2,10 +2,18 @@ import type { Metadata } from "next"
 import { Mail, Phone, User } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
+import { JsonLd } from "@/components/seo/json-ld"
+import { breadcrumbSchema } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Ia legătura cu echipa FutureMinds pentru orice întrebare despre burse și înscriere.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact · FutureMinds",
+    description: "Ia legătura cu echipa FutureMinds pentru orice întrebare despre burse și înscriere.",
+    url: "/contact",
+  },
 }
 
 const CONTACTS = [
@@ -32,6 +40,12 @@ const CONTACTS = [
 export default function ContactPage() {
   return (
     <PageLayout>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Acasă", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ])}
+      />
       <PageHero
         eyebrow="Contact"
         title="Ai o întrebare? Hai să vorbim."

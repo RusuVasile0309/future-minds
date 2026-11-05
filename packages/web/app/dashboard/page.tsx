@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { signOutAction } from "@/app/auth/actions"
 
-export const metadata: Metadata = { title: "Contul meu" }
+export const metadata: Metadata = {
+  title: "Contul meu",
+  robots: { index: false, follow: false },
+}
 
 const ROLE_LABEL: Record<string, string> = {
   STUDENT: "Candidat",

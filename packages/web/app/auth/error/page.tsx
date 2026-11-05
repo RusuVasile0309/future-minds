@@ -3,7 +3,10 @@ import type { Metadata } from "next"
 import { AuthShell } from "@/components/auth/auth-shell"
 import { Button } from "@/components/ui/button"
 
-export const metadata: Metadata = { title: "Eroare de autentificare" }
+export const metadata: Metadata = {
+  title: "Eroare de autentificare",
+  robots: { index: false, follow: false },
+}
 
 const MESSAGES: Record<string, string> = {
   Configuration: "Configurarea autentificării nu este completă. Verifică cheile Google.",

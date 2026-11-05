@@ -4,10 +4,18 @@ import { Plus, GraduationCap } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
+import { JsonLd } from "@/components/seo/json-ld"
+import { breadcrumbSchema, faqSchema } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: "Întrebări frecvente",
   description: "Răspunsuri la cele mai frecvente întrebări despre bursele FutureMinds.",
+  alternates: { canonical: "/intrebari-frecvente" },
+  openGraph: {
+    title: "Întrebări frecvente · FutureMinds",
+    description: "Răspunsuri la cele mai frecvente întrebări despre bursele FutureMinds.",
+    url: "/intrebari-frecvente",
+  },
 }
 
 const FAQ = [
@@ -44,6 +52,15 @@ const FAQ = [
 export default function FaqPage() {
   return (
     <PageLayout>
+      <JsonLd
+        data={[
+          breadcrumbSchema([
+            { name: "Acasă", path: "/" },
+            { name: "Întrebări frecvente", path: "/intrebari-frecvente" },
+          ]),
+          faqSchema(FAQ),
+        ]}
+      />
       <PageHero
         eyebrow="Întrebări frecvente"
         title="Ai o întrebare? Probabil e aici."

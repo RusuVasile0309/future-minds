@@ -6,7 +6,10 @@ import { SignUpWizard } from "@/components/auth/sign-up-wizard"
 import { Button } from "@/components/ui/button"
 import { googleSignUp } from "@/app/auth/actions"
 
-export const metadata: Metadata = { title: "Creează cont" }
+export const metadata: Metadata = {
+  title: "Creează cont",
+  robots: { index: false, follow: false },
+}
 
 export default function SignUpPage({
   searchParams,

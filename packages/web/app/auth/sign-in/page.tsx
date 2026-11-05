@@ -5,7 +5,10 @@ import { CredentialsForm, AuthDivider } from "@/components/auth/credentials-form
 import { Button } from "@/components/ui/button"
 import { googleSignIn } from "@/app/auth/actions"
 
-export const metadata: Metadata = { title: "Autentificare" }
+export const metadata: Metadata = {
+  title: "Autentificare",
+  robots: { index: false, follow: false },
+}
 
 export default function SignInPage() {
   return (

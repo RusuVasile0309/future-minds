@@ -5,11 +5,20 @@ import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
 import { expenseTables, scholarshipIncludes, type Table } from "@/lib/content/budget"
+import { JsonLd } from "@/components/seo/json-ld"
+import { breadcrumbSchema, scholarshipProgramSchema } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: "Bursa",
   description:
     "Bursa FutureMinds valorează aproximativ 6.000 € pe an și acoperă cazarea, masa zilnică, banii de buzunar, taxele de studii și materialele.",
+  alternates: { canonical: "/bursa" },
+  openGraph: {
+    title: "Bursa · FutureMinds",
+    description:
+      "Bursa FutureMinds valorează aproximativ 6.000 € pe an și acoperă cazarea, masa zilnică, banii de buzunar, taxele de studii și materialele.",
+    url: "/bursa",
+  },
 }
 
 const ICONS = [Home, Utensils, Wallet, GraduationCap, Laptop]
@@ -17,6 +26,15 @@ const ICONS = [Home, Utensils, Wallet, GraduationCap, Laptop]
 export default function BursaPage() {
   return (
     <PageLayout>
+      <JsonLd
+        data={[
+          breadcrumbSchema([
+            { name: "Acasă", path: "/" },
+            { name: "Bursa", path: "/bursa" },
+          ]),
+          scholarshipProgramSchema(),
+        ]}
+      />
       <PageHero
         eyebrow="Bursa FutureMinds"
         title={

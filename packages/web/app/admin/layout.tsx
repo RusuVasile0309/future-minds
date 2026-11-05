@@ -1,9 +1,15 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { auth } from "@/auth"
 import FutureMindsLogo from "@/components/FutureMindsLogo"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { Button } from "@/components/ui/button"
 import { signOutAction } from "@/app/auth/actions"
+
+// Panoul admin nu este niciodată indexat.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()

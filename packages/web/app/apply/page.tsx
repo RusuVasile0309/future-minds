@@ -2,7 +2,10 @@ import type { Metadata } from "next"
 import { PageLayout } from "@/components/site/page-layout"
 import { ApplicationForm } from "@/components/apply/application-form"
 
-export const metadata: Metadata = { title: "Formular de înscriere" }
+export const metadata: Metadata = {
+  title: "Formular de înscriere",
+  robots: { index: false, follow: false },
+}
 
 export default function ApplyPage() {
   return (
