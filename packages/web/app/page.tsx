@@ -42,7 +42,7 @@ export default function HomePage() {
                 lipsește sprijinul financiar.
               </p>
               <div
-                className="mt-9 flex flex-wrap items-center gap-3 animate-fade-rise"
+                className="mt-9 flex flex-col gap-3 animate-fade-rise sm:flex-row sm:flex-wrap sm:items-center"
                 style={{ animationDelay: "240ms" }}
               >
                 <Button asChild size="lg">
@@ -101,35 +101,22 @@ export default function HomePage() {
 
         {/* ── Parteneri (bandă albă) ───────────────────────── */}
         <section className="border-y border-border bg-white">
-          <Reveal className="container flex flex-wrap items-center justify-center gap-x-12 gap-y-8 pb-6 pt-[39px] md:gap-x-16 md:pb-7 md:pt-[43px]">
-            <a
-              href="https://www.ubbcluj.ro/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Universitatea Babeș-Bolyai"
-              className="opacity-90 transition-opacity hover:opacity-100"
-            >
-              <Image
-                src="/ubb-logo.png"
-                alt="Universitatea Babeș-Bolyai"
-                width={2000}
-                height={1014}
-                className="h-[80px] w-auto md:h-[96px]"
-              />
-            </a>
+          {/* Mobil: 2 logouri/rând (rând 1: Nova + Rotaract, rând 2: UBB + UTCN).
+              Desktop (md+): un singur rând, ordine UBB · Nova · Rotaract · UTCN via `md:order-*`. */}
+          <Reveal className="container grid grid-cols-2 place-items-center gap-x-6 gap-y-8 pb-6 pt-[39px] md:flex md:flex-wrap md:items-center md:justify-center md:gap-x-16 md:pb-7 md:pt-[43px]">
             <a
               href="https://vreaulanova.ro/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Nova Power&Gas"
-              className="opacity-90 transition-opacity hover:opacity-100"
+              className="flex h-16 w-full items-center justify-center opacity-90 transition-opacity hover:opacity-100 md:order-2 md:block md:h-auto md:w-auto"
             >
               <Image
                 src="/nova-logo.svg"
                 alt="Nova Power&Gas"
                 width={400}
                 height={220}
-                className="h-[72px] w-auto md:h-[84px]"
+                className="h-full w-full object-contain md:h-[84px] md:w-auto"
               />
             </a>
             <a
@@ -137,14 +124,29 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Rotaract Cluj-Napoca SAMVS"
-              className="-translate-y-[15px] opacity-90 transition-opacity hover:opacity-100"
+              className="flex h-16 w-full items-center justify-center opacity-90 transition-opacity hover:opacity-100 md:order-3 md:block md:h-auto md:w-auto md:-translate-y-[15px]"
             >
               <Image
                 src="/rac-logo.png"
                 alt="Rotaract Cluj-Napoca SAMVS"
                 width={1332}
                 height={388}
-                className="h-[86px] w-auto md:h-[101px]"
+                className="h-full w-full object-contain md:h-[96px] md:w-auto"
+              />
+            </a>
+            <a
+              href="https://www.ubbcluj.ro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Universitatea Babeș-Bolyai"
+              className="flex h-16 w-full items-center justify-center opacity-90 transition-opacity hover:opacity-100 md:order-1 md:block md:h-auto md:w-auto"
+            >
+              <Image
+                src="/ubb-logo.png"
+                alt="Universitatea Babeș-Bolyai"
+                width={2000}
+                height={1014}
+                className="h-full w-full object-contain md:h-[96px] md:w-auto"
               />
             </a>
             <a
@@ -152,14 +154,14 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Universitatea Tehnică din Cluj-Napoca"
-              className="opacity-90 transition-opacity hover:opacity-100"
+              className="flex h-16 w-full items-center justify-center opacity-90 transition-opacity hover:opacity-100 md:order-4 md:block md:h-auto md:w-auto"
             >
               <Image
                 src="/utcn-logo.svg"
                 alt="Universitatea Tehnică din Cluj-Napoca"
-                width={1032}
-                height={709}
-                className="h-[80px] w-auto md:h-[96px]"
+                width={649}
+                height={424}
+                className="h-full w-full object-contain md:h-[96px] md:w-auto"
               />
             </a>
           </Reveal>
