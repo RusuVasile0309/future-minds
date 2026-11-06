@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 import { ImageResponse } from "next/og"
 
 // Imaginea de previzualizare socială (OpenGraph + Twitter), generată la build.
@@ -13,10 +15,12 @@ const fontBodyUrl =
   "https://github.com/google/fonts/raw/main/ofl/poppins/Poppins-Regular.ttf"
 
 export default async function OpenGraphImage() {
-  const [fontSemiBold, fontRegular] = await Promise.all([
+  const [fontSemiBold, fontRegular, logo] = await Promise.all([
     fetch(fontUrl).then((r) => r.arrayBuffer()),
     fetch(fontBodyUrl).then((r) => r.arrayBuffer()),
+    readFile(join(process.cwd(), "public/futureminds-logo-alb.png")),
   ])
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`
 
   return new ImageResponse(
     (
@@ -47,20 +51,13 @@ export default async function OpenGraphImage() {
             filter: "blur(40px)",
           }}
         />
-        {/* wordmark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{ display: "flex", gap: 7, alignItems: "flex-end", height: 30 }}
-          >
-            <div style={{ width: 11, height: 11, borderRadius: 11, background: "#A9C2D9" }} />
-            <div style={{ width: 11, height: 17, borderRadius: 11, background: "#8AB0CF" }} />
-            <div style={{ width: 11, height: 23, borderRadius: 11, background: "#6D9BEF" }} />
-            <div style={{ width: 11, height: 30, borderRadius: 11, background: "#F2B544" }} />
-          </div>
-          <span style={{ fontSize: 30, letterSpacing: -0.5 }}>FutureMinds</span>
+        {/* logo FutureMinds */}
+        <div style={{ display: "flex" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} alt="FutureMinds" width={462} height={80} />
         </div>
 
-        {/* headline */}
+        {/* headline + descriere scurtă (RO) */}
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           <div style={{ display: "flex", width: 72, height: 6, borderRadius: 6, background: "#F2B544" }} />
           <div
@@ -89,7 +86,7 @@ export default async function OpenGraphImage() {
           </div>
         </div>
 
-        {/* partners */}
+        {/* parteneri */}
         <div
           style={{
             fontFamily: "Poppins-Regular",
@@ -98,7 +95,7 @@ export default async function OpenGraphImage() {
             letterSpacing: 2,
           }}
         >
-          Un proiect Nova Power&Gas · Rotaract Cluj-Napoca
+          Un proiect Nova Power&Gas · Rotaract Cluj-Napoca SAMVS
         </div>
       </div>
     ),

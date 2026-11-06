@@ -5,11 +5,13 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Reveal } from "@/components/site/reveal";
 import { FloatingApplyGate } from "@/components/site/floating-apply-gate";
+import { HomeSplash } from "@/components/site/home-splash";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
+      <HomeSplash />
       <SiteHeader />
 
       <main className="flex-1">

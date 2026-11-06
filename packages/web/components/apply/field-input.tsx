@@ -408,11 +408,12 @@ function CustomSelect({
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
+        title={selected ? selected.label : undefined}
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         className="flex h-10 w-full items-center justify-between gap-1 rounded-lg border border-input bg-background px-3 text-sm transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className={selected ? "text-foreground" : "text-muted-foreground"}>
+        <span className={`min-w-0 flex-1 truncate text-left ${selected ? "text-foreground" : "text-muted-foreground"}`}>
           {selected ? selected.label : placeholder}
         </span>
         <ChevronDown className={`size-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />

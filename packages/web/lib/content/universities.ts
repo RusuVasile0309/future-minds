@@ -158,9 +158,9 @@ export const STUDY_LANGUAGE_LABELS: Record<StudyLanguage, string> = {
   DE: "Germană",
 };
 
-/** Opțiuni pentru câmpul `university` (select nivel 1). */
+/** Opțiuni pentru câmpul `university` (select nivel 1). Afișăm codul scurt (UTCN / UBB). */
 export function universityOptions(): { value: string; label: string }[] {
-  return UNIVERSITIES.map((u) => ({ value: u.code, label: u.name }));
+  return UNIVERSITIES.map((u) => ({ value: u.code, label: u.code }));
 }
 
 /** Facultăți pentru o universitate dată (select nivel 2, cascadă). */

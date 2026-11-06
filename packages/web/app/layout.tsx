@@ -95,6 +95,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ro" className={`${inter.variable} ${poppins.variable} ${plexMono.variable}`}>
       <body className="min-h-screen antialiased">
+        {/* Decide ÎNAINTE de primul paint dacă rulează animația de intro (o dată
+            per sesiune, doar pe pagina principală), ca overlay-ul din HTML să fie
+            vizibil imediat — fără ca pagina să apară o clipă înaintea animației. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var d=document.documentElement;if(location.pathname==='/'&&!sessionStorage.getItem('fm:splash-seen')){sessionStorage.setItem('fm:splash-seen','1');d.setAttribute('data-splash','show');setTimeout(function(){d.removeAttribute('data-splash')},4000);}}catch(e){}})();",
+          }}
+        />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <Providers>{children}</Providers>
         <Analytics />

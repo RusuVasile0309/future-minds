@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, Check, Loader2, Send } from "lucide-react"
 import { useMyApplication } from "@/app/network/applications"
 import { useSaveApplication, useSubmitApplication } from "@/app/network/applications"
@@ -148,35 +148,32 @@ export function ApplicationForm() {
         </div>
       </div>
 
-      <div
-        key={step}
-        className={`rounded-2xl border border-border bg-card p-6 motion-reduce:animate-none sm:p-8 ${
-          direction === 1 ? "animate-step-in-right" : "animate-step-in-left"
-        }`}
-      >
-        <h2 className="font-serif text-2xl font-medium">{section.title}</h2>
-        {section.description ? <p className="mt-1 text-muted-foreground">{section.description}</p> : null}
+      <StepCarousel step={step} direction={direction}>
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <h2 className="font-serif text-2xl font-medium">{section.title}</h2>
+          {section.description ? <p className="mt-1 text-muted-foreground">{section.description}</p> : null}
 
-        <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12">
-          {section.fields
-            .filter((field) => !field.derived && isFieldVisible(field, answers))
-            .map((field) => {
-              const value = answers[field.key] ?? null
-              return (
-                <FieldRow key={field.id} field={field} error={validateFieldValue(field, value, answers)}>
-                  <FieldInput
-                    field={field}
-                    value={value}
-                    onChange={(v) => update(field.key, v)}
-                    files={files}
-                    answers={answers}
-                    disabled={isFieldDisabled(field, answers)}
-                  />
-                </FieldRow>
-              )
-            })}
+          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12">
+            {section.fields
+              .filter((field) => !field.derived && isFieldVisible(field, answers))
+              .map((field) => {
+                const value = answers[field.key] ?? null
+                return (
+                  <FieldRow key={field.id} field={field} error={validateFieldValue(field, value, answers)}>
+                    <FieldInput
+                      field={field}
+                      value={value}
+                      onChange={(v) => update(field.key, v)}
+                      files={files}
+                      answers={answers}
+                      disabled={isFieldDisabled(field, answers)}
+                    />
+                  </FieldRow>
+                )
+              })}
+          </div>
         </div>
-      </div>
+      </StepCarousel>
 
       {submitError ? (
         <p className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -199,6 +196,112 @@ export function ApplicationForm() {
             Continuă <ArrowRight className="size-4" />
           </Button>
         )}
+      </div>
+    </div>
+  )
+}
+
+// useLayoutEffect pe client, useEffect pe server (evită avertismentul SSR).
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
+
+// Tranziția „carusel" între pași: când `step` se schimbă, panoul care iese și cel
+// care intră alunecă simultan pe orizontală (sensul dat de `direction`), iar
+// înălțimea scenei se animează între cele două. Respectă prefers-reduced-motion.
+function StepCarousel({
+  step,
+  direction,
+  duration = 500,
+  children,
+}: {
+  step: number
+  direction: 1 | -1
+  duration?: number
+  children: React.ReactNode
+}) {
+  const stageRef = useRef<HTMLDivElement>(null)
+  const prevStep = useRef(step)
+  const lastChildren = useRef<React.ReactNode>(children)
+  const lastHeight = useRef<number | null>(null)
+
+  const [anim, setAnim] = useState<{ leaving: React.ReactNode; dir: 1 | -1 } | null>(null)
+  const [height, setHeight] = useState<number | undefined>(undefined)
+
+  // Cât timp scena e „în repaus", reține înălțimea curentă — e înălțimea de la care
+  // va porni animația la următoarea schimbare de pas.
+  useIsoLayoutEffect(() => {
+    if (!anim && stageRef.current) lastHeight.current = stageRef.current.offsetHeight
+  })
+
+  useIsoLayoutEffect(() => {
+    if (step === prevStep.current) {
+      lastChildren.current = children
+      return
+    }
+    const reduce =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+    const leaving = lastChildren.current
+    const dir = direction
+    prevStep.current = step
+    lastChildren.current = children
+
+    if (reduce) {
+      setAnim(null)
+      setHeight(undefined)
+      return
+    }
+
+    // Pornim de la înălțimea pasului care iese…
+    setAnim({ leaving, dir })
+    setHeight(lastHeight.current ?? stageRef.current?.offsetHeight ?? undefined)
+
+    // …apoi, în frame-ul următor, animăm spre înălțimea pasului care intră.
+    const raf = requestAnimationFrame(() => {
+      const incoming = stageRef.current?.querySelector<HTMLElement>('[data-carousel="incoming"]')
+      if (incoming) setHeight(incoming.offsetHeight)
+    })
+    const done = setTimeout(() => {
+      setAnim(null)
+      setHeight(undefined)
+    }, duration + 40)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(done)
+    }
+  }, [step, direction, children, duration])
+
+  return (
+    <div
+      ref={stageRef}
+      className={`relative ${anim ? "overflow-hidden" : ""}`}
+      style={
+        anim
+          ? { height, transition: `height ${duration}ms cubic-bezier(0.65, 0, 0.35, 1)` }
+          : undefined
+      }
+    >
+      {anim ? (
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-x-0 top-0 ${
+            anim.dir === 1 ? "animate-carousel-out-left" : "animate-carousel-out-right"
+          }`}
+        >
+          {anim.leaving}
+        </div>
+      ) : null}
+      <div
+        data-carousel="incoming"
+        className={
+          anim
+            ? `absolute inset-x-0 top-0 ${
+                anim.dir === 1 ? "animate-carousel-in-right" : "animate-carousel-in-left"
+              }`
+            : ""
+        }
+      >
+        {children}
       </div>
     </div>
   )

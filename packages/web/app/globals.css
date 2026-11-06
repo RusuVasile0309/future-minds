@@ -137,3 +137,14 @@
     @apply font-display text-xs font-semibold uppercase tracking-[0.2em] text-primary;
   }
 }
+
+/* Splash de intro: overlay-ul e în HTML-ul de la server, dar rămâne ascuns până
+   când scriptul inline din layout decide (înainte de paint) că trebuie afișat —
+   astfel pagina nu „clipește" înaintea animației, iar la sesiunile deja văzute
+   splash-ul nu apare deloc. Selectorul pe id are prioritate peste clasa modulului. */
+#fm-splash-root {
+  display: none;
+}
+html[data-splash="show"] #fm-splash-root {
+  display: flex;
+}

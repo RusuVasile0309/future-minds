@@ -100,6 +100,24 @@ const config = {
           from: { opacity: "0", transform: "translateX(-24px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
+        // Tranziția „carusel" a pașilor: cele două panouri (ieșire + intrare) alunecă
+        // simultan pe orizontală. Sensul: *-in = panoul care intră, *-out = cel care iese.
+        "carousel-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "carousel-in-left": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "carousel-out-left": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
+        },
+        "carousel-out-right": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(100%)" },
+        },
         // Intrări reutilizabile — încărcare pagină, dezvăluiri la scroll, micro-interacțiuni.
         "fade-in": {
           from: { opacity: "0" },
@@ -132,6 +150,10 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "step-in-right": "step-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
         "step-in-left": "step-in-left 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+        "carousel-in-right": "carousel-in-right 0.5s cubic-bezier(0.65, 0, 0.35, 1) both",
+        "carousel-in-left": "carousel-in-left 0.5s cubic-bezier(0.65, 0, 0.35, 1) both",
+        "carousel-out-left": "carousel-out-left 0.5s cubic-bezier(0.65, 0, 0.35, 1) both",
+        "carousel-out-right": "carousel-out-right 0.5s cubic-bezier(0.65, 0, 0.35, 1) both",
         "fade-in": "fade-in 0.5s ease-out both",
         "fade-rise": "fade-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
         "scale-in": "scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",

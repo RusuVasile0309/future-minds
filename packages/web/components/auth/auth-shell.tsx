@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 import FutureMindsLogo from "@/components/FutureMindsLogo"
 
 export function AuthShell({
@@ -18,6 +19,14 @@ export function AuthShell({
         aria-hidden
         className="pointer-events-none absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-brand-light/20 blur-3xl"
       />
+
+      <Link
+        href="/"
+        className="absolute left-4 top-6 inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:left-8"
+      >
+        <ArrowLeft className="size-4" /> Pagina principală
+      </Link>
+
       <div className="relative w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <Link href="/" aria-label="Acasă FutureMinds">

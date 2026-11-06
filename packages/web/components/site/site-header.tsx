@@ -56,15 +56,53 @@ export async function SiteHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        {isLoggedIn ? (
-          <UserMenu
-            name={user.name ?? user.email ?? "Contul meu"}
-            email={user.email ?? ""}
-            image={user.image ?? null}
-            isAdmin={isAdmin}
-          />
-        ) : null}
-        <NavMenu items={NAV} isLoggedIn={isLoggedIn} />
+        {/* Desktop: rutele inline, fără meniu burger. */}
+        <nav className="hidden items-center gap-1 lg:flex">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Desktop: cont / autentificare. */}
+        <div className="hidden items-center lg:flex lg:border-l lg:border-border lg:pl-2">
+          {isLoggedIn ? (
+            <UserMenu
+              name={user.name ?? user.email ?? "Contul meu"}
+              email={user.email ?? ""}
+              image={user.image ?? null}
+              isAdmin={isAdmin}
+            />
+          ) : (
+            <Link
+              href="/autentificare/intra"
+              className="rounded-xl px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-secondary"
+            >
+              Autentificare
+            </Link>
+          )}
+        </div>
+
+        {/* Mobil: meniu burger cu rutele și contul (avatar inclus). */}
+        <NavMenu
+          className="lg:hidden"
+          items={NAV}
+          account={
+            isLoggedIn
+              ? {
+                  name: user.name ?? user.email ?? "Contul meu",
+                  email: user.email ?? "",
+                  image: user.image ?? null,
+                  isAdmin,
+                }
+              : null
+          }
+        />
       </div>
     </StickyHeader>
   )

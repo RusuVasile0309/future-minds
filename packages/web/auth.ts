@@ -15,6 +15,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   trustHost: true,
 
+  // Pagina de eroare afișează doar codul generic „Configuration". Logăm aici
+  // cauza reală (state cookie lipsă, OAuthCallbackError, eroare DB etc.) ca să
+  // apară în logurile Vercel la reproducere.
+  logger: {
+    error(error) {
+      console.error("[auth]", error?.name, error?.message, {
+        cause: (error as { cause?: unknown })?.cause,
+      })
+    },
+  },
+
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
