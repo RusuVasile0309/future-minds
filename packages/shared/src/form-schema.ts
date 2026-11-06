@@ -88,8 +88,8 @@ const SECTIONS: SectionSpec[] = [
     id: "personal",
     title: "Date personale",
     fields: [
-      { key: "last_name", label: "Nume", type: "text", required: true, colSpan: 6 },
-      { key: "first_name", label: "Prenume", type: "text", required: true, colSpan: 6 },
+      { key: "last_name", label: "Nume", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
+      { key: "first_name", label: "Prenume", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
       {
         key: "cnp",
         label: "CNP",
@@ -97,7 +97,7 @@ const SECTIONS: SectionSpec[] = [
         required: true,
         colSpan: 6,
         helpText: "Cod numeric personal (13 cifre).",
-        validation: { minLength: 13, maxLength: 13, regex: "^[0-9]{13}$" },
+        validation: { minLength: 13, maxLength: 13, regex: "^[0-9]{13}$", inputFilter: "digits" },
       },
       { key: "birth_date", label: "Data nașterii", type: "date", required: true, colSpan: 6 },
       { key: "county", label: "Județ", type: "select", required: true, colSpan: 6, options: opts(COUNTIES) },
@@ -116,7 +116,7 @@ const SECTIONS: SectionSpec[] = [
       { key: "entrance", label: "Scară", type: "text", colSpan: 6 },
       { key: "floor", label: "Etaj", type: "text", colSpan: 6 },
       { key: "apartment", label: "Apartament", type: "text", colSpan: 6 },
-      { key: "postal_code", label: "Cod poștal", type: "text" },
+      { key: "postal_code", label: "Cod poștal", type: "text", validation: { maxLength: 6, inputFilter: "digits" } },
       {
         key: "environment",
         label: "Mediu",
@@ -134,7 +134,14 @@ const SECTIONS: SectionSpec[] = [
     id: "bac",
     title: "Rezultate Bacalaureat",
     fields: [
-      { key: "bac_subject_1", label: "Disciplina 1", type: "select", required: true, options: opts(BAC_SUBJECTS), colSpan: 6 },
+      {
+        key: "bac_subject_1",
+        label: "Disciplina 1",
+        type: "select",
+        required: true,
+        optionsSource: "bac_subject",
+        colSpan: 6,
+      },
       { key: "bac_grade_1", label: "Nota 1", type: "number", required: true, validation: grade, colSpan: 6 },
       {
         key: "bac_subject_2",
@@ -142,7 +149,6 @@ const SECTIONS: SectionSpec[] = [
         type: "select",
         required: true,
         optionsSource: "bac_subject",
-        dependsOn: ["bac_subject_1"],
         colSpan: 6,
       },
       { key: "bac_grade_2", label: "Nota 2", type: "number", required: true, validation: grade, colSpan: 6 },
@@ -152,7 +158,6 @@ const SECTIONS: SectionSpec[] = [
         type: "select",
         required: true,
         optionsSource: "bac_subject",
-        dependsOn: ["bac_subject_1", "bac_subject_2"],
         colSpan: 6,
       },
       { key: "bac_grade_3", label: "Nota 3", type: "number", required: true, validation: grade, colSpan: 6 },
@@ -282,8 +287,8 @@ const SECTIONS: SectionSpec[] = [
         helpText: "Venitul tău net lunar.",
         visibleWhen: { all: [{ field: "student_employed", truthy: true }] },
       },
-      { key: "mother_last_name", label: "Nume mamă", type: "text", required: true, colSpan: 6 },
-      { key: "mother_first_name", label: "Prenume mamă", type: "text", required: true, colSpan: 6 },
+      { key: "mother_last_name", label: "Nume mamă", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
+      { key: "mother_first_name", label: "Prenume mamă", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
       { key: "mother_deceased", label: "Mama este decedată", type: "boolean", colSpan: 6 },
       { key: "mother_supports", label: "Mama mă susține financiar", type: "boolean", colSpan: 6 },
       {
@@ -293,8 +298,8 @@ const SECTIONS: SectionSpec[] = [
         // Venitul se cere doar dacă mama susține financiar (implicit și în viață).
         visibleWhen: { all: [{ field: "mother_supports", truthy: true }] },
       },
-      { key: "father_last_name", label: "Nume tată", type: "text", required: true, colSpan: 6 },
-      { key: "father_first_name", label: "Prenume tată", type: "text", required: true, colSpan: 6 },
+      { key: "father_last_name", label: "Nume tată", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
+      { key: "father_first_name", label: "Prenume tată", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
       { key: "father_deceased", label: "Tatăl este decedat", type: "boolean", colSpan: 6 },
       { key: "father_supports", label: "Tata mă susține financiar", type: "boolean", colSpan: 6 },
       {
@@ -545,12 +550,71 @@ export function isValidRoPhone(v: string): boolean {
   return RO_PHONE_REGEX.test(v.replace(/[\s.\-()]/g, ""))
 }
 
+// ── Validare CNP (cod numeric personal) ───────────────────────────────────────
+// Cifra de control = suma(cifra_i × cheie_i) % 11, cu cheia 2 7 9 1 4 6 3 5 8 2 7 9;
+// dacă restul e 10, cifra de control devine 1.
+const CNP_CONTROL_KEY = [2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9]
+// Secolul nașterii după prima cifră (sex/secol). 7/8/9 (rezidenți/străini) sunt
+// ambigue ca secol, deci rămân nedeterminate.
+const CNP_CENTURY: Record<string, number> = { "1": 1900, "2": 1900, "3": 1800, "4": 1800, "5": 2000, "6": 2000 }
+// Coduri de județ valide: 01–46 (județe + sectoarele Bucureștiului) plus 51 și 52.
+const CNP_COUNTIES = new Set<number>([...Array.from({ length: 46 }, (_, i) => i + 1), 51, 52])
+
+const pad2 = (n: number) => String(n).padStart(2, "0")
+
+export interface CnpInfo {
+  valid: boolean
+  // Componentele de dată așa cum apar în CNP (anul pe două cifre, fără secol).
+  year2: number
+  month: number
+  day: number
+  // Data completă de naștere (ISO) dacă secolul e determinabil și CNP-ul e valid.
+  birthDate: string | null
+}
+
+/** Parsează și validează un CNP. Returnează `null` dacă nu are exact 13 cifre. */
+export function parseCnp(cnp: string): CnpInfo | null {
+  if (!/^\d{13}$/.test(cnp)) return null
+  const d = [...cnp].map(Number)
+  const rest = CNP_CONTROL_KEY.reduce((acc, k, i) => acc + k * d[i], 0) % 11
+  const checksumOk = (rest === 10 ? 1 : rest) === d[12]
+
+  const year2 = d[1] * 10 + d[2]
+  const month = d[3] * 10 + d[4]
+  const day = d[5] * 10 + d[6]
+  const county = d[7] * 10 + d[8]
+
+  const century = CNP_CENTURY[String(d[0])] ?? null
+  // Verifică și că data e una reală (ex.: respinge 31 februarie, 00, luna 13).
+  const refYear = (century ?? 2000) + year2
+  const asDate = new Date(refYear, month - 1, day)
+  const dateOk =
+    month >= 1 && month <= 12 && day >= 1 &&
+    asDate.getFullYear() === refYear && asDate.getMonth() === month - 1 && asDate.getDate() === day
+
+  const valid = checksumOk && dateOk && CNP_COUNTIES.has(county)
+  const birthDate = valid && century ? `${century + year2}-${pad2(month)}-${pad2(day)}` : null
+  return { valid, year2, month, day, birthDate }
+}
+
+export function isValidCnp(cnp: string): boolean {
+  return parseCnp(cnp.trim())?.valid ?? false
+}
+
+// Câmpurile de disciplină Bacalaureat care se exclud reciproc (fără dubluri).
+const BAC_SUBJECT_KEYS = ["bac_subject_1", "bac_subject_2", "bac_subject_3"]
+
 /**
  * Validează valoarea DEJA introdusă a unui câmp (format/interval). Nu verifică
- * dacă e obligatoriu (vezi `missingRequired`). Returnează un mesaj de eroare în
- * română sau `null` dacă valoarea e validă (sau goală).
+ * dacă e obligatoriu (vezi `missingRequired`). `answers` permite verificări
+ * între câmpuri (ex.: CNP vs. data nașterii, disciplinele Bac duplicate).
+ * Returnează un mesaj de eroare în română sau `null` dacă valoarea e validă.
  */
-export function validateFieldValue(field: FormField, value: unknown): string | null {
+export function validateFieldValue(
+  field: FormField,
+  value: unknown,
+  answers?: Record<string, unknown>
+): string | null {
   if (value === null || value === undefined || value === "") return null
 
   if (field.type === "email") {
@@ -560,6 +624,23 @@ export function validateFieldValue(field: FormField, value: unknown): string | n
   if (field.type === "phone") {
     if (typeof value !== "string" || !isValidRoPhone(value))
       return "Număr de telefon invalid (format românesc, ex.: 07XXXXXXXX)."
+    return null
+  }
+  if (field.key === "cnp") {
+    const info = typeof value === "string" ? parseCnp(value.trim()) : null
+    if (!info) return "CNP-ul trebuie să conțină exact 13 cifre."
+    if (!info.valid) return "CNP invalid. Verifică cifrele introduse."
+    const bd = answers?.birth_date
+    if (typeof bd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(bd)) {
+      const [y, m, d] = bd.split("-").map(Number)
+      if (y % 100 !== info.year2 || m !== info.month || d !== info.day)
+        return "Data nașterii nu corespunde cu cea din CNP."
+    }
+    return null
+  }
+  if (field.optionsSource === "bac_subject" && typeof value === "string" && answers) {
+    const duplicate = BAC_SUBJECT_KEYS.some((k) => k !== field.key && answers[k] === value)
+    if (duplicate) return "Disciplină deja selectată la altă poziție."
     return null
   }
   if (field.type === "number") {

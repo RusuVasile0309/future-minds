@@ -163,7 +163,7 @@ export function ApplicationForm() {
             .map((field) => {
               const value = answers[field.key] ?? null
               return (
-                <FieldRow key={field.id} field={field} error={validateFieldValue(field, value)}>
+                <FieldRow key={field.id} field={field} error={validateFieldValue(field, value, answers)}>
                   <FieldInput
                     field={field}
                     value={value}
@@ -253,8 +253,8 @@ function isStepComplete(
       }
       if (isEmpty(field, value)) return false
     }
-    // Câmp completat dar invalid (format/interval) → blochează pasul.
-    if (validateFieldValue(field, value)) return false
+    // Câmp completat dar invalid (format/interval/corelații) → blochează pasul.
+    if (validateFieldValue(field, value, answers)) return false
   }
   return true
 }
@@ -278,7 +278,11 @@ function FieldRow({
       {field.helpText && field.type !== "textarea" ? (
         <p className="mb-2 mt-0.5 text-xs text-muted-foreground">{field.helpText}</p>
       ) : (
-        <div className="mt-1.5" />
+        // Rezervă aceeași înălțime ca linia de ajutor, ca inputurile vecine pe
+        // același rând (ex.: Data nașterii lângă CNP) să rămână aliniate.
+        <p className="mb-2 mt-0.5 text-xs text-muted-foreground" aria-hidden="true">
+          &nbsp;
+        </p>
       )}
       {children}
       {error ? <p className="mt-1.5 text-xs text-destructive motion-safe:animate-slide-down">{error}</p> : null}
