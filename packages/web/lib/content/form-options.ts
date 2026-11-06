@@ -17,6 +17,9 @@ function str(v: AnswerValue | undefined): string {
   return typeof v === "string" ? v : ""
 }
 
+// Cele trei câmpuri de disciplină Bac, care se exclud reciproc.
+const BAC_SUBJECT_FIELDS = ["bac_subject_1", "bac_subject_2", "bac_subject_3"] as const
+
 /**
  * Opțiunile efective ale unui câmp, în funcție de răspunsurile curente:
  *  - câmpuri cu opțiuni statice → `field.options`;
@@ -34,7 +37,14 @@ export function resolveFieldOptions(field: FormField, answers: Record<string, An
     case "study_language":
       return languageOptions(str(answers.university), str(answers.faculty), str(answers.specialization))
     case "bac_subject": {
-      const taken = new Set((field.dependsOn ?? []).map((k) => str(answers[k])).filter(Boolean))
+      // Excludere reciprocă: o disciplină aleasă într-un câmp dispare din celelalte
+      // două, deci aceeași materie nu poate fi selectată de mai multe ori. Valoarea
+      // proprie a câmpului rămâne vizibilă (se exclud doar celelalte poziții).
+      const taken = new Set(
+        BAC_SUBJECT_FIELDS.filter((k) => k !== field.key)
+          .map((k) => str(answers[k]))
+          .filter(Boolean)
+      )
       return BAC_SUBJECTS.filter((s) => !taken.has(s)).map((s) => ({ value: s, label: s }))
     }
     default:

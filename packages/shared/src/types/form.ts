@@ -25,6 +25,10 @@ export interface FieldValidation {
   regex?: string
   fileTypes?: string[]
   maxSizeMB?: number
+  // Restricționează caracterele acceptate la tastare:
+  // "name" = doar litere (cu diacritice), spațiu, cratimă, apostrof;
+  // "digits" = doar cifre.
+  inputFilter?: "name" | "digits"
 }
 
 // Sursă dinamică de opțiuni pentru câmpurile în cascadă (rezolvată în client din

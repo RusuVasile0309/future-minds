@@ -207,7 +207,7 @@ export class ApplicationsService {
     for (const section of sections) {
       for (const field of section.fields) {
         if (field.derived || !isFieldVisible(field, answers)) continue
-        if (validateFieldValue(field, answers[field.key] ?? null)) invalid.push(field.label)
+        if (validateFieldValue(field, answers[field.key] ?? null, answers)) invalid.push(field.label)
       }
     }
     return invalid

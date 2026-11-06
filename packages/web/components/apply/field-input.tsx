@@ -9,6 +9,22 @@ import { useUploadFile, useDeleteFile } from "@/app/network/applications"
 import { resolveFieldOptions } from "@/lib/content/form-options"
 import type { AnswerValue, ApplicationFile, FormField } from "@fm/shared"
 
+// Curăță valoarea tastată după tipul câmpului:
+// - telefon → fără litere (doar cifre și simbolurile uzuale +, spațiu, (), -, .)
+// - nume/prenume (inputFilter "name") → doar litere (cu diacritice), spațiu și cratimă
+// - CNP / cod poștal (inputFilter "digits") → doar cifre
+function sanitizeInput(field: FormField, raw: string): string {
+  if (field.type === "phone") return raw.replace(/[^\d+\s().-]/g, "")
+  switch (field.validation?.inputFilter) {
+    case "name":
+      return raw.replace(/[^\p{L}\s-]/gu, "")
+    case "digits":
+      return raw.replace(/\D/g, "")
+    default:
+      return raw
+  }
+}
+
 export function FieldInput({
   field,
   value,
@@ -77,7 +93,13 @@ export function FieldInput({
 
     case "phone":
       return (
-        <Input type="tel" value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} disabled={disabled} />
+        <Input
+          type="tel"
+          inputMode="tel"
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
+          disabled={disabled}
+        />
       )
 
     case "boolean":
@@ -149,8 +171,9 @@ export function FieldInput({
       return (
         <Input
           value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
           disabled={disabled}
+          inputMode={field.validation?.inputFilter === "digits" ? "numeric" : undefined}
           minLength={field.validation?.minLength}
           maxLength={field.validation?.maxLength}
           pattern={field.validation?.regex}
