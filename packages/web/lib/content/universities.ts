@@ -12,6 +12,9 @@
 
 export type StudyLanguage = "RO" | "EN" | "HU" | "DE";
 
+/** Opțiune sentinel pentru specializare — când aplicantul nu are/nu știe specializarea. */
+export const NO_SPECIALIZATION = "Fără Specializare";
+
 export interface Specialization {
   /** Denumire afișată (și valoare stocată în răspuns). */
   name: string;
@@ -178,7 +181,10 @@ export function specializationOptions(
   const uni = UNIVERSITIES.find((u) => u.code === universityCode);
   const fac = uni?.faculties.find((f) => f.name === facultyName);
   if (!fac) return [];
-  return fac.specializations.map((s) => ({ value: s.name, label: s.name }));
+  return [
+    ...fac.specializations.map((s) => ({ value: s.name, label: s.name })),
+    { value: NO_SPECIALIZATION, label: NO_SPECIALIZATION },
+  ];
 }
 
 /** Limbile de studiu disponibile pentru o specializare dată (filtrează `study_language`). */
@@ -189,7 +195,14 @@ export function languageOptions(
 ): { value: StudyLanguage; label: string }[] {
   const uni = UNIVERSITIES.find((u) => u.code === universityCode);
   const fac = uni?.faculties.find((f) => f.name === facultyName);
-  const spec = fac?.specializations.find((s) => s.name === specializationName);
+  if (!fac) return [];
+  // „Fără Specializare": oferă uniunea limbilor disponibile în facultate.
+  if (specializationName === NO_SPECIALIZATION) {
+    const langs = new Set<StudyLanguage>();
+    for (const s of fac.specializations) for (const l of s.languages) langs.add(l);
+    return [...langs].map((l) => ({ value: l, label: STUDY_LANGUAGE_LABELS[l] }));
+  }
+  const spec = fac.specializations.find((s) => s.name === specializationName);
   if (!spec) return [];
   return spec.languages.map((l) => ({ value: l, label: STUDY_LANGUAGE_LABELS[l] }));
 }

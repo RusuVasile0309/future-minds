@@ -232,18 +232,21 @@ function StepCarousel({
     if (!anim && stageRef.current) lastHeight.current = stageRef.current.offsetHeight
   })
 
+  // Animăm DOAR la schimbarea de pas. `children` e ținut într-un ref sincronizat
+  // separat, ca re-randările din cadrul aceluiași pas (câmpuri dezvăluite dinamic,
+  // fișiere încărcate) să NU reporneasca efectul — altfel cleanup-ul ar anula
+  // timeout-ul de reset și scena ar rămâne blocată cu `overflow-hidden` + înălțime
+  // fixă, tăind conținutul nou. Trebuie declarat ÎNAINTE de sincronizarea de mai
+  // jos, ca `lastChildren` să rețină încă pasul care iese.
   useIsoLayoutEffect(() => {
-    if (step === prevStep.current) {
-      lastChildren.current = children
-      return
-    }
+    if (step === prevStep.current) return
+
     const reduce =
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     const leaving = lastChildren.current
     const dir = direction
     prevStep.current = step
-    lastChildren.current = children
 
     if (reduce) {
       setAnim(null)
@@ -269,7 +272,13 @@ function StepCarousel({
       cancelAnimationFrame(raf)
       clearTimeout(done)
     }
-  }, [step, direction, children, duration])
+  }, [step, direction, duration])
+
+  // Reține conținutul curent pentru următoarea tranziție. Rulează după efectul de
+  // mai sus, deci la schimbarea de pas acela a apucat deja să citească pasul vechi.
+  useIsoLayoutEffect(() => {
+    lastChildren.current = children
+  })
 
   return (
     <div

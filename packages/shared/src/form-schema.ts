@@ -295,7 +295,9 @@ const SECTIONS: SectionSpec[] = [
         key: "mother_income",
         label: "Venit net lunar mamă (RON)",
         type: "number",
-        // Venitul se cere doar dacă mama susține financiar (implicit și în viață).
+        // Venitul se cere doar dacă mama susține financiar (implicit și în viață),
+        // iar atunci e obligatoriu — nu poate rămâne gol.
+        required: true,
         visibleWhen: { all: [{ field: "mother_supports", truthy: true }] },
       },
       { key: "father_last_name", label: "Nume tată", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
@@ -306,6 +308,8 @@ const SECTIONS: SectionSpec[] = [
         key: "father_income",
         label: "Venit net lunar tată (RON)",
         type: "number",
+        // Obligatoriu când tata susține financiar — nu poate rămâne gol.
+        required: true,
         visibleWhen: { all: [{ field: "father_supports", truthy: true }] },
       },
       {
