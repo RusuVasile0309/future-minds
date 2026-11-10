@@ -62,8 +62,8 @@ const ROTARACT = {
     "Rotaract SAMVS Cluj-Napoca, aripa tânără a familiei Rotary, activează din 2015 prin proiecte caritabile pentru comunitatea clujeană. FutureMinds este unul dintre proiectele clubului.",
   foundingDate: "2015",
   taxID: "35408330",
-  url: "https://rotaractsamvs.ro/",
-  sameAs: ["https://rotaractsamvs.ro/", "https://www.instagram.com/rotaractsamvs/"],
+  url: "https://www.instagram.com/rotaractsamvs/",
+  sameAs: ["https://www.instagram.com/rotaractsamvs/"],
   address: {
     "@type": "PostalAddress",
     streetAddress: "Str. Constantin Dobrogeanu Gherea nr. 21, et. 1, ap. 6",

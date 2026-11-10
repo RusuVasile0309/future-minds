@@ -150,8 +150,8 @@ export default function DesprePage() {
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button asChild variant="secondary">
-                  <a href="https://rotaractsamvs.ro/" target="_blank" rel="noopener noreferrer">
-                    Site Rotaract SAMVS
+                  <a href="https://www.instagram.com/rotaractsamvs/" target="_blank" rel="noopener noreferrer">
+                    Rotaract SAMVS
                   </a>
                 </Button>
                 <Button asChild variant="ghost">
