@@ -3,18 +3,17 @@
 import { z } from "zod"
 import { AuthError } from "next-auth"
 import { signIn, signOut } from "@/auth"
-import { setOAuthIntent } from "@/lib/oauth-intent"
 import { AuthService } from "@fm/server"
 
 const REDIRECT_TO = "/contul-meu"
 
+// „Intră cu Google" și „Creează cont cu Google" fac același lucru: dacă nu există
+// cont, adapterul îl creează automat la primul sign-in (vezi callback-ul din auth.ts).
 export async function googleSignIn() {
-  await setOAuthIntent("signin")
   await signIn("google", { redirectTo: REDIRECT_TO })
 }
 
 export async function googleSignUp() {
-  await setOAuthIntent("signup")
   await signIn("google", { redirectTo: REDIRECT_TO })
 }
 

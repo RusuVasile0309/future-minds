@@ -11,13 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function SignUpPage({
-  searchParams,
-}: {
-  searchParams: { error?: string; email?: string }
-}) {
-  const noAccount = searchParams.error === "no_account"
-
+export default function SignUpPage() {
   return (
     <AuthShell
       title="Creează-ți contul"
@@ -31,13 +25,6 @@ export default function SignUpPage({
         </>
       }
     >
-      {noAccount ? (
-        <p className="mb-5 rounded-lg border border-brand-light/60 bg-secondary px-4 py-3 text-sm text-brand-deep">
-          Nu am găsit un cont
-          {searchParams.email ? ` pentru ${searchParams.email}` : ""}. Creează unul mai jos.
-        </p>
-      ) : null}
-
       <form action={googleSignUp}>
         <Button type="submit" variant="secondary" size="lg" className="w-full">
           <GoogleGlyph />

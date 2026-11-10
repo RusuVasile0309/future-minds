@@ -3,7 +3,6 @@ import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import authConfig, { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from "./auth.config"
 import { createSQLAdapter } from "./lib/auth-adapter"
-import { readAndClearOAuthIntent } from "./lib/oauth-intent"
 import { AuthService } from "@fm/server"
 
 // Limite anti-brute-force pentru login cu parolă.
@@ -58,19 +57,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
-    async signIn({ user, account }) {
-      // La „sign in" cu Google fără cont existent, nu creăm tăcut un cont — trimitem
-      // utilizatorul la sign-up. Doar intenția explicită de „signup" permite crearea.
-      if (account?.provider === "google") {
-        const intent = await readAndClearOAuthIntent()
-        const existing = user.email ? await AuthService.getUserByEmail(user.email) : null
-        if (!existing && intent !== "signup") {
-          return `/autentificare/inregistrare?error=no_account&email=${encodeURIComponent(user.email ?? "")}`
-        }
-      }
-      return true
-    },
-
+    // Sign-in cu Google: dacă nu există cont pentru acel email, adapterul îl creează
+    // automat și leagă contul Google (createUser + linkAccount). Nu mai redirectăm
+    // către sign-up — „intra cu Google" și „creează cont cu Google" fac același lucru.
     async jwt({ token, user }) {
       // Initial sign-in — create refresh token + read role from DB
       if (user) {
