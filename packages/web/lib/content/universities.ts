@@ -170,6 +170,16 @@ export function facultyOptions(universityCode: string): { value: string; label: 
   return uni.faculties.map((f) => ({ value: f.name, label: f.name }));
 }
 
+/**
+ * Valoare „nespecificat" pentru specializare — oferită la TOATE facultățile,
+ * pentru cazul în care specializarea studentului nu e în listă. E răspuns valid
+ * (non-gol, deci trece de obligativitate), iar la limba de studiu deblochează
+ * toate limbile (vezi `languageOptions`).
+ */
+export const SPECIALIZATION_UNSPECIFIED = "-";
+
+const ALL_LANGUAGES = Object.keys(STUDY_LANGUAGE_LABELS) as StudyLanguage[];
+
 /** Specializări pentru o facultate dată (select nivel 3, cascadă). */
 export function specializationOptions(
   universityCode: string,
@@ -178,7 +188,11 @@ export function specializationOptions(
   const uni = UNIVERSITIES.find((u) => u.code === universityCode);
   const fac = uni?.faculties.find((f) => f.name === facultyName);
   if (!fac) return [];
-  return fac.specializations.map((s) => ({ value: s.name, label: s.name }));
+  // Varianta „-" apare prima, la orice facultate.
+  return [
+    { value: SPECIALIZATION_UNSPECIFIED, label: SPECIALIZATION_UNSPECIFIED },
+    ...fac.specializations.map((s) => ({ value: s.name, label: s.name })),
+  ];
 }
 
 /** Limbile de studiu disponibile pentru o specializare dată (filtrează `study_language`). */
@@ -187,6 +201,10 @@ export function languageOptions(
   facultyName: string,
   specializationName: string,
 ): { value: StudyLanguage; label: string }[] {
+  // „-" (specializare nespecificată) → oferă toate limbile, ca formularul să poată continua.
+  if (specializationName === SPECIALIZATION_UNSPECIFIED) {
+    return ALL_LANGUAGES.map((l) => ({ value: l, label: STUDY_LANGUAGE_LABELS[l] }));
+  }
   const uni = UNIVERSITIES.find((u) => u.code === universityCode);
   const fac = uni?.faculties.find((f) => f.name === facultyName);
   const spec = fac?.specializations.find((s) => s.name === specializationName);
