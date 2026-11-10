@@ -133,11 +133,16 @@ export default function DesprePage() {
           <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
             <div className="space-y-4 text-muted-foreground">
               <p>
-                FutureMinds este un proiect al{" "}
-                <strong className="text-foreground">Rotaract Club Cluj-Napoca SAMVS</strong>, club din Districtul
-                2241 înființat în 2015. Membrii derulează proiecte sociale menite să îmbunătățească viața
-                comunității — de la „Urban Hero” și „Mental Health During Crisis” la „O cană de fericire” și „Cursa
-                de rățuște”.
+                FutureMinds este un proiect al clubului{" "}
+                <strong className="text-foreground">Rotaract SAMVS Cluj-Napoca</strong>. Rotaract, aripa tânără a
+                familiei Rotary, este o comunitate internațională de peste 200.000 de membri cu vârste de peste 18
+                ani, care oferă un cadru de dezvoltare personală prin implicarea în rezolvarea nevoilor fizice și
+                sociale ale comunităților lor.
+              </p>
+              <p>
+                Clubul Rotaract SAMVS activează în Cluj-Napoca din anul 2015 și a fost un ajutor de nădejde pentru
+                comunitatea clujeană, excelând prin proiecte caritabile de succes — evenimente și inițiative de care
+                se bucură atât publicul larg, cât și membrii clubului.
               </p>
               <p>
                 Bursele sunt finanțate de <strong className="text-foreground">Nova Power&amp;Gas</strong>, care

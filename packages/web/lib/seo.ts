@@ -59,7 +59,7 @@ const ROTARACT = {
   name: "Rotaract Cluj-Napoca SAMVS",
   legalName: "Asociația Rotaract Club Cluj-Napoca Samus",
   description:
-    "Club Rotaract din Districtul 2241, înființat în 2015, care derulează proiecte sociale pentru comunitate. FutureMinds este unul dintre proiectele clubului.",
+    "Rotaract SAMVS Cluj-Napoca, aripa tânără a familiei Rotary, activează din 2015 prin proiecte caritabile pentru comunitatea clujeană. FutureMinds este unul dintre proiectele clubului.",
   foundingDate: "2015",
   taxID: "35408330",
   url: "https://rotaractsamvs.ro/",
