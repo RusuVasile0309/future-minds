@@ -1,18 +1,12 @@
-import { unstable_cache, revalidateTag } from "next/cache"
 import { SettingsService } from "@fm/server"
 
-// Starea „fereastra de înscriere" e citită pe paginile publice (butoanele de
-// aplicare). O cache-uim cu un tag ca să nu lovim DB-ul la fiecare randare și o
-// invalidăm explicit când adminul schimbă setarea (vezi revalidateAppSettings).
-export const APP_SETTINGS_TAG = "app-settings"
-
-export const getApplicationsOpenCached = unstable_cache(
-  async () => SettingsService.getApplicationsOpen(),
-  ["applications-open"],
-  { tags: [APP_SETTINGS_TAG], revalidate: 300 }
-)
-
-/** De apelat după orice modificare a setărilor globale din admin. */
-export function revalidateAppSettings(): void {
-  revalidateTag(APP_SETTINGS_TAG)
+// Starea „fereastra de înscriere" e citită la request-time pe paginile publice
+// (butoanele de aplicare). O citim direct din DB: paginile care o folosesc devin
+// dinamice (randare per-request), ceea ce reflectă imediat modificările din admin.
+//
+// NB: nu folosim `unstable_cache` aici — driverul Neon face fetch cu `no-store`,
+// incompatibil cu scope-ul de caching al lui `unstable_cache` (aruncă
+// DYNAMIC_SERVER_USAGE la prerender-ul static din build).
+export async function getApplicationsOpen(): Promise<boolean> {
+  return SettingsService.getApplicationsOpen()
 }

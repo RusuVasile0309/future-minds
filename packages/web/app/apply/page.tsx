@@ -4,7 +4,7 @@ import { Lock } from "lucide-react"
 import { PageLayout } from "@/components/site/page-layout"
 import { ApplicationForm } from "@/components/apply/application-form"
 import { Button } from "@/components/ui/button"
-import { getApplicationsOpenCached } from "@/lib/settings-cache"
+import { getApplicationsOpen } from "@/lib/settings-cache"
 
 export const metadata: Metadata = {
   title: "Formular de înscriere",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ApplyPage() {
-  const open = await getApplicationsOpenCached()
+  const open = await getApplicationsOpen()
 
   return (
     <PageLayout>

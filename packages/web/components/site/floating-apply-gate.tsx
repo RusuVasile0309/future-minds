@@ -1,6 +1,6 @@
 import { auth } from "@/auth"
 import { ApplicationsService } from "@fm/server"
-import { getApplicationsOpenCached } from "@/lib/settings-cache"
+import { getApplicationsOpen } from "@/lib/settings-cache"
 import { FloatingApply } from "./floating-apply"
 
 /**
@@ -11,7 +11,7 @@ import { FloatingApply } from "./floating-apply"
  *  - autentificat cu aplicație deja trimisă → nu.
  */
 export async function FloatingApplyGate() {
-  if (!(await getApplicationsOpenCached())) return null // înscrieri închise
+  if (!(await getApplicationsOpen())) return null // înscrieri închise
 
   const session = await auth()
   const userId = session?.user?.id

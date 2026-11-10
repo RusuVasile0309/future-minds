@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { SettingsService } from "@fm/server"
 import { requireRole, CAN_VIEW, CAN_MUTATE } from "@/lib/api-auth"
-import { revalidateAppSettings } from "@/lib/settings-cache"
 import type { ApiResponse, AdminSettings } from "@fm/shared"
 
 export async function GET(): Promise<NextResponse<ApiResponse>> {
@@ -37,9 +36,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse>> 
   if (parsed.data.currentCohort !== undefined) {
     await SettingsService.setCurrentCohort(parsed.data.currentCohort)
   }
-
-  // Invalidează cache-ul citit de paginile publice (butoanele de aplicare).
-  revalidateAppSettings()
 
   const data: AdminSettings = {
     applicationsOpen: await SettingsService.getApplicationsOpen(),

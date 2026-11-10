@@ -34,6 +34,13 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 })
 
+// Paginile publice citesc starea live „fereastra de înscriere" din DB (prin
+// FloatingApplyGate / ApplyCta), iar clientul Neon rulează fiecare query cu
+// `no-store` (vezi db.ts — evită citiri de settings învechite). O citire la
+// request-time face randarea dinamică; o declarăm explicit ca să nu se încerce
+// prerender static (ar arunca DYNAMIC_SERVER_USAGE la build).
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {

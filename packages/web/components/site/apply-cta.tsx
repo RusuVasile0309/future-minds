@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { GraduationCap, Lock } from "lucide-react"
 import { Button, type ButtonProps } from "@/components/ui/button"
-import { getApplicationsOpenCached } from "@/lib/settings-cache"
+import { getApplicationsOpen } from "@/lib/settings-cache"
 import { cn } from "@/lib/utils"
 
 /**
@@ -23,7 +23,7 @@ export async function ApplyCta({
   size?: ButtonProps["size"]
   className?: string
 }) {
-  const open = await getApplicationsOpenCached()
+  const open = await getApplicationsOpen()
 
   if (!open) {
     return (
