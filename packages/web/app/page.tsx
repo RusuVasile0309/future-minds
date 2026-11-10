@@ -7,6 +7,7 @@ import { Reveal } from "@/components/site/reveal";
 import { FloatingApplyGate } from "@/components/site/floating-apply-gate";
 import { HomeSplash } from "@/components/site/home-splash";
 import { Button } from "@/components/ui/button";
+import { ApplyCta } from "@/components/site/apply-cta";
 
 export default function HomePage() {
   return (
@@ -47,11 +48,7 @@ export default function HomePage() {
                 className="mt-9 flex flex-col gap-3 animate-fade-rise sm:flex-row sm:flex-wrap sm:items-center"
                 style={{ animationDelay: "240ms" }}
               >
-                <Button asChild size="lg">
-                  <Link href="/aplica" data-apply-cta>
-                    Vreau bursă <GraduationCap className="size-4" />
-                  </Link>
-                </Button>
+                <ApplyCta size="lg" />
                 <Button asChild size="lg" variant="secondary">
                   <Link href="/eligibilitate">Vezi criteriile</Link>
                 </Button>
