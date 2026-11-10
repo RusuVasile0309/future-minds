@@ -42,5 +42,10 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
+  // Rulează DOAR pe rutele care au nevoie de sesiune (auth + protejate + admin).
+  // Important: paginile publice (`/`, `/despre`, `/bursa`, `/eligibilitate`,
+  // `/intrebari-frecvente`, `/contact`) nu mai trec prin middleware, așa că nu
+  // mai primesc cookie-urile Auth.js (CSRF / callback-url) și pot fi cache-uite
+  // la edge de Vercel (TTFB mai mic, fără cookie-uri către crawleri).
+  matcher: ["/autentificare/:path*", "/aplica/:path*", "/contul-meu/:path*", "/admin/:path*"],
 }
