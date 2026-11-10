@@ -24,6 +24,7 @@ export const PUBLIC_ROUTES = [
   { path: "/bursa", priority: 0.9, changeFrequency: "monthly" as const },
   { path: "/intrebari-frecvente", priority: 0.7, changeFrequency: "monthly" as const },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" as const },
+  { path: "/confidentialitate", priority: 0.3, changeFrequency: "yearly" as const },
 ]
 
 /** Căile private — niciodată indexate (robots.ts + metadata per-pagină). */
@@ -35,21 +36,38 @@ export const PRIVATE_PREFIXES = [
   "/api",
 ]
 
-// ── Parteneri (finanțatori ai programului) ────────────────────────────────
+// ── Organizator (entitate juridică) și finanțator ──────────────────────────
+/** ID stabil pentru a lega nodurile JSON-LD între ele (@id). */
+export const ORG_ID = `${SITE_URL}/#organization`
+const WEBSITE_ID = `${SITE_URL}/#website`
+const ROTARACT_ID = `${SITE_URL}/#rotaract`
+
+/** Nova Power&Gas — finanțatorul programului. */
 const NOVA = {
   "@type": "Organization",
   name: "Nova Power&Gas",
   url: "https://vreaulanova.ro/",
 }
-const ROTARACT = {
-  "@type": "Organization",
-  name: "Rotaract Cluj-Napoca SAMVS",
-  url: "https://www.facebook.com/RotaractSamvsCluj/",
-}
 
-/** ID stabil pentru a lega nodurile JSON-LD între ele (@id). */
-export const ORG_ID = `${SITE_URL}/#organization`
-const WEBSITE_ID = `${SITE_URL}/#website`
+/**
+ * Asociația Rotaract Club Cluj-Napoca Samus — organizatorul programului,
+ * modelat ca entitate juridică (NGO) cu CUI și adresă pentru claritate E-E-A-T.
+ */
+const ROTARACT = {
+  "@type": "NGO",
+  "@id": ROTARACT_ID,
+  name: "Rotaract Cluj-Napoca SAMVS",
+  legalName: "Asociația Rotaract Club Cluj-Napoca Samus",
+  taxID: "35408330",
+  url: "https://www.instagram.com/rotaractsamvs/",
+  sameAs: ["https://www.instagram.com/rotaractsamvs/"],
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Str. Constantin Dobrogeanu Gherea nr. 21, et. 1, ap. 6",
+    addressLocality: "Cluj-Napoca",
+    addressCountry: "RO",
+  },
+}
 
 /**
  * EducationalOrganization — nodul rădăcină, injectat în layout pe tot site-ul.
@@ -59,9 +77,10 @@ const WEBSITE_ID = `${SITE_URL}/#website`
 export function organizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
+    "@type": ["EducationalOrganization", "NGO"],
     "@id": ORG_ID,
     name: SITE_NAME,
+    alternateName: "Future Minds",
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
@@ -73,6 +92,9 @@ export function organizationSchema() {
       "@type": "City",
       name: "Cluj-Napoca",
     },
+    sameAs: ["https://www.instagram.com/rotaractsamvs/"],
+    // Rotaract este organizatorul programului (entitatea juridică din spate).
+    parentOrganization: ROTARACT,
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",
@@ -81,7 +103,7 @@ export function organizationSchema() {
       areaServed: "RO",
       availableLanguage: ["Romanian"],
     },
-    funder: [NOVA, ROTARACT],
+    funder: [NOVA],
   }
 }
 
@@ -110,13 +132,15 @@ export function scholarshipProgramSchema() {
     "@type": "EducationalOccupationalProgram",
     name: "Bursa FutureMinds",
     description:
-      "Bursă integrală (~6.000 € pe an, per bursier) care acoperă taxele de studii, cazarea în cămin, masa zilnică, materialele didactice, un laptop și bani de buzunar, pentru studii de IT și inginerie la UBB și UTCN din Cluj-Napoca.",
+      "Bursă integrală (~6.000 € pe an, per bursier) care acoperă taxele de studii, cazarea în cămin, masa zilnică, materialele didactice, un laptop și bani de buzunar. Se acordă 5 burse per ediție, exclusiv studenților de la UBB și UTCN din Cluj-Napoca, la specializări de IT și inginerie.",
     url: absoluteUrl("/bursa"),
     programType: "Bursă integrală de studii",
     educationalProgramMode: "full-time",
     occupationalCategory: ["IT", "Inginerie"],
     educationalCredentialAwarded: "Diplomă de licență",
     timeToComplete: "P4Y",
+    // Număr de burse acordate per ediție.
+    maximumEnrollment: 5,
     provider: { "@id": ORG_ID },
     financialAidEligible:
       "Bursă integrală ce acoperă taxe, cazare, masă, materiale, laptop și cheltuieli de trai.",

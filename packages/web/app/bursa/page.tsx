@@ -56,6 +56,14 @@ export default function BursaPage() {
               6.000&nbsp;€
             </p>
             <p className="mt-2 text-lg text-muted-foreground">pe an, per bursier</p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                5 burse în această ediție
+              </span>
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm font-medium text-foreground/80">
+                Doar UBB &amp; UTCN
+              </span>
+            </div>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
               Acordată pe toată durata studiilor de licență (3-4 ani), alături de îndrumare din partea Rotaract și
               oportunități de stagiu și angajare la Nova Power&Gas.
