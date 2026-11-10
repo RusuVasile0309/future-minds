@@ -12,9 +12,11 @@ import { clearDependentAnswers } from "@/lib/content/form-options"
 import {
   applyComputedFields,
   applyParentRules,
+  computeIncomePerMember,
   getFormSchema,
   isFieldVisible,
   validateFieldValue,
+  INCOME_PER_MEMBER_THRESHOLD,
 } from "@fm/shared"
 import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField, FormSection } from "@fm/shared"
 
@@ -159,7 +161,7 @@ export function ApplicationForm() {
               .map((field) => {
                 const value = answers[field.key] ?? null
                 return (
-                  <FieldRow key={field.id} field={field} error={validateFieldValue(field, value, answers)}>
+                  <FieldRow key={field.id} field={field} error={fieldRowError(field, value, answers)}>
                     <FieldInput
                       field={field}
                       value={value}
@@ -172,6 +174,8 @@ export function ApplicationForm() {
                 )
               })}
           </div>
+
+          {section.id === "finance" ? <IncomeSummary answers={answers} /> : null}
         </div>
       </StepCarousel>
 
@@ -330,6 +334,61 @@ function isEmpty(field: FormField, value: AnswerValue): boolean {
     value === "" ||
     (Array.isArray(value) && value.length === 0) ||
     (field.type === "boolean" && typeof value !== "boolean")
+  )
+}
+
+// Câmpurile de venit: când sunt obligatorii și goale, arătăm explicit un mesaj de
+// eroare sub câmp (ca la celelalte erori), pe lângă blocarea butonului „Continuă".
+const INCOME_FIELD_KEYS = new Set(["student_income", "mother_income", "father_income"])
+
+function fieldRowError(
+  field: FormField,
+  value: AnswerValue,
+  answers: Record<string, AnswerValue>
+): string | null {
+  if (INCOME_FIELD_KEYS.has(field.key) && field.required && isEmpty(field, value)) {
+    return "Completează venitul net lunar."
+  }
+  return validateFieldValue(field, value, answers)
+}
+
+// Rezumatul venitului pe membru de familie, afișat în secțiunea financiară. Peste
+// prag (≥ 2500 lei) arată un avertisment, dar NU blochează trimiterea — eligibilitatea
+// finală se decide la evaluare.
+function IncomeSummary({ answers }: { answers: Record<string, AnswerValue> }) {
+  const hasIncome = [...INCOME_FIELD_KEYS].some((k) => {
+    const v = answers[k]
+    return v !== undefined && v !== null && v !== ""
+  })
+  if (!hasIncome) return null
+
+  const perMember = computeIncomePerMember(answers)
+  if (perMember === null) return null
+
+  const over = perMember >= INCOME_PER_MEMBER_THRESHOLD
+  const money = (n: number) => n.toLocaleString("ro-RO", { maximumFractionDigits: 2 })
+
+  return (
+    <div
+      className={`mt-6 rounded-xl border p-4 text-sm ${
+        over
+          ? "border-amber-300/70 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
+          : "border-border bg-secondary/40 text-muted-foreground"
+      }`}
+    >
+      <p>
+        Venit net estimat / membru de familie:{" "}
+        <strong className={over ? "" : "text-foreground"}>{money(perMember)} lei</strong>
+      </p>
+      {over ? (
+        <p className="mt-1.5">
+          ⚠ Este peste pragul de {money(INCOME_PER_MEMBER_THRESHOLD)} lei/membru. Poți trimite aplicația, dar s-ar putea
+          să nu te încadrezi în criteriul de venit.
+        </p>
+      ) : (
+        <p className="mt-1.5">Se încadrează sub pragul de {money(INCOME_PER_MEMBER_THRESHOLD)} lei/membru.</p>
+      )}
+    </div>
   )
 }
 

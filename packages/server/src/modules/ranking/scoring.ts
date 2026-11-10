@@ -8,7 +8,11 @@ import type {
   ScoredApplication,
   ApplicationStatus,
 } from "@fm/shared"
-import { applyComputedFields } from "@fm/shared"
+import { applyComputedFields, computeIncomePerMember, DEFAULT_INCOME_CONFIG } from "@fm/shared"
+
+// Calculul venitului/membru și config-ul implicit trăiesc în @fm/shared (sursă unică,
+// folosită și de formularul client); le re-exportăm pentru consumatorii @fm/server.
+export { computeIncomePerMember, DEFAULT_INCOME_CONFIG }
 
 // Cheia sintetică a criteriului de venit calculat.
 export const INCOME_KEY = "income_per_member"
@@ -22,18 +26,6 @@ export const ORPHAN_BOTH_KEY = "orphan_both_parents"
 // părinte sau familie monoparentală, 2 = orfan de ambii părinți.
 export const FAMILY_STATUS_KEY = "family_status"
 export const SINGLE_PARENT_KEY = "single_parent_family"
-
-// Mapare implicită pe cheile din specificația formularului (docs/formular-elevi-campuri.md).
-export const DEFAULT_INCOME_CONFIG: IncomeConfig = {
-  studentIncomeKey: "student_income",
-  motherIncomeKey: "mother_income",
-  fatherIncomeKey: "father_income",
-  dependentsKey: "dependents_count",
-  motherDeceasedKey: "mother_deceased",
-  fatherDeceasedKey: "father_deceased",
-  motherSupportsKey: "mother_supports",
-  fatherSupportsKey: "father_supports",
-}
 
 function num(v: AnswerValue | undefined): number {
   if (typeof v === "number") return v
@@ -51,35 +43,6 @@ function bool(v: AnswerValue | undefined): boolean {
 function clamp01(n: number): number {
   if (!Number.isFinite(n)) return 0
   return Math.max(0, Math.min(1, n))
-}
-
-/**
- * Venit net / membru de familie.
- * Venitul unui părinte se ignoră dacă e decedat sau bifează „nu mă susține".
- * Membrii = student + frați/surori în întreținere + părinții în viață.
- */
-export function computeIncomePerMember(
-  answers: Record<string, AnswerValue>,
-  income: IncomeConfig
-): number | null {
-  // Un părinte „iese" din calcul dacă e decedat SAU nu bifează că susține financiar.
-  const motherOut = bool(answers[income.motherDeceasedKey]) || !bool(answers[income.motherSupportsKey])
-  const fatherOut = bool(answers[income.fatherDeceasedKey]) || !bool(answers[income.fatherSupportsKey])
-
-  const studentIncome = num(answers[income.studentIncomeKey])
-  const motherIncome = motherOut ? 0 : num(answers[income.motherIncomeKey])
-  const fatherIncome = fatherOut ? 0 : num(answers[income.fatherIncomeKey])
-
-  const dependents = Math.max(0, Math.round(num(answers[income.dependentsKey])))
-  const members =
-    1 +
-    dependents +
-    (bool(answers[income.motherDeceasedKey]) ? 0 : 1) +
-    (bool(answers[income.fatherDeceasedKey]) ? 0 : 1)
-
-  if (members <= 0) return null
-  const total = studentIncome + motherIncome + fatherIncome
-  return Math.round((total / members) * 100) / 100
 }
 
 /**

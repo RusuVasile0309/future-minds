@@ -34,7 +34,7 @@ const CRITERIA = [
   {
     icon: HandCoins,
     title: "Situație financiară",
-    body: "Accent pe tinerii care au o nevoie reală de sprijin pentru a-și putea continua studiile.",
+    body: "Accent pe tinerii cu o nevoie reală de sprijin: acceptăm bursieri din familii cu un venit net sub 2.500 lei pe membru de familie.",
   },
   {
     icon: Sparkles,
@@ -101,6 +101,33 @@ export default function EligibilitatePage() {
             <ApplyCta className="mt-6 w-full" />
           </div>
         </Reveal>
+      </section>
+
+      <section className="border-t border-border">
+        <div className="container py-16 md:py-20">
+          <Reveal className="mx-auto max-w-3xl rounded-2xl border border-border bg-card p-7 sm:p-9">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
+              <HandCoins className="size-5" />
+            </span>
+            <h2 className="mt-5 font-serif text-2xl font-medium">Pragul de venit</h2>
+            <p className="mt-3 text-muted-foreground">
+              Acceptăm bursieri care provin dintr-o familie în care venitul net
+              pe membru de familie este <strong className="text-foreground">sub 2.500 lei</strong>.
+            </p>
+            <div className="mt-6 rounded-xl border border-border bg-secondary/40 p-5 text-sm">
+              <p className="font-medium text-foreground">Cum se calculează</p>
+              <p className="mt-2 text-muted-foreground">
+                Venitul net total al familiei (părinți care susțin financiar + student), împărțit la numărul
+                de membri (student + frați/surori în întreținere + părinții în viață).
+              </p>
+              <p className="mt-4 text-muted-foreground">
+                <span className="font-medium text-foreground">Exemplu:</span> mama 5.000 lei, tata 4.000 lei,
+                2 copii în familie → <span className="font-mono">(5.000 + 4.000) ÷ 4 = 2.250 lei</span> pe membru.
+                Sub prag, deci se încadrează.
+              </p>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       <section className="border-t border-border bg-secondary/30">
