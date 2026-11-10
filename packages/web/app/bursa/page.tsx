@@ -4,6 +4,7 @@ import { ArrowRight, Home, Utensils, Wallet, GraduationCap, Laptop, Check } from
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
+import { ApplyCta } from "@/components/site/apply-cta"
 import { expenseTables, scholarshipIncludes, type Table } from "@/lib/content/budget"
 import { JsonLd } from "@/components/seo/json-ld"
 import { breadcrumbSchema, scholarshipProgramSchema } from "@/lib/seo"
@@ -59,11 +60,7 @@ export default function BursaPage() {
               Acordată pe toată durata studiilor de licență (3-4 ani), alături de îndrumare din partea Rotaract și
               oportunități de stagiu și angajare la Nova Power&Gas.
             </p>
-            <Button asChild size="lg" className="mt-8 w-full">
-              <Link href="/aplica" data-apply-cta>
-                Vreau bursă <GraduationCap className="size-4" />
-              </Link>
-            </Button>
+            <ApplyCta size="lg" className="mt-8 w-full" />
           </div>
 
           {/* Ce include */}

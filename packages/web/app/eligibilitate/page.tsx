@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   GraduationCap,
   HandCoins,
@@ -9,7 +8,7 @@ import {
 } from "lucide-react";
 import { PageLayout, PageHero } from "@/components/site/page-layout";
 import { Reveal } from "@/components/site/reveal";
-import { Button } from "@/components/ui/button";
+import { ApplyCta } from "@/components/site/apply-cta";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/seo";
 
@@ -99,11 +98,7 @@ export default function EligibilitatePage() {
                 de ansamblu. Aplică și lasă-ne să te cunoaștem.
               </p>
             </div>
-            <Button asChild className="mt-6 w-full">
-              <Link href="/aplica" data-apply-cta>
-                Vreau bursă <GraduationCap className="size-4" />
-              </Link>
-            </Button>
+            <ApplyCta className="mt-6 w-full" />
           </div>
         </Reveal>
       </section>

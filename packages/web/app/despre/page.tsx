@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { GraduationCap } from "lucide-react"
+import { ApplyCta } from "@/components/site/apply-cta"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
@@ -132,11 +132,7 @@ export default function DesprePage() {
           <p className="mt-2 text-muted-foreground">Vezi criteriile de eligibilitate sau începe direct aplicația.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg">
-            <Link href="/aplica" data-apply-cta>
-              Vreau bursă <GraduationCap className="size-4" />
-            </Link>
-          </Button>
+          <ApplyCta size="lg" />
           <Button asChild size="lg" variant="secondary">
             <Link href="/eligibilitate">Criterii de eligibilitate</Link>
           </Button>

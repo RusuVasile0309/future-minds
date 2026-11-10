@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Plus, GraduationCap } from "lucide-react"
+import { Plus } from "lucide-react"
 import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
-import { Button } from "@/components/ui/button"
+import { ApplyCta } from "@/components/site/apply-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { breadcrumbSchema, faqSchema } from "@/lib/seo"
 
@@ -95,11 +95,7 @@ export default function FaqPage() {
 
         <Reveal className="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-4 text-center">
           <p className="text-muted-foreground">Ești gata să aplici?</p>
-          <Button asChild size="lg">
-            <Link href="/aplica" data-apply-cta>
-              Vreau bursă <GraduationCap className="size-4" />
-            </Link>
-          </Button>
+          <ApplyCta size="lg" />
         </Reveal>
       </section>
     </PageLayout>
