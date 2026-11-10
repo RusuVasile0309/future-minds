@@ -59,8 +59,8 @@ const ROTARACT = {
   name: "Rotaract Cluj-Napoca SAMVS",
   legalName: "Asociația Rotaract Club Cluj-Napoca Samus",
   taxID: "35408330",
-  url: "https://www.facebook.com/RotaractSamvsCluj/",
-  sameAs: ["https://www.facebook.com/RotaractSamvsCluj/"],
+  url: "https://www.instagram.com/rotaractsamvs/",
+  sameAs: ["https://www.instagram.com/rotaractsamvs/"],
   address: {
     "@type": "PostalAddress",
     streetAddress: "Str. Constantin Dobrogeanu Gherea nr. 21, et. 1, ap. 6",
@@ -92,7 +92,7 @@ export function organizationSchema() {
       "@type": "City",
       name: "Cluj-Napoca",
     },
-    sameAs: ["https://www.facebook.com/RotaractSamvsCluj/"],
+    sameAs: ["https://www.instagram.com/rotaractsamvs/"],
     // Rotaract este organizatorul programului (entitatea juridică din spate).
     parentOrganization: ROTARACT,
     contactPoint: {

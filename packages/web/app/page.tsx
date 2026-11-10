@@ -123,7 +123,7 @@ export default function HomePage() {
               />
             </a>
             <a
-              href="https://www.facebook.com/RotaractSamvsCluj/"
+              href="https://www.instagram.com/rotaractsamvs/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Rotaract Cluj-Napoca SAMVS"

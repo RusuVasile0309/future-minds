@@ -27,7 +27,7 @@ export function SiteFooter() {
                 <Image src="/nova-logo.svg" alt="Nova Power&Gas" width={400} height={220} className="h-8 w-auto" />
               </a>
               <a
-                href="https://www.facebook.com/RotaractSamvsCluj/"
+                href="https://www.instagram.com/rotaractsamvs/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Rotaract Cluj-Napoca SAMVS"
@@ -61,7 +61,7 @@ export function SiteFooter() {
             title="Parteneri"
             links={[
               { href: "https://vreaulanova.ro/", label: "Nova Power&Gas", external: true },
-              { href: "https://www.facebook.com/RotaractSamvsCluj/", label: "Rotaract Cluj-Napoca SAMVS", external: true },
+              { href: "https://www.instagram.com/rotaractsamvs/", label: "Rotaract Cluj-Napoca SAMVS", external: true },
             ]}
           />
         </div>
