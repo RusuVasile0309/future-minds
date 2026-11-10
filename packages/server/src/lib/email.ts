@@ -143,16 +143,43 @@ export async function sendApplicationConfirmation(input: {
 }): Promise<boolean> {
   const cfg = getConfig()
   if (!cfg) {
-    console.warn("[email] SMTP neconfigurat — se omite emailul de confirmare.")
+    // Arată exact ce variabilă lipsește ca să fie clar de ce s-a omis.
+    const missing = (
+      [
+        ["SMTP_HOST", process.env.SMTP_HOST],
+        ["SMTP_USER", process.env.SMTP_USER],
+        ["SMTP_PASS", process.env.SMTP_PASS],
+        ["EMAIL_FROM", process.env.EMAIL_FROM],
+      ] as const
+    )
+      .filter(([, v]) => !v?.trim())
+      .map(([k]) => k)
+    console.warn(`[email] SMTP neconfigurat — se omite emailul. Variabile lipsă: ${missing.join(", ")}`)
     return false
   }
 
-  await getTransporter(cfg).sendMail({
-    from: cfg.from,
-    to: input.to,
-    subject: "Confirmare înscriere bursă FutureMinds",
-    html: renderHtml(input.fullName, input.answers, input.files),
-    text: renderText(input.fullName, input.answers, input.files),
-  })
-  return true
+  console.info(
+    `[email] Trimit confirmare → to=${input.to} from=${cfg.from} host=${cfg.host}:${cfg.port} secure=${cfg.port === 465}`
+  )
+  try {
+    const info = await getTransporter(cfg).sendMail({
+      from: cfg.from,
+      to: input.to,
+      subject: "Confirmare înscriere bursă FutureMinds",
+      html: renderHtml(input.fullName, input.answers, input.files),
+      text: renderText(input.fullName, input.answers, input.files),
+    })
+    console.info(
+      `[email] Trimis OK → messageId=${info.messageId} accepted=${JSON.stringify(info.accepted)} ` +
+        `rejected=${JSON.stringify(info.rejected)} response=${info.response}`
+    )
+    return true
+  } catch (e) {
+    const err = e as { code?: string; responseCode?: number; response?: string; message?: string }
+    console.error(
+      `[email] EȘEC trimitere → to=${input.to} code=${err.code} responseCode=${err.responseCode} ` +
+        `response=${err.response ?? err.message}`
+    )
+    throw e
+  }
 }

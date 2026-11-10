@@ -2,7 +2,13 @@ import { sql } from "../../database/db"
 import { SettingsService } from "../settings/settings.service"
 import { FilesService } from "../files/files.service"
 import { sendApplicationConfirmation } from "../../lib/email"
-import { FORM_SCHEMA, isFieldVisible, validateFieldValue } from "@fm/shared"
+import {
+  FORM_SCHEMA,
+  isFieldVisible,
+  validateFieldValue,
+  computeIncomePerMember,
+  INCOME_PER_MEMBER_THRESHOLD,
+} from "@fm/shared"
 import type {
   Application,
   ApplicationStatus,
@@ -138,6 +144,7 @@ export class ApplicationsService {
   }
 
   static async submit(userId: string): Promise<Application> {
+    console.info(`[applications] submit() start userId=${userId}`)
     if (!(await SettingsService.getApplicationsOpen())) {
       throw new ApplicationError("Înscrierile sunt închise momentan.", 403)
     }
@@ -158,12 +165,23 @@ export class ApplicationsService {
       throw new ApplicationError(`Valori invalide: ${invalid.join(", ")}`, 400)
     }
 
+    // Criteriu de venit: nu se poate trimite dacă venitul net/membru ≥ prag.
+    const perMember = computeIncomePerMember(app.answers)
+    if (perMember !== null && perMember >= INCOME_PER_MEMBER_THRESHOLD) {
+      throw new ApplicationError(
+        `Venitul net pe membru de familie (${perMember} lei) depășește pragul de ${INCOME_PER_MEMBER_THRESHOLD} lei — nu îndeplinești criteriul de venit.`,
+        400
+      )
+    }
+
     const [row] = await sql`
       UPDATE applications
       SET status = 'submitted', submitted_at = NOW(), updated_at = NOW()
       WHERE id = ${app.id}
       RETURNING *
     `
+
+    console.info(`[applications] submit() validat, status=submitted, appId=${app.id} — trec la email`)
 
     // Email de confirmare cu toate datele transmise. Best-effort: o eroare la
     // trimitere NU trebuie să invalideze o înscriere deja salvată.
@@ -178,19 +196,26 @@ export class ApplicationsService {
     answers: Record<string, AnswerValue>,
     files: Awaited<ReturnType<typeof FilesService.listForApplication>>
   ): Promise<void> {
+    console.info(`[applications] Pregătesc emailul de confirmare pentru userId=${userId}`)
     try {
       const [u] = await sql`
         SELECT id AS u_id, email, name AS u_name, first_name AS u_first, last_name AS u_last
         FROM users WHERE id = ${userId}
       `
       const to = (u?.email as string | null) ?? null
-      if (!to) return
-      await sendApplicationConfirmation({
+      if (!to) {
+        console.warn(
+          `[applications] Fără email de confirmare: userId=${userId} nu are adresă (user găsit=${!!u}).`
+        )
+        return
+      }
+      const sent = await sendApplicationConfirmation({
         to,
         fullName: deriveFullName(answers, u),
         answers,
         files,
       })
+      console.info(`[applications] Email de confirmare procesat pentru userId=${userId} → trimis=${sent}`)
     } catch (e) {
       console.error("[applications] Eroare la emailul de confirmare:", e)
     }

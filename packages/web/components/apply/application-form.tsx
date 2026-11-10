@@ -372,7 +372,7 @@ function IncomeSummary({ answers }: { answers: Record<string, AnswerValue> }) {
     <div
       className={`mt-6 rounded-xl border p-4 text-sm ${
         over
-          ? "border-amber-300/70 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
+          ? "border-destructive/40 bg-destructive/5 text-destructive"
           : "border-border bg-secondary/40 text-muted-foreground"
       }`}
     >
@@ -382,8 +382,8 @@ function IncomeSummary({ answers }: { answers: Record<string, AnswerValue> }) {
       </p>
       {over ? (
         <p className="mt-1.5">
-          ⚠ Este peste pragul de {money(INCOME_PER_MEMBER_THRESHOLD)} lei/membru. Poți trimite aplicația, dar s-ar putea
-          să nu te încadrezi în criteriul de venit.
+          Depășește pragul de {money(INCOME_PER_MEMBER_THRESHOLD)} lei/membru, deci nu îndeplinești criteriul de venit
+          și nu poți trimite aplicația.
         </p>
       ) : (
         <p className="mt-1.5">Se încadrează sub pragul de {money(INCOME_PER_MEMBER_THRESHOLD)} lei/membru.</p>
@@ -422,6 +422,11 @@ function isStepComplete(
     }
     // Câmp completat dar invalid (format/interval/corelații) → blochează pasul.
     if (validateFieldValue(field, value, answers)) return false
+  }
+  // Criteriu de venit: peste prag (≥ 2500 lei/membru) → nu se poate avansa/trimite.
+  if (section.id === "finance") {
+    const perMember = computeIncomePerMember(answers)
+    if (perMember !== null && perMember >= INCOME_PER_MEMBER_THRESHOLD) return false
   }
   return true
 }
