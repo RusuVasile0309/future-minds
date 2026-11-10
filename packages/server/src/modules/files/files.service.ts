@@ -84,4 +84,19 @@ export class FilesService {
       }
     }
   }
+
+  // Șterge din R2 toate fișierele unei aplicații. Rândurile din DB se curăță prin
+  // ON DELETE CASCADE la ștergerea aplicației. Best-effort (vezi `removeStorageForUser`).
+  static async removeStorageForApplication(applicationId: string): Promise<void> {
+    const rows = await sql`
+      SELECT storage_key FROM application_files WHERE application_id = ${applicationId}
+    `
+    for (const row of rows) {
+      try {
+        await deleteObject(row.storage_key as string)
+      } catch {
+        // ignoră eroarea per fișier (obiect deja lipsă / R2 indisponibil)
+      }
+    }
+  }
 }

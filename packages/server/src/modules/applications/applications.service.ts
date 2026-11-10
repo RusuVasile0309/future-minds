@@ -318,6 +318,14 @@ export class ApplicationsService {
     })
   }
 
+  // Ștergere definitivă a unei aplicații (rezervată SUPER_USER în rută). Întâi
+  // curăță fișierele din R2 (cascade-ul din DB nu atinge storage-ul), apoi șterge
+  // rândul — `application_files` se curăță prin ON DELETE CASCADE.
+  static async delete(id: string): Promise<void> {
+    await FilesService.removeStorageForApplication(id)
+    await sql`DELETE FROM applications WHERE id = ${id}`
+  }
+
   static async updateStatus(id: string, status: ApplicationStatus): Promise<Application> {
     if (!STATUSES.includes(status)) throw new ApplicationError(`Status invalid: ${status}`)
     const [row] = await sql`

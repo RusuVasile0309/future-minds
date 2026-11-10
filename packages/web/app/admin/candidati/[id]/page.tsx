@@ -6,11 +6,11 @@ export const metadata: Metadata = { title: "Detaliu candidat" }
 
 export default async function AdminCandidatDetailPage({ params }: { params: { id: string } }) {
   const session = await auth()
-  const canScore = session?.role === "SUPER_USER"
+  const isSuperUser = session?.role === "SUPER_USER"
 
   return (
     <div className="container py-12">
-      <CandidateDetail id={params.id} canScore={canScore} />
+      <CandidateDetail id={params.id} canScore={isSuperUser} canDelete={isSuperUser} />
     </div>
   )
 }

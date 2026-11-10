@@ -41,6 +41,18 @@ export function useUpdateCandidateStatus(id: string) {
   })
 }
 
+export function useDeleteApplication() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => adminApplicationsApi.remove(id),
+    onSuccess: (res, id) => {
+      if (!res.success) return
+      qc.removeQueries({ queryKey: detailKey(id) })
+      qc.invalidateQueries({ queryKey: LIST_KEY })
+    },
+  })
+}
+
 export function useSetLetterScores(id: string) {
   const qc = useQueryClient()
   return useMutation({

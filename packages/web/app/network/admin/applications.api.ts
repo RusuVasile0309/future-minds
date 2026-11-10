@@ -20,4 +20,6 @@ export const adminApplicationsApi = {
 
   fileUrl: (id: string, fileId: string) =>
     apiRequest<{ url: string }>(`/api/admin/applications/${id}/files/${fileId}`),
+
+  remove: (id: string) => apiRequest(`/api/admin/applications/${id}`, { method: "DELETE" }),
 }

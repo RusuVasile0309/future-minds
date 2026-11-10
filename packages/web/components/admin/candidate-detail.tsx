@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Check, Download, Loader2, Mail, Phone } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, Check, Download, Loader2, Mail, Phone, Trash2 } from "lucide-react"
 import {
   useCandidate,
   useUpdateCandidateStatus,
   useSetLetterScores,
+  useDeleteApplication,
   adminApplicationsApi,
 } from "@/app/network/admin"
 import { StatusBadge } from "@/components/apply/status-badge"
@@ -27,21 +29,47 @@ function formatDate(d: Date | string | null): string {
   return new Date(d).toLocaleString("ro-RO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
 }
 
-export function CandidateDetail({ id, canScore = false }: { id: string; canScore?: boolean }) {
+export function CandidateDetail({
+  id,
+  canScore = false,
+  canDelete = false,
+}: {
+  id: string
+  canScore?: boolean
+  canDelete?: boolean
+}) {
+  const router = useRouter()
   const { data, isLoading, error } = useCandidate(id)
   const updateStatus = useUpdateCandidateStatus(id)
+  const removeApplication = useDeleteApplication()
   const [statusError, setStatusError] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   if (isLoading) return <p className="text-muted-foreground">Se încarcă aplicația…</p>
   if (error) return <p className="text-destructive">Nu am putut încărca aplicația. Încearcă din nou.</p>
   if (!data) return <p className="text-muted-foreground">Aplicația nu a fost găsită.</p>
 
   const filesByField = (key: string) => data.files.filter((f) => f.fieldKey === key)
+  const candidateName = displayName(data.applicant, data.answers)
 
   async function setStatus(status: ApplicationStatus) {
     setStatusError(null)
     const res = await updateStatus.mutateAsync(status)
     if (!res.success) setStatusError(res.error)
+  }
+
+  async function handleDelete() {
+    setDeleteError(null)
+    if (
+      !confirm(
+        `Ștergi definitiv aplicația lui ${candidateName}? Răspunsurile și toate documentele încărcate (din R2) se șterg permanent și nu pot fi recuperate.`
+      )
+    ) {
+      return
+    }
+    const res = await removeApplication.mutateAsync(id)
+    if (res.success) router.push("/admin/candidati")
+    else setDeleteError(res.error)
   }
 
   return (
@@ -100,6 +128,26 @@ export function CandidateDetail({ id, canScore = false }: { id: string; canScore
           </div>
           {statusError ? <p className="mt-2 text-sm text-destructive">{statusError}</p> : null}
         </div>
+
+        {/* Ștergere definitivă — doar SUPER_USER */}
+        {canDelete ? (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-destructive/30 pt-5">
+            <p className="text-xs text-muted-foreground">
+              Șterge definitiv aplicația și documentele ei din R2. Ireversibil.
+            </p>
+            <div className="flex items-center gap-3">
+              {deleteError ? <span className="text-sm text-destructive">{deleteError}</span> : null}
+              <button
+                onClick={handleDelete}
+                disabled={removeApplication.isPending}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {removeApplication.isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                Șterge aplicația
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Răspunsuri pe secțiuni */}
