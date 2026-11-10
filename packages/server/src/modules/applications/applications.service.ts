@@ -255,7 +255,7 @@ export class ApplicationsService {
         (SELECT COUNT(*) FROM application_files f WHERE f.application_id = a.id) AS file_count
       FROM applications a
       JOIN users u ON u.id = a.user_id
-      WHERE a.cohort = ${cohort} AND a.status <> 'draft'
+      WHERE a.cohort = ${cohort}
       ORDER BY a.submitted_at DESC NULLS LAST, a.created_at DESC
     `
     return rows.map(toSummary)

@@ -15,6 +15,7 @@ type SortDir = "asc" | "desc"
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "Toate" },
+  { value: "draft", label: "Draft" },
   { value: "submitted", label: "Trimise" },
   { value: "under_review", label: "În evaluare" },
   { value: "accepted", label: "Acceptate" },
@@ -105,7 +106,7 @@ export function CandidateTable() {
   if ((data ?? []).length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground">
-        Nu există încă aplicații trimise pentru cohorta curentă.
+        Nu există încă aplicații pentru cohorta curentă.
       </div>
     )
   }
