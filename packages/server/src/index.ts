@@ -7,5 +7,6 @@ export { FilesService } from "./modules/files/files.service"
 export { RankingService, RankingError } from "./modules/ranking/ranking.service"
 export { computeIncomePerMember, rankAll, INCOME_KEY, DEFAULT_INCOME_CONFIG } from "./modules/ranking/scoring"
 export { StorageError, ALLOWED_DOC_TYPES } from "./lib/storage"
+export { sendApplicationConfirmation } from "./lib/email"
 
 // Further service modules are re-exported here as they are added (users).

@@ -1,6 +1,7 @@
 import { sql } from "../../database/db"
 import { SettingsService } from "../settings/settings.service"
 import { FilesService } from "../files/files.service"
+import { sendApplicationConfirmation } from "../../lib/email"
 import { FORM_SCHEMA, isFieldVisible, validateFieldValue } from "@fm/shared"
 import type {
   Application,
@@ -163,7 +164,36 @@ export class ApplicationsService {
       WHERE id = ${app.id}
       RETURNING *
     `
+
+    // Email de confirmare cu toate datele transmise. Best-effort: o eroare la
+    // trimitere NU trebuie să invalideze o înscriere deja salvată.
+    await this.sendConfirmationEmail(userId, app.answers, files)
+
     return toApplication(row)
+  }
+
+  // Trimite candidatului confirmarea pe emailul contului. Nu aruncă niciodată.
+  private static async sendConfirmationEmail(
+    userId: string,
+    answers: Record<string, AnswerValue>,
+    files: Awaited<ReturnType<typeof FilesService.listForApplication>>
+  ): Promise<void> {
+    try {
+      const [u] = await sql`
+        SELECT id AS u_id, email, name AS u_name, first_name AS u_first, last_name AS u_last
+        FROM users WHERE id = ${userId}
+      `
+      const to = (u?.email as string | null) ?? null
+      if (!to) return
+      await sendApplicationConfirmation({
+        to,
+        fullName: deriveFullName(answers, u),
+        answers,
+        files,
+      })
+    } catch (e) {
+      console.error("[applications] Eroare la emailul de confirmare:", e)
+    }
   }
 
   private static missingRequired(
