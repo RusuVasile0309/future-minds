@@ -69,7 +69,12 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="container flex flex-col items-center justify-between gap-2 py-6 text-xs text-muted-foreground sm:flex-row">
           <span>© {new Date().getFullYear()} FutureMinds. Toate drepturile rezervate.</span>
-          <span className="font-mono uppercase tracking-[0.2em]">educație · acces · viitor</span>
+          <div className="flex items-center gap-4">
+            <Link href="/confidentialitate" className="transition-colors hover:text-foreground">
+              Confidențialitate
+            </Link>
+            <span className="font-mono uppercase tracking-[0.2em]">educație · acces · viitor</span>
+          </div>
         </div>
       </div>
     </footer>
