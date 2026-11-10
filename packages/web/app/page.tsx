@@ -1,6 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
-import { GraduationCap, HandCoins, Laptop, Home } from "lucide-react";
+import {
+  GraduationCap,
+  HandCoins,
+  Laptop,
+  Home,
+  Sparkles,
+  MapPin,
+  BadgeCheck,
+  Users,
+  CalendarDays,
+  Building2,
+  ArrowRight,
+  Plus,
+} from "lucide-react";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Reveal } from "@/components/site/reveal";
@@ -167,8 +180,102 @@ export default function HomePage() {
           </Reveal>
         </section>
 
-        {/* ── Cum funcționează ─────────────────────────────── */}
+        {/* ── Despre: cine suntem (rezumat /despre) ─────────── */}
+        <section className="border-t border-border">
+          <div className="container py-20">
+            <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+              <Reveal>
+                <p className="eyebrow">Despre proiect</p>
+                <h2 className="display-title mt-4 max-w-xl text-3xl sm:text-4xl">
+                  Potențialul nu așteaptă{" "}
+                  <span className="text-primary">permisiune</span>.
+                </h2>
+                <p className="mt-6 max-w-xl text-muted-foreground">
+                  Există o diferență clară între potențialul academic al unor
+                  tineri din medii defavorizate și posibilitățile lor reale de
+                  a-și continua studiile. FutureMinds identifică tinerii cu
+                  competențe reale pentru IT și inginerie și le acoperă integral
+                  studiile, cu obiectivul integrării profesionale la Nova
+                  Power&Gas.
+                </p>
+                <Button asChild variant="secondary" className="mt-8">
+                  <Link href="/despre">
+                    Despre proiect <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </Reveal>
+
+              <Reveal delay={100} className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+                <AboutFact
+                  icon={<Users className="size-5" />}
+                  value="Din 2015"
+                  label="Proiect al clubului Rotaract SAMVS Cluj-Napoca"
+                />
+                <AboutFact
+                  icon={<Building2 className="size-5" />}
+                  value="Nova Power&Gas"
+                  label="Finanțează bursele și oferă stagii și angajare"
+                />
+                <AboutFact
+                  icon={<Sparkles className="size-5" />}
+                  value="200.000+ membri"
+                  label="Rotaract, comunitate internațională din familia Rotary"
+                />
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Bursa: valoare (rezumat /bursa) ───────────────── */}
         <section className="border-t border-border bg-secondary/30">
+          <div className="container py-20">
+            <Reveal>
+              <p className="eyebrow">Bursa FutureMinds</p>
+              <h2 className="display-title mt-4 max-w-2xl text-3xl sm:text-4xl">
+                O bursă care acoperă{" "}
+                <span className="text-primary">tot ce ai nevoie</span>.
+              </h2>
+              <p className="mt-4 max-w-2xl text-muted-foreground">
+                Nu doar taxele: bursa îți acoperă traiul complet ca student, ca
+                să te poți concentra pe studii și pe viitorul tău.
+              </p>
+            </Reveal>
+
+            <Reveal delay={100} className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat
+                icon={<HandCoins className="size-5" />}
+                value="6.000 €"
+                label="pe an, per bursier"
+              />
+              <Stat
+                icon={<BadgeCheck className="size-5" />}
+                value="5 burse"
+                label="acordate în această ediție"
+              />
+              <Stat
+                icon={<CalendarDays className="size-5" />}
+                value="3-4 ani"
+                label="pe toată durata licenței"
+              />
+              <Stat
+                icon={<GraduationCap className="size-5" />}
+                value="UBB & UTCN"
+                label="specializări IT și inginerie"
+              />
+            </Reveal>
+
+            <Reveal delay={200} className="mt-8">
+              <Button asChild variant="secondary">
+                <Link href="/bursa">
+                  Ce include bursa <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── Cum funcționează ─────────────────────────────── */}
+        <section className="border-t border-border">
           <div className="container py-20">
             <Reveal>
               <p className="eyebrow">Cum funcționează</p>
@@ -202,6 +309,76 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Eligibilitate: criterii (rezumat /eligibilitate) ─ */}
+        <section className="border-t border-border bg-secondary/30">
+          <div className="container py-20">
+            <Reveal>
+              <p className="eyebrow">Criterii de eligibilitate</p>
+              <h2 className="display-title mt-4 max-w-2xl text-3xl sm:text-4xl">
+                Sprijinim tineri{" "}
+                <span className="text-primary">motivați și serioși</span>.
+              </h2>
+              <p className="mt-4 max-w-2xl text-muted-foreground">
+                Selecția se face pe baza recomandărilor cadrelor didactice,
+                ținând cont de cinci criterii principale. Nu trebuie să le bifezi
+                perfect pe toate — contează imaginea de ansamblu.
+              </p>
+            </Reveal>
+
+            <Reveal delay={100} className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Criterion icon={<GraduationCap className="size-5" />} title="Rezultate academice" />
+              <Criterion icon={<HandCoins className="size-5" />} title="Situație financiară" />
+              <Criterion icon={<Sparkles className="size-5" />} title="Interese și implicare" />
+              <Criterion icon={<MapPin className="size-5" />} title="Zona de proveniență" />
+              <Criterion icon={<BadgeCheck className="size-5" />} title="Statut de student bugetat" />
+              <Link
+                href="/eligibilitate"
+                className="group flex items-center justify-between gap-3 rounded-xl border border-brand-light/60 bg-card p-4 text-sm font-medium text-primary transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                Vezi toate criteriile
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── Întrebări frecvente (rezumat /intrebari-frecvente) ─ */}
+        <section className="border-t border-border">
+          <div className="container py-20">
+            <Reveal>
+              <p className="eyebrow">Întrebări frecvente</p>
+              <h2 className="display-title mt-4 max-w-2xl text-3xl sm:text-4xl">
+                Ai o întrebare?{" "}
+                <span className="text-primary">Probabil e aici.</span>
+              </h2>
+            </Reveal>
+
+            <Reveal delay={100} className="mt-10 max-w-3xl divide-y divide-border rounded-2xl border border-border bg-card">
+              {HOME_FAQ.map((item) => (
+                <details
+                  key={item.q}
+                  className="group px-6 py-5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-secondary/30 [&_summary::-webkit-details-marker]:hidden"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 font-serif text-lg font-medium text-foreground">
+                    {item.q}
+                    <Plus className="size-5 shrink-0 text-primary transition-transform duration-300 group-open:rotate-45" />
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground group-open:animate-slide-down">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </Reveal>
+
+            <Reveal delay={200} className="mt-8 max-w-3xl">
+              <Button asChild variant="secondary">
+                <Link href="/intrebari-frecvente">
+                  Toate întrebările <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </Reveal>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
@@ -209,6 +386,25 @@ export default function HomePage() {
     </div>
   );
 }
+
+const HOME_FAQ = [
+  {
+    q: "Cine poate aplica?",
+    a: "Elevi și studenți cu potențial real pentru studii de IT sau inginerie, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență.",
+  },
+  {
+    q: "Ce acoperă bursa?",
+    a: "Studiile universitare pe 3-4 ani: taxe de școlarizare, cazare în cămin, materiale didactice, laptop, precum și sprijin pentru cheltuielile de trai.",
+  },
+  {
+    q: "La ce universități se aplică programul?",
+    a: "Programul se adresează studenților de la specializări din IT și inginerie de la Universitatea Babeș-Bolyai (UBB) și de la Universitatea Tehnică din Cluj-Napoca (UTCN).",
+  },
+  {
+    q: "Ce obligații am ca beneficiar?",
+    a: "Menținerea unei medii minime de 8.5 (cu maximum o restanță reportată între ani), finalizarea studiilor în termen, o conduită corespunzătoare și acceptarea oportunităților de stagiu sau angajare la Nova Power&Gas.",
+  },
+];
 
 function CoverItem({
   icon,
@@ -234,6 +430,69 @@ function CoverItem({
         <span className="text-sm text-muted-foreground">{note}</span>
       </span>
     </li>
+  );
+}
+
+function AboutFact({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+        {icon}
+      </span>
+      <div>
+        <p className="font-serif text-lg font-medium text-foreground">{value}</p>
+        <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+          {label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Stat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:border-brand-light/60 hover:shadow-md">
+      <span className="flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
+        {icon}
+      </span>
+      <p className="mt-5 font-serif text-3xl font-medium text-brand-deep dark:text-primary">
+        {value}
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function Criterion({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition duration-300 hover:-translate-y-0.5 hover:border-brand-light/60 hover:shadow-md">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+        {icon}
+      </span>
+      <span className="font-medium text-foreground">{title}</span>
+    </div>
   );
 }
 

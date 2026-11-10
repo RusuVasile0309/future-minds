@@ -284,7 +284,9 @@ const SECTIONS: SectionSpec[] = [
         key: "student_income",
         label: "Venit net lunar (RON)",
         type: "number",
+        required: true,
         helpText: "Venitul tău net lunar.",
+        // Obligatoriu doar când e vizibil (adică „Sunt angajat" e bifat).
         visibleWhen: { all: [{ field: "student_employed", truthy: true }] },
       },
       { key: "mother_last_name", label: "Nume mamă", type: "text", required: true, colSpan: 6, validation: { inputFilter: "name" } },
@@ -295,6 +297,7 @@ const SECTIONS: SectionSpec[] = [
         key: "mother_income",
         label: "Venit net lunar mamă (RON)",
         type: "number",
+        required: true,
         // Venitul se cere doar dacă mama susține financiar (implicit și în viață).
         visibleWhen: { all: [{ field: "mother_supports", truthy: true }] },
       },
@@ -306,6 +309,8 @@ const SECTIONS: SectionSpec[] = [
         key: "father_income",
         label: "Venit net lunar tată (RON)",
         type: "number",
+        required: true,
+        // Obligatoriu doar când e vizibil (adică „Tata mă susține financiar" e bifat).
         visibleWhen: { all: [{ field: "father_supports", truthy: true }] },
       },
       {

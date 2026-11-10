@@ -226,24 +226,20 @@ function StepCarousel({
   const [anim, setAnim] = useState<{ leaving: React.ReactNode; dir: 1 | -1 } | null>(null)
   const [height, setHeight] = useState<number | undefined>(undefined)
 
-  // Cât timp scena e „în repaus", reține înălțimea curentă — e înălțimea de la care
-  // va porni animația la următoarea schimbare de pas.
+  // Animația depinde DOAR de schimbarea pasului. `children` e intenționat în afara
+  // dependențelor: e un obiect JSX nou la fiecare render, așa că dacă ar fi aici,
+  // orice re-render din timpul animației (ex. auto-save comută `isPending`) ar
+  // re-rula efectul, i-ar anula din cleanup `setTimeout`-ul de finalizare, iar
+  // scena ar rămâne blocată cu `overflow-hidden` + înălțime fixă (cardul tăiat).
   useIsoLayoutEffect(() => {
-    if (!anim && stageRef.current) lastHeight.current = stageRef.current.offsetHeight
-  })
+    if (step === prevStep.current) return
 
-  useIsoLayoutEffect(() => {
-    if (step === prevStep.current) {
-      lastChildren.current = children
-      return
-    }
     const reduce =
       typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     const leaving = lastChildren.current
     const dir = direction
     prevStep.current = step
-    lastChildren.current = children
 
     if (reduce) {
       setAnim(null)
@@ -269,7 +265,16 @@ function StepCarousel({
       cancelAnimationFrame(raf)
       clearTimeout(done)
     }
-  }, [step, direction, children, duration])
+  }, [step, direction, duration])
+
+  // Rulează după fiecare render (ordine: DUPĂ efectul de mai sus, ca acela să
+  // citească încă `lastChildren` dinainte de schimbare pentru panoul care iese).
+  // Reține conținutul curent (devine „cel care iese" la următoarea tranziție) și,
+  // cât timp scena e în repaus, înălțimea curentă — punctul de start al animației.
+  useIsoLayoutEffect(() => {
+    lastChildren.current = children
+    if (!anim && stageRef.current) lastHeight.current = stageRef.current.offsetHeight
+  })
 
   return (
     <div
