@@ -110,10 +110,16 @@ function RowGroup({ r, isOpen, onToggle }: { r: ScoredApplication; isOpen: boole
               {r.breakdown.map((b) => (
                 <div key={b.criterionId} className="flex items-center justify-between gap-3 rounded-md bg-card px-3 py-1.5">
                   <span className="min-w-0 truncate text-sm">{b.label}</span>
-                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
-                    {b.normalized.toFixed(2)} × {b.weight} ={" "}
-                    <span className="font-semibold text-foreground">{b.contribution.toFixed(2)}</span>
-                  </span>
+                  {b.na ? (
+                    // Criteriu neaplicabil candidatului (ex.: fără medii de facultate / restanțe):
+                    // exclus din calcul, nu punctat cu 0.
+                    <span className="shrink-0 font-mono text-xs italic text-muted-foreground">N/A (exclus)</span>
+                  ) : (
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                      {b.normalized.toFixed(2)} × {b.weight} ={" "}
+                      <span className="font-semibold text-foreground">{b.contribution.toFixed(2)}</span>
+                    </span>
+                  )}
                 </div>
               ))}
               {r.breakdown.length === 0 && <p className="text-sm text-muted-foreground">Niciun criteriu activ.</p>}

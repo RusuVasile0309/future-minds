@@ -118,11 +118,11 @@ const SECTIONS: SectionSpec[] = [
       { key: "apartment", label: "Apartament", type: "text", colSpan: 6 },
       { key: "postal_code", label: "Cod poștal", type: "text", validation: { maxLength: 6, inputFilter: "digits" } },
       {
+        // Se colectează în continuare, dar NU mai e criteriu de ranking (nov. 2026).
         key: "environment",
         label: "Mediu",
         type: "select",
         required: true,
-        scorable: true,
         options: [
           { value: "urban", label: "Urban" },
           { value: "rural", label: "Rural" },
@@ -172,11 +172,11 @@ const SECTIONS: SectionSpec[] = [
         computed: { kind: "average", from: ["bac_grade_1", "bac_grade_2", "bac_grade_3"] },
       },
       {
+        // Se colectează în continuare, dar NU mai e criteriu de ranking (nov. 2026).
         key: "highschool_average",
         label: "Media generală liceu",
         type: "number",
         required: true,
-        scorable: true,
         validation: grade,
       },
       {
@@ -273,6 +273,20 @@ const SECTIONS: SectionSpec[] = [
           from: ["grade_y1_s1", "grade_y1_s2", "grade_y2_s1", "grade_y2_s2", "grade_y3_s1", "grade_y3_s2"],
         },
       },
+      // Numărul total de restanțe din semestrele ÎNCHEIATE. Vizibil/obligatoriu doar
+      // dacă există cel puțin un an încheiat (ca la mediile semestriale). Pentru boboci
+      // (anul 1, fără semestru încheiat) câmpul lipsește → criteriul iese din calcul (N/A),
+      // nu se punctează cu 0. Scoring: 0→3p, 1→2p, 2→1p, 3+→0p (interval 0–3, „mai mic = mai bine").
+      {
+        key: "restante",
+        label: "Nr. restanțe",
+        type: "number",
+        required: true,
+        scorable: true,
+        helpText: "Numărul total de restanțe rămase din semestrele deja încheiate.",
+        validation: { min: 0, integer: true },
+        visibleWhen: { all: [{ field: "study_year", gte: 2 }] },
+      },
     ],
   },
   {
@@ -348,6 +362,62 @@ const SECTIONS: SectionSpec[] = [
       { key: "disability_certificate", label: "Certificat de handicap", type: "boolean", scorable: true },
       // Bifă completată de candidat; intră în „family_status", deci nu mai e scorabilă separat.
       { key: "single_parent_family", label: "Familie monoparentală", type: "boolean" },
+    ],
+  },
+  {
+    id: "implicare",
+    title: "Implicare",
+    description:
+      "Implicarea în job, proiecte și voluntariat arată dezvoltarea ta personală și profesională. Bifează ce ți se aplică și descrie pe scurt fiecare experiență.",
+    fields: [
+      { key: "implicare_job", label: "Am un job", type: "boolean", colSpan: 12 },
+      {
+        key: "implicare_job_detail",
+        label: "Descrie jobul tău",
+        type: "textarea",
+        required: true,
+        helpText: "Unde lucrezi, ce rol ai și de cât timp.",
+        visibleWhen: { all: [{ field: "implicare_job", truthy: true }] },
+      },
+      { key: "implicare_proiecte", label: "Sunt implicat în proiecte", type: "boolean", colSpan: 12 },
+      {
+        key: "implicare_proiecte_detail",
+        label: "Descrie proiectele tale",
+        type: "textarea",
+        required: true,
+        helpText: "Proiecte academice, personale sau profesionale la care ai contribuit.",
+        visibleWhen: { all: [{ field: "implicare_proiecte", truthy: true }] },
+      },
+      { key: "implicare_voluntariat", label: "Fac voluntariat", type: "boolean", colSpan: 12 },
+      {
+        key: "implicare_voluntariat_detail",
+        label: "Descrie activitatea de voluntariat",
+        type: "textarea",
+        required: true,
+        helpText: "Organizații, cauze și rolul tău de voluntar.",
+        visibleWhen: { all: [{ field: "implicare_voluntariat", truthy: true }] },
+      },
+      // Note manuale (0–1, pas 0.25) acordate de evaluator per sub-câmp. NU se
+      // completează de candidat (`derived`) și NU sunt criterii separate — intră
+      // doar în media `implicare_score`.
+      { key: "implicare_job_score", label: "Notă implicare – job", type: "number", derived: true, validation: { min: 0, max: 1 } },
+      { key: "implicare_proiecte_score", label: "Notă implicare – proiecte", type: "number", derived: true, validation: { min: 0, max: 1 } },
+      { key: "implicare_voluntariat_score", label: "Notă implicare – voluntariat", type: "number", derived: true, validation: { min: 0, max: 1 } },
+      // Criteriul UNIC de ranking pentru implicare = media celor 3 note de evaluator.
+      // `derived` (nu se randează) + `scorable` → o singură linie în clasament, pondere 5.
+      {
+        key: "implicare_score",
+        label: "Implicare",
+        type: "number",
+        scorable: true,
+        derived: true,
+        validation: { min: 0, max: 1 },
+        computed: {
+          // Media pe numitor fix 3: o sub-notă goală contează ca 0. Toate goale → N/A.
+          kind: "average_zero_fill",
+          from: ["implicare_job_score", "implicare_proiecte_score", "implicare_voluntariat_score"],
+        },
+      },
     ],
   },
   {
@@ -498,6 +568,15 @@ export function computeFieldValue(field: FormField, answers: Record<string, unkn
     if (nums.length === 0) return null
     const avg = nums.reduce((a, b) => a + b, 0) / nums.length
     return Math.round(avg * 100) / 100
+  }
+  if (c.kind === "average_zero_fill") {
+    // Numitor FIX (toate câmpurile din `from`): cele goale contează ca 0. Dacă TOATE
+    // lipsesc → null (neevaluat, se tratează ca N/A la scoring), nu 0.
+    const vals = c.from.map((k) => toNumber(answers[k]))
+    if (vals.every((n) => n === null)) return null
+    let sum = 0
+    for (const n of vals) sum += n ?? 0
+    return Math.round((sum / c.from.length) * 100) / 100
   }
   return null
 }

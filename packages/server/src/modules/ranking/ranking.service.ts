@@ -37,6 +37,9 @@ function toVersion(row: Record<string, unknown>): RankingVersion {
 
 // Interval numeric implicit: din validarea câmpului, altfel după semantica cheii.
 function numericRange(field: FormField): { min: number; max: number } {
+  // Restanțe: 0→3p, 1→2p, 2→1p, 3+→0p. Pe interval [0,3] cu direcția „lower",
+  // normalizarea liniară reproduce exact punctele (÷3): 1.0 / 0.667 / 0.333 / 0.
+  if (field.key === "restante") return { min: 0, max: 3 }
   const v = field.validation
   if (typeof v?.min === "number" && typeof v?.max === "number") return { min: v.min, max: v.max }
   if (/medi|average|grade|nota/i.test(field.key)) return { min: 1, max: 10 }
@@ -47,15 +50,15 @@ function numericRange(field: FormField): { min: number; max: number } {
 // Ponderile implicite per câmp (config de start al unei cohorte noi). Orice câmp
 // scorabil care nu apare aici pornește cu pondere 1.
 const DEFAULT_WEIGHTS: Record<string, number> = {
-  [INCOME_KEY]: 4,
-  environment: 2,
-  bac_average: 4,
-  highschool_average: 3,
+  [INCOME_KEY]: 5,
+  bac_average: 3,
   admission_grade: 5,
   faculty_average: 5,
+  restante: 5,
+  implicare_score: 5,
   family_status: 2,
-  institutionalized: 3,
-  disability_certificate: 3,
+  institutionalized: 2,
+  disability_certificate: 1,
   cover_letter_score: 3,
   recommendation_letter_score: 3,
 }
@@ -89,7 +92,8 @@ function buildDefaultConfig(sections: FormSection[]): RankingConfig {
           kind: "numeric",
           weight: weightFor(field.key),
           enabled: true,
-          direction: "higher",
+          // Restanțele: mai puține = mai bine. Restul mediilor: mai mare = mai bine.
+          direction: field.key === "restante" ? "lower" : "higher",
           min,
           max,
         })

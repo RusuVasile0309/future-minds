@@ -17,7 +17,7 @@ import type {
   ApplicantUser,
   AnswerValue,
   FormSection,
-  LetterScores,
+  EvaluatorScores,
 } from "@fm/shared"
 
 export class ApplicationError extends Error {
@@ -49,6 +49,10 @@ function toApplication(row: Record<string, unknown>): Application {
     coverLetterScore: row.cover_letter_score != null ? Number(row.cover_letter_score) : null,
     recommendationLetterScore:
       row.recommendation_letter_score != null ? Number(row.recommendation_letter_score) : null,
+    implicareJobScore: row.implicare_job_score != null ? Number(row.implicare_job_score) : null,
+    implicareProiecteScore: row.implicare_proiecte_score != null ? Number(row.implicare_proiecte_score) : null,
+    implicareVoluntariatScore:
+      row.implicare_voluntariat_score != null ? Number(row.implicare_voluntariat_score) : null,
     submittedAt: row.submitted_at ? new Date(row.submitted_at as string) : null,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -321,6 +325,7 @@ export class ApplicationsService {
     const rows = await sql`
       SELECT
         a.id, a.status, a.answers, a.cover_letter_score, a.recommendation_letter_score,
+        a.implicare_job_score, a.implicare_proiecte_score, a.implicare_voluntariat_score,
         u.email, u.name AS u_name, u.first_name AS u_first, u.last_name AS u_last
       FROM applications a
       JOIN users u ON u.id = a.user_id
@@ -329,10 +334,17 @@ export class ApplicationsService {
     `
     return rows.map((row) => {
       const answers = { ...((row.answers as Record<string, AnswerValue>) ?? {}) }
-      // Injectează notele manuale ale scrisorilor ca răspunsuri „derivate" pentru scoring.
+      // Injectează notele manuale (evaluator) ca răspunsuri „derivate" pentru scoring.
+      // Scrisori (intenție/recomandare) + cele 3 sub-note de implicare, din care
+      // `applyComputedFields` derivă media `implicare_score` (criteriul de ranking).
       if (row.cover_letter_score != null) answers.cover_letter_score = Number(row.cover_letter_score)
       if (row.recommendation_letter_score != null)
         answers.recommendation_letter_score = Number(row.recommendation_letter_score)
+      if (row.implicare_job_score != null) answers.implicare_job_score = Number(row.implicare_job_score)
+      if (row.implicare_proiecte_score != null)
+        answers.implicare_proiecte_score = Number(row.implicare_proiecte_score)
+      if (row.implicare_voluntariat_score != null)
+        answers.implicare_voluntariat_score = Number(row.implicare_voluntariat_score)
       return {
         id: row.id as string,
         fullName: deriveFullName(answers, row),
@@ -360,18 +372,33 @@ export class ApplicationsService {
     return toApplication(row)
   }
 
-  // Notele manuale (1–3) ale scrisorilor — doar SUPER_USER (impus în rută). `null` = neacordată.
-  static async setLetterScores(id: string, scores: LetterScores): Promise<Application> {
-    const validate = (v: number | null, label: string): number | null => {
+  // Notele manuale ale evaluatorului — doar SUPER_USER (impus în rută). `null` = neacordată.
+  // Scrisori: întreg 1–3. Implicare (job/proiecte/voluntariat): 0–1 în pași de 0.25.
+  static async setEvaluatorScores(id: string, scores: EvaluatorScores): Promise<Application> {
+    const validateLetter = (v: number | null, label: string): number | null => {
       if (v === null) return null
       if (!Number.isInteger(v) || v < 1 || v > 3) throw new ApplicationError(`${label} trebuie să fie 1, 2 sau 3`)
       return v
     }
-    const cover = validate(scores.coverLetterScore, "Nota scrisorii de intenție")
-    const reco = validate(scores.recommendationLetterScore, "Nota scrisorii de recomandare")
+    const IMPLICARE_STEPS = [0, 0.25, 0.5, 0.75, 1]
+    const validateImplicare = (v: number | null, label: string): number | null => {
+      if (v === null) return null
+      if (!IMPLICARE_STEPS.includes(v)) throw new ApplicationError(`${label} trebuie să fie între 0 și 1 (pas 0.25)`)
+      return v
+    }
+    const cover = validateLetter(scores.coverLetterScore, "Nota scrisorii de intenție")
+    const reco = validateLetter(scores.recommendationLetterScore, "Nota scrisorii de recomandare")
+    const job = validateImplicare(scores.implicareJobScore, "Nota de implicare (job)")
+    const proiecte = validateImplicare(scores.implicareProiecteScore, "Nota de implicare (proiecte)")
+    const voluntariat = validateImplicare(scores.implicareVoluntariatScore, "Nota de implicare (voluntariat)")
     const [row] = await sql`
       UPDATE applications
-      SET cover_letter_score = ${cover}, recommendation_letter_score = ${reco}, updated_at = NOW()
+      SET cover_letter_score = ${cover},
+          recommendation_letter_score = ${reco},
+          implicare_job_score = ${job},
+          implicare_proiecte_score = ${proiecte},
+          implicare_voluntariat_score = ${voluntariat},
+          updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
     `

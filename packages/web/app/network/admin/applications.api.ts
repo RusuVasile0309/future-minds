@@ -1,5 +1,5 @@
 import { apiRequest } from "../utils/request"
-import type { ApplicationSummary, ApplicationDetail, ApplicationStatus, LetterScores } from "@fm/shared"
+import type { ApplicationSummary, ApplicationDetail, ApplicationStatus, EvaluatorScores } from "@fm/shared"
 
 export const adminApplicationsApi = {
   list: () => apiRequest<ApplicationSummary[]>("/api/admin/applications"),
@@ -12,7 +12,7 @@ export const adminApplicationsApi = {
       body: JSON.stringify({ status }),
     }),
 
-  setLetterScores: (id: string, scores: LetterScores) =>
+  setEvaluatorScores: (id: string, scores: EvaluatorScores) =>
     apiRequest<ApplicationDetail>(`/api/admin/applications/${id}/scores`, {
       method: "PATCH",
       body: JSON.stringify(scores),

@@ -36,6 +36,18 @@ function num(v: AnswerValue | undefined): number {
   return 0
 }
 
+// Ca `num`, dar întoarce `null` când valoarea LIPSEȘTE (undefined / null / gol /
+// nenumeric) — necesară la regula „N/A": un câmp numeric fără valoare NU se
+// punctează cu 0, ci se exclude din calcul (vezi `scoreCriterion` / `scoreApplication`).
+function toNum(v: AnswerValue | undefined): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v.replace(",", "."))
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
 function bool(v: AnswerValue | undefined): boolean {
   return v === true || v === "true"
 }
@@ -71,11 +83,13 @@ export function withDerivedAnswers(
 }
 
 // Normalizează un criteriu la [0,1] și întoarce și valoarea brută pentru afișare.
+// `normalized === null` înseamnă N/A (criteriul nu se aplică acestui candidat și
+// se exclude din calcul — vezi `scoreApplication`).
 function scoreCriterion(
   criterion: RankingCriterion,
   answers: Record<string, AnswerValue>,
   incomePerMember: number | null
-): { raw: CriterionScore["raw"]; normalized: number } {
+): { raw: CriterionScore["raw"]; normalized: number | null } {
   switch (criterion.kind) {
     case "income": {
       const raw = incomePerMember
@@ -89,7 +103,10 @@ function scoreCriterion(
       return { raw, normalized }
     }
     case "numeric": {
-      const raw = num(answers[criterion.fieldKey])
+      const raw = toNum(answers[criterion.fieldKey])
+      // Valoare lipsă = criteriu neaplicabil (N/A). Nu se punctează cu 0.
+      // Ex.: boboc fără medii de facultate / fără restanțe; notă de evaluator neacordată.
+      if (raw === null) return { raw: null, normalized: null }
       const min = criterion.min ?? 0
       const max = criterion.max ?? Math.max(min + 1, 10)
       const span = max - min || 1
@@ -134,6 +151,20 @@ export function scoreApplication(
 
   for (const c of active) {
     const { raw, normalized } = scoreCriterion(c, answers, incomePerMember)
+    // N/A: criteriul se exclude complet — nu intră nici în total, nici în suma de
+    // ponderi (altfel candidatul ar fi penalizat cu 0 pentru ceva ce nu poate avea).
+    if (normalized === null) {
+      breakdown.push({
+        criterionId: c.id,
+        label: c.label,
+        raw: null,
+        normalized: 0,
+        weight: c.weight,
+        contribution: 0,
+        na: true,
+      })
+      continue
+    }
     const contribution = normalized * c.weight
     total += contribution
     weightSum += c.weight

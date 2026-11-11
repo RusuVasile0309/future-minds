@@ -94,6 +94,13 @@ export interface CriterionScore {
   weight: number
   /** Contribuția ponderată la total (weight × normalized). */
   contribution: number
+  /**
+   * Criteriu neaplicabil pentru acest candidat (ex.: un boboc fără semestre
+   * încheiate nu are medii de facultate / restanțe). Când e `true`, criteriul
+   * NU se punctează cu 0, ci se EXCLUDE complet din calcul — iese și din suma
+   * de ponderi pe care se împarte procentul.
+   */
+  na?: boolean
 }
 
 export interface ScoredApplication {

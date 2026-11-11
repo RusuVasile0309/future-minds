@@ -7,14 +7,21 @@ import { ArrowLeft, Check, Download, Loader2, Mail, Phone, Trash2 } from "lucide
 import {
   useCandidate,
   useUpdateCandidateStatus,
-  useSetLetterScores,
+  useSetEvaluatorScores,
   useDeleteApplication,
   adminApplicationsApi,
 } from "@/app/network/admin"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { cn } from "@/lib/utils"
 import { isFieldVisible } from "@fm/shared"
-import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField } from "@fm/shared"
+import type {
+  AnswerValue,
+  ApplicationDetail,
+  ApplicationFile,
+  ApplicationStatus,
+  EvaluatorScores,
+  FormField,
+} from "@fm/shared"
 
 const STATUS_ACTIONS: { value: ApplicationStatus; label: string }[] = [
   { value: "submitted", label: "Trimisă" },
@@ -150,127 +157,235 @@ export function CandidateDetail({
         ) : null}
       </div>
 
-      {/* Răspunsuri pe secțiuni */}
-      <div className="mt-6 space-y-6">
-        {data.sections.map((section) => (
-          <div key={section.id} className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="font-serif text-lg font-medium">{section.title}</h2>
-            <dl className="mt-4 divide-y divide-border/60">
-              {section.fields
-                .filter((field) => !field.derived && isFieldVisible(field, data.answers))
-                .map((field) => (
-                  <div key={field.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
-                    <dt className="text-sm text-muted-foreground">{field.label}</dt>
-                    <dd className="text-sm text-foreground sm:col-span-2">
-                      {field.type === "file" ? (
-                        <FileList applicationId={data.id} files={filesByField(field.key)} />
-                      ) : (
-                        formatAnswer(field, data.answers[field.key])
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              {section.id === "letters" && canScore ? (
-                <LetterScoring
-                  id={data.id}
-                  coverLetterScore={data.coverLetterScore}
-                  recommendationLetterScore={data.recommendationLetterScore}
-                />
-              ) : null}
-            </dl>
-          </div>
+      {/* Răspunsuri pe secțiuni (+ notarea evaluatorului pe scrisori și implicare) */}
+      <ScoredSections detail={data} canScore={canScore} />
+    </div>
+  )
+}
+
+// Notele manuale ale evaluatorului (scrisori + implicare) trăiesc într-o singură
+// stare partajată aici, ca fiecare panou să salveze TOATE valorile deodată — altfel
+// salvarea unui panou ar șterge notele celuilalt (ruta face UPDATE pe toate coloanele).
+function pickScores(d: ApplicationDetail): EvaluatorScores {
+  return {
+    coverLetterScore: d.coverLetterScore,
+    recommendationLetterScore: d.recommendationLetterScore,
+    implicareJobScore: d.implicareJobScore,
+    implicareProiecteScore: d.implicareProiecteScore,
+    implicareVoluntariatScore: d.implicareVoluntariatScore,
+  }
+}
+
+function scoresEqual(a: EvaluatorScores, b: EvaluatorScores): boolean {
+  return (Object.keys(a) as (keyof EvaluatorScores)[]).every((k) => a[k] === b[k])
+}
+
+function ScoredSections({ detail, canScore }: { detail: ApplicationDetail; canScore: boolean }) {
+  const save = useSetEvaluatorScores(detail.id)
+  const server = pickScores(detail)
+  const [scores, setScores] = useState<EvaluatorScores>(server)
+  const [saved, setSaved] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  const dirty = !scoresEqual(scores, server)
+  const filesByField = (key: string) => detail.files.filter((f) => f.fieldKey === key)
+
+  const set = (patch: Partial<EvaluatorScores>) => {
+    setScores((s) => ({ ...s, ...patch }))
+    setSaved(false)
+  }
+
+  async function onSave() {
+    setErr(null)
+    setSaved(false)
+    const res = await save.mutateAsync(scores)
+    if (res.success) setSaved(true)
+    else setErr(res.error)
+  }
+
+  const saveBar = (
+    <ScoreSaveBar pending={save.isPending} dirty={dirty} saved={saved} err={err} onSave={onSave} />
+  )
+
+  return (
+    <div className="mt-6 space-y-6">
+      {detail.sections.map((section) => (
+        <div key={section.id} className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-serif text-lg font-medium">{section.title}</h2>
+          <dl className="mt-4 divide-y divide-border/60">
+            {section.fields
+              .filter((field) => !field.derived && isFieldVisible(field, detail.answers))
+              .map((field) => (
+                <div key={field.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3">
+                  <dt className="text-sm text-muted-foreground">{field.label}</dt>
+                  <dd className="text-sm text-foreground sm:col-span-2">
+                    {field.type === "file" ? (
+                      <FileList applicationId={detail.id} files={filesByField(field.key)} />
+                    ) : (
+                      formatAnswer(field, detail.answers[field.key])
+                    )}
+                  </dd>
+                </div>
+              ))}
+            {section.id === "letters" && canScore ? (
+              <LetterScoring scores={scores} set={set}>
+                {saveBar}
+              </LetterScoring>
+            ) : null}
+            {section.id === "implicare" && canScore ? (
+              <ImplicareScoring scores={scores} set={set}>
+                {saveBar}
+              </ImplicareScoring>
+            ) : null}
+          </dl>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Notele scrisorilor sunt întregi 1–3.
+const LETTER_ROWS: { key: keyof EvaluatorScores; label: string }[] = [
+  { key: "coverLetterScore", label: "Notă scrisoare de intenție" },
+  { key: "recommendationLetterScore", label: "Notă scrisoare de recomandare" },
+]
+const LETTER_STEPS = [1, 2, 3]
+
+// Notele de implicare sunt 0–1 în pași de 0.25; media lor = criteriul „Implicare".
+const IMPLICARE_ROWS: { key: keyof EvaluatorScores; label: string }[] = [
+  { key: "implicareJobScore", label: "Job" },
+  { key: "implicareProiecteScore", label: "Proiecte" },
+  { key: "implicareVoluntariatScore", label: "Voluntariat" },
+]
+const IMPLICARE_STEPS = [0, 0.25, 0.5, 0.75, 1]
+
+// Un rând de butoane de notare, cu toggle (re-apasă = deselectează → `null`).
+function ScoreRow({
+  label,
+  value,
+  steps,
+  onPick,
+}: {
+  label: string
+  value: number | null
+  steps: number[]
+  onPick: (v: number | null) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <span className="text-sm text-foreground">{label}</span>
+      <div className="flex items-center gap-1.5">
+        {steps.map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onPick(value === n ? null : n)}
+            className={cn(
+              "h-8 min-w-8 rounded-lg border px-2 text-sm font-medium transition-colors",
+              value === n
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-input bg-background text-foreground hover:bg-secondary"
+            )}
+          >
+            {n}
+          </button>
         ))}
       </div>
     </div>
   )
 }
 
-const LETTER_SCORES = [
-  { key: "coverLetterScore", label: "Notă scrisoare de intenție" },
-  { key: "recommendationLetterScore", label: "Notă scrisoare de recomandare" },
-] as const
-
-// Panou de notare (1–3) al scrisorilor — vizibil doar pentru SUPER_USER. Notele
-// contează la ranking (câmpuri `scorable` derivate din schemă).
+// Panou de notare (1–3) al scrisorilor — vizibil doar pentru SUPER_USER.
 function LetterScoring({
-  id,
-  coverLetterScore,
-  recommendationLetterScore,
+  scores,
+  set,
+  children,
 }: {
-  id: string
-  coverLetterScore: number | null
-  recommendationLetterScore: number | null
+  scores: EvaluatorScores
+  set: (patch: Partial<EvaluatorScores>) => void
+  children: React.ReactNode
 }) {
-  const save = useSetLetterScores(id)
-  const [cover, setCover] = useState<number | null>(coverLetterScore)
-  const [reco, setReco] = useState<number | null>(recommendationLetterScore)
-  const [saved, setSaved] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-
-  const values: Record<string, [number | null, (v: number | null) => void]> = {
-    coverLetterScore: [cover, setCover],
-    recommendationLetterScore: [reco, setReco],
-  }
-  const dirty = cover !== coverLetterScore || reco !== recommendationLetterScore
-
-  async function onSave() {
-    setErr(null)
-    setSaved(false)
-    const res = await save.mutateAsync({ coverLetterScore: cover, recommendationLetterScore: reco })
-    if (res.success) setSaved(true)
-    else setErr(res.error)
-  }
-
   return (
     <div className="mt-5 rounded-xl border border-brand-light/60 bg-secondary/40 p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evaluarea ta (1-3)</p>
       <div className="mt-3 space-y-3">
-        {LETTER_SCORES.map(({ key, label }) => {
-          const [value, setValue] = values[key]
-          return (
-            <div key={key} className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-sm text-foreground">{label}</span>
-              <div className="flex items-center gap-1.5">
-                {[1, 2, 3].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => {
-                      setValue(value === n ? null : n)
-                      setSaved(false)
-                    }}
-                    className={cn(
-                      "size-8 rounded-lg border text-sm font-medium transition-colors",
-                      value === n
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input bg-background text-foreground hover:bg-secondary"
-                    )}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )
-        })}
+        {LETTER_ROWS.map(({ key, label }) => (
+          <ScoreRow
+            key={key}
+            label={label}
+            value={scores[key]}
+            steps={LETTER_STEPS}
+            onPick={(v) => set({ [key]: v })}
+          />
+        ))}
       </div>
-      <div className="mt-4 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={save.isPending || !dirty}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand-deep px-3 py-1.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary dark:text-brand-deep"
-        >
-          {save.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-          Salvează notele
-        </button>
-        {saved && !dirty ? (
-          <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
-            <Check className="size-4" /> Salvat
-          </span>
-        ) : null}
-        {err ? <span className="text-sm text-destructive">{err}</span> : null}
+      {children}
+    </div>
+  )
+}
+
+// Panou de notare (0–1, pas 0.25) al implicării — media celor 3 = criteriul de ranking.
+function ImplicareScoring({
+  scores,
+  set,
+  children,
+}: {
+  scores: EvaluatorScores
+  set: (patch: Partial<EvaluatorScores>) => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="mt-5 rounded-xl border border-brand-light/60 bg-secondary/40 p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Evaluarea ta (0-1, pas 0.25) — media celor 3 note contează la ranking
+      </p>
+      <div className="mt-3 space-y-3">
+        {IMPLICARE_ROWS.map(({ key, label }) => (
+          <ScoreRow
+            key={key}
+            label={label}
+            value={scores[key]}
+            steps={IMPLICARE_STEPS}
+            onPick={(v) => set({ [key]: v })}
+          />
+        ))}
       </div>
+      {children}
+    </div>
+  )
+}
+
+// Bara comună de salvare — toate notele (scrisori + implicare) se persistă deodată.
+function ScoreSaveBar({
+  pending,
+  dirty,
+  saved,
+  err,
+  onSave,
+}: {
+  pending: boolean
+  dirty: boolean
+  saved: boolean
+  err: string | null
+  onSave: () => void
+}) {
+  return (
+    <div className="mt-4 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={pending || !dirty}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-brand-deep px-3 py-1.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-primary dark:text-brand-deep"
+      >
+        {pending ? <Loader2 className="size-4 animate-spin" /> : null}
+        Salvează notele
+      </button>
+      {saved && !dirty ? (
+        <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
+          <Check className="size-4" /> Salvat
+        </span>
+      ) : null}
+      {err ? <span className="text-sm text-destructive">{err}</span> : null}
     </div>
   )
 }

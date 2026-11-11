@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { adminApplicationsApi } from "./applications.api"
-import type { ApplicationStatus, LetterScores } from "@fm/shared"
+import type { ApplicationStatus, EvaluatorScores } from "@fm/shared"
 
 const LIST_KEY = ["admin", "applications"]
 const detailKey = (id: string) => ["admin", "application", id]
@@ -53,10 +53,10 @@ export function useDeleteApplication() {
   })
 }
 
-export function useSetLetterScores(id: string) {
+export function useSetEvaluatorScores(id: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (scores: LetterScores) => adminApplicationsApi.setLetterScores(id, scores),
+    mutationFn: (scores: EvaluatorScores) => adminApplicationsApi.setEvaluatorScores(id, scores),
     onSuccess: (res) => {
       if (!res.success) return
       qc.invalidateQueries({ queryKey: detailKey(id) })

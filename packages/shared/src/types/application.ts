@@ -30,16 +30,27 @@ export interface Application {
   coverLetterScore: number | null
   /** Notă manuală (1–3) a scrisorii de recomandare, acordată de SUPER_USER. */
   recommendationLetterScore: number | null
+  /** Note manuale (0–1, pas 0.25) pentru implicare, acordate de SUPER_USER. */
+  implicareJobScore: number | null
+  implicareProiecteScore: number | null
+  implicareVoluntariatScore: number | null
   submittedAt: Date | null
   createdAt: Date
   updatedAt: Date
   files?: ApplicationFile[]
 }
 
-/** Notele manuale (1–3) pentru cele două scrisori. `null` = neacordată. */
-export interface LetterScores {
+/**
+ * Notele manuale acordate de SUPER_USER la evaluare (`null` = neacordată):
+ *  - scrisori: întreg 1–3;
+ *  - implicare (job / proiecte / voluntariat): 0–1 în pași de 0.25.
+ */
+export interface EvaluatorScores {
   coverLetterScore: number | null
   recommendationLetterScore: number | null
+  implicareJobScore: number | null
+  implicareProiecteScore: number | null
+  implicareVoluntariatScore: number | null
 }
 
 // ── Vedere admin ──────────────────────────────────────────────────────────────

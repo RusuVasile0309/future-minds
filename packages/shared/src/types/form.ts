@@ -55,8 +55,11 @@ export interface VisibleWhen {
 
 // Câmp calculat automat din alte câmpuri (read-only în formular).
 export interface ComputedField {
-  // `average` = media aritmetică a câmpurilor numerice din `from` (ignoră cele goale).
-  kind: "average"
+  // `average` = media aritmetică a câmpurilor din `from` care AU valoare (ignoră cele goale);
+  //   ex.: media facultate pe semestrele încheiate.
+  // `average_zero_fill` = media pe numitor FIX `from.length`, tratând câmpurile goale ca 0;
+  //   întoarce null doar dacă TOATE lipsesc (ex.: implicare neevaluată încă → N/A).
+  kind: "average" | "average_zero_fill"
   from: string[]
 }
 

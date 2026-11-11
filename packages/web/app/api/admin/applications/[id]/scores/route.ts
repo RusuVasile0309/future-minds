@@ -4,11 +4,18 @@ import { ApplicationsService, ApplicationError } from "@fm/server"
 import { requireRole, CAN_MUTATE } from "@/lib/api-auth"
 import type { ApiResponse } from "@fm/shared"
 
-// Notele scrisorilor = evaluare subiectivă rezervată SUPER_USER-ului.
-const score = z.number().int().min(1).max(3).nullable()
+// Notele de evaluare = subiective, rezervate SUPER_USER-ului.
+// Scrisori: întreg 1–3. Implicare: 0–1 în pași de 0.25.
+const letterScore = z.number().int().min(1).max(3).nullable()
+const implicareScore = z
+  .union([z.literal(0), z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1)])
+  .nullable()
 const scoresSchema = z.object({
-  coverLetterScore: score,
-  recommendationLetterScore: score,
+  coverLetterScore: letterScore,
+  recommendationLetterScore: letterScore,
+  implicareJobScore: implicareScore,
+  implicareProiecteScore: implicareScore,
+  implicareVoluntariatScore: implicareScore,
 })
 
 export async function PATCH(
@@ -24,7 +31,7 @@ export async function PATCH(
   }
 
   try {
-    const app = await ApplicationsService.setLetterScores(params.id, parsed.data)
+    const app = await ApplicationsService.setEvaluatorScores(params.id, parsed.data)
     return NextResponse.json({ success: true, data: app })
   } catch (e) {
     const code = e instanceof ApplicationError ? e.code : 500
