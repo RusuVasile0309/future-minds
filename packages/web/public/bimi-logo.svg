@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.2" baseProfile="tiny-ps" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>FutureMinds</title>
+  <rect x="0" y="0" width="512" height="512" fill="#1E2F40"/>
+  <g transform="translate(124.90,190.45) scale(2.52117)">
+    <path fill="#FFFFFF" d="M0 84V0.79L22.45 9.48L50 50L77.55 9.48L100 0.79V84H85V28L57 70H43L15 28V84ZM-12 -6 50 -30 112 -6 104.77 -3.2 107.17 -2.99Q109 -2.83 109 -1V35.67L110 34H112L108 45H115L104 62L108 49H101L107.64 37.94Q107.35 38 107 38Q105 38 105 36V0.83L96.32 0.07L50 18Z"/>
+  </g>
+</svg>
