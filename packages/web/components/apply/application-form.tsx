@@ -6,11 +6,12 @@ import { useMyApplication } from "@/app/network/applications"
 import { useSaveApplication, useSubmitApplication } from "@/app/network/applications"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { FieldInput } from "@/components/apply/field-input"
+import { FieldInput, fieldFloats } from "@/components/apply/field-input"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { clearDependentAnswers } from "@/lib/content/form-options"
 import {
   applyComputedFields,
+  applyCnpBirthDate,
   applyParentRules,
   computeIncomePerMember,
   getFormSchema,
@@ -49,6 +50,7 @@ export function ApplicationForm() {
       if (account?.email && !init.email) init.email = account.email
       if (account?.phone && !init.phone) init.phone = account.phone
       applyComputedFields(init) // ex.: media Bac, dacă notele există deja în draft
+      applyCnpBirthDate(init) // data nașterii derivată din CNP (read-only)
       applyParentRules(init) // ex.: părinte decedat → nu susține financiar
       setAnswers(init)
       // Persistă pre-completarea dacă a adăugat ceva (email/telefon din cont).
@@ -95,6 +97,8 @@ export function ApplicationForm() {
       clearDependentAnswers(next, key)
       // Recalculează câmpurile derivate (ex.: media Bac din cele 3 note).
       applyComputedFields(next)
+      // Data nașterii se re-derivă din CNP (câmp read-only).
+      applyCnpBirthDate(next)
       // Reguli părinți: decedat → nu susține financiar (câmp dezactivat).
       applyParentRules(next)
       return next
@@ -155,7 +159,7 @@ export function ApplicationForm() {
           <h2 className="font-serif text-2xl font-medium">{section.title}</h2>
           {section.description ? <p className="mt-1 text-muted-foreground">{section.description}</p> : null}
 
-          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12">
+          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
             {section.fields
               .filter((field) => !field.derived && isFieldVisible(field, answers))
               .map((field) => {
@@ -396,6 +400,8 @@ function IncomeSummary({ answers }: { answers: Record<string, AnswerValue> }) {
 function isFieldDisabled(field: FormField, answers: Record<string, AnswerValue>): boolean {
   if (field.key === "mother_supports") return answers.mother_deceased === true
   if (field.key === "father_supports") return answers.father_deceased === true
+  // Data nașterii e mereu read-only: se completează automat din CNP.
+  if (field.key === "birth_date") return true
   return false
 }
 
@@ -441,17 +447,30 @@ function FieldRow({
   children: React.ReactNode
 }) {
   const spanClass = COL_SPAN[field.colSpan ?? 12] ?? "sm:col-span-12"
+
+  // Câmpuri cu etichetă flotantă (text/număr/select/dată): numele e în input,
+  // deci nu mai punem etichetă deasupra. Textul de ajutor coboară sub input.
+  if (fieldFloats(field)) {
+    return (
+      <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
+        {children}
+        {field.helpText ? <p className="mt-1.5 text-xs text-muted-foreground">{field.helpText}</p> : null}
+        {error ? <p className="mt-1.5 text-xs text-destructive motion-safe:animate-slide-down">{error}</p> : null}
+      </div>
+    )
+  }
+
   return (
     <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
       <Label htmlFor={field.key}>
         {field.label}
         {field.required ? <span className="ml-1 text-primary">*</span> : null}
       </Label>
-      {field.helpText && field.type !== "textarea" ? (
+      {field.helpText ? (
         <p className="mb-2 mt-0.5 text-xs text-muted-foreground">{field.helpText}</p>
       ) : (
         // Rezervă aceeași înălțime ca linia de ajutor, ca inputurile vecine pe
-        // același rând (ex.: Data nașterii lângă CNP) să rămână aliniate.
+        // același rând să rămână aliniate.
         <p className="mb-2 mt-0.5 text-xs text-muted-foreground" aria-hidden="true">
           &nbsp;
         </p>

@@ -7,7 +7,72 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { useUploadFile, useDeleteFile } from "@/app/network/applications"
 import { resolveFieldOptions } from "@/lib/content/form-options"
+import { cn } from "@/lib/utils"
 import type { AnswerValue, ApplicationFile, FormField } from "@fm/shared"
+
+// Tipurile de câmp care folosesc „floating label" (eticheta stă în input când e
+// gol, apoi urcă pe border-top-left când e completat/focalizat). Celelalte —
+// boolean (Da/Nu), fișiere, multiselect — își păstrează eticheta clasică deasupra.
+const FLOATING_TYPES = new Set<FormField["type"]>([
+  "text",
+  "textarea",
+  "number",
+  "select",
+  "date",
+  "email",
+  "phone",
+])
+
+export function fieldFloats(field: FormField): boolean {
+  return FLOATING_TYPES.has(field.type)
+}
+
+// O valoare „are conținut" (deci eticheta trebuie să urce). `0` numeric contează
+// ca valoare completată (ex.: Nr. restanțe = 0).
+function hasValue(v: AnswerValue): boolean {
+  return v !== null && v !== undefined && v !== ""
+}
+
+// Ambalaj cu etichetă flotantă. `floated` o ține sus permanent (câmp completat
+// sau cu sub-etichete proprii, ex. data). Focalizarea o ridică mereu, via
+// `group-focus-within` pe wrapper.
+function FloatingField({
+  htmlFor,
+  label,
+  required,
+  floated,
+  multiline,
+  children,
+}: {
+  htmlFor?: string
+  label: string
+  required?: boolean
+  floated: boolean
+  multiline?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div className="group relative">
+      {children}
+      <label
+        htmlFor={htmlFor}
+        className={cn(
+          "pointer-events-none absolute left-3 z-10 origin-left leading-none text-muted-foreground transition-all duration-150",
+          // Ridicată: stă DEASUPRA borderului (fără fundal care să-l acopere).
+          floated
+            ? "top-0 -translate-y-[calc(100%+3px)] text-xs"
+            : multiline
+              ? "top-3 text-sm"
+              : "top-1/2 -translate-y-1/2 text-sm",
+          "group-focus-within:top-0 group-focus-within:-translate-y-[calc(100%+3px)] group-focus-within:text-xs group-focus-within:text-primary",
+        )}
+      >
+        {label}
+        {required ? <span className="ml-0.5 text-primary">*</span> : null}
+      </label>
+    </div>
+  )
+}
 
 // Curăță valoarea tastată după tipul câmpului:
 // - telefon → fără litere (doar cifre și simbolurile uzuale +, spațiu, (), -, .)
@@ -45,61 +110,84 @@ export function FieldInput({
   // Câmp calculat automat (ex.: media Bac) — read-only, valoarea vine din `answers`.
   if (field.computed) {
     return (
-      <Input
-        type="number"
-        value={(value as number | string) ?? ""}
-        readOnly
-        disabled
-        placeholder="Se calculează automat"
-        className="bg-secondary/40"
-      />
+      <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)}>
+        <Input
+          id={field.key}
+          type="number"
+          value={(value as number | string) ?? ""}
+          readOnly
+          disabled
+          className="bg-secondary/40"
+        />
+      </FloatingField>
     )
   }
 
   switch (field.type) {
     case "textarea":
       return (
-        <Textarea
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled}
-          minLength={field.validation?.minLength}
-          maxLength={field.validation?.maxLength}
-          placeholder={field.helpText ?? ""}
-        />
+        <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)} multiline>
+          <Textarea
+            id={field.key}
+            value={(value as string) ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            minLength={field.validation?.minLength}
+            maxLength={field.validation?.maxLength}
+          />
+        </FloatingField>
       )
 
     case "number":
       return (
-        <Input
-          type="number"
-          value={(value as number | string) ?? ""}
-          onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
-          disabled={disabled}
-          min={field.validation?.min}
-          max={field.validation?.max}
-          step={field.validation?.integer ? "1" : "any"}
-        />
+        <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)}>
+          <Input
+            id={field.key}
+            type="number"
+            value={(value as number | string) ?? ""}
+            onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+            disabled={disabled}
+            min={field.validation?.min}
+            max={field.validation?.max}
+            step={field.validation?.integer ? "1" : "any"}
+          />
+        </FloatingField>
       )
 
     case "date":
-      return <DateSelect value={(value as string) ?? null} onChange={onChange} disabled={disabled} />
+      // Data are sub-etichete proprii (Zi/Lună/An), deci eticheta stă permanent sus.
+      return (
+        <FloatingField label={field.label} required={field.required} floated>
+          <DateSelect value={(value as string) ?? null} onChange={onChange} disabled={disabled} />
+        </FloatingField>
+      )
 
 
     case "email":
       return (
-        <Input type="email" value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} disabled={disabled} />
+        <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)}>
+          <Input
+            id={field.key}
+            type="email"
+            value={(value as string) ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+          />
+        </FloatingField>
       )
 
     case "phone":
       return (
-        <Input
-          type="tel"
-          inputMode="tel"
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
-          disabled={disabled}
-        />
+        <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)}>
+          <Input
+            id={field.key}
+            type="tel"
+            inputMode="tel"
+            value={(value as string) ?? ""}
+            onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
+            disabled={disabled}
+          />
+        </FloatingField>
       )
 
     case "boolean":
@@ -129,15 +217,24 @@ export function FieldInput({
     case "select": {
       // Câmp în cascadă fără opțiuni încă (părinte necompletat).
       const waitingForParent = !!field.optionsSource && options.length === 0
+      const sel = (value as string) ?? null
       return (
-        <CustomSelect
-          ariaLabel={field.label}
-          placeholder={waitingForParent ? "Alege mai întâi câmpul anterior…" : "Alege…"}
-          disabled={disabled || waitingForParent}
-          value={(value as string) ?? null}
-          options={options}
-          onChange={(v) => onChange(v)}
-        />
+        <FloatingField
+          label={field.label}
+          required={field.required}
+          // Gol și fără selecție → eticheta stă în câmp (ca placeholder); când
+          // așteaptă părintele arătăm hint-ul în buton, deci ridicăm eticheta.
+          floated={hasValue(sel) || waitingForParent}
+        >
+          <CustomSelect
+            ariaLabel={field.label}
+            placeholder={waitingForParent ? "Alege mai întâi câmpul anterior…" : ""}
+            disabled={disabled || waitingForParent}
+            value={sel}
+            options={options}
+            onChange={(v) => onChange(v)}
+          />
+        </FloatingField>
       )
     }
 
@@ -169,16 +266,19 @@ export function FieldInput({
 
     default:
       return (
-        <Input
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
-          disabled={disabled}
-          inputMode={field.validation?.inputFilter === "digits" ? "numeric" : undefined}
-          minLength={field.validation?.minLength}
-          maxLength={field.validation?.maxLength}
-          pattern={field.validation?.regex}
-          title={field.helpText ?? undefined}
-        />
+        <FloatingField htmlFor={field.key} label={field.label} required={field.required} floated={hasValue(value)}>
+          <Input
+            id={field.key}
+            value={(value as string) ?? ""}
+            onChange={(e) => onChange(sanitizeInput(field, e.target.value))}
+            disabled={disabled}
+            inputMode={field.validation?.inputFilter === "digits" ? "numeric" : undefined}
+            minLength={field.validation?.minLength}
+            maxLength={field.validation?.maxLength}
+            pattern={field.validation?.regex}
+            title={field.helpText ?? undefined}
+          />
+        </FloatingField>
       )
   }
 }
@@ -325,9 +425,18 @@ function DateSelect({
 
   const toNum = (v: string | null) => (v ? Number(v) : null)
 
+  // Cutie unică (un singur border) cu trei dropdown-uri „bare", ca eticheta
+  // flotantă să aibă un singur border-top pe care să se așeze.
   return (
-    <div className="grid grid-cols-[1fr_1.4fr_1fr] gap-2">
+    <div
+      className={cn(
+        "grid h-10 grid-cols-[1fr_1.4fr_1fr] items-center gap-1 rounded-lg border border-input bg-background px-1 transition-colors",
+        "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 focus-within:ring-offset-background",
+        disabled && "cursor-not-allowed opacity-60"
+      )}
+    >
       <CustomSelect
+        bare
         ariaLabel="Ziua"
         placeholder="Zi"
         disabled={disabled}
@@ -336,6 +445,7 @@ function DateSelect({
         onChange={(v) => update({ ...parts, d: toNum(v) })}
       />
       <CustomSelect
+        bare
         ariaLabel="Luna"
         placeholder="Lună"
         disabled={disabled}
@@ -344,6 +454,7 @@ function DateSelect({
         onChange={(v) => update({ ...parts, m: toNum(v) })}
       />
       <CustomSelect
+        bare
         ariaLabel="Anul"
         placeholder="An"
         disabled={disabled}
@@ -364,6 +475,7 @@ function CustomSelect({
   placeholder,
   disabled,
   ariaLabel,
+  bare,
 }: {
   value: string | null
   onChange: (v: string | null) => void
@@ -371,6 +483,9 @@ function CustomSelect({
   placeholder: string
   disabled?: boolean
   ariaLabel?: string
+  // `bare` = fără border/înălțime proprie; folosit ca sub-dropdown într-o cutie
+  // (ex.: selectorul de dată). Borderul vine de la containerul părinte.
+  bare?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -402,7 +517,7 @@ function CustomSelect({
   const selected = options.find((o) => o.value === value)
 
   return (
-    <div className="relative" ref={ref}>
+    <div className={cn("relative", bare && "min-w-0")} ref={ref}>
       <button
         type="button"
         aria-label={ariaLabel}
@@ -411,7 +526,12 @@ function CustomSelect({
         title={selected ? selected.label : undefined}
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-10 w-full items-center justify-between gap-1 rounded-lg border border-input bg-background px-3 text-sm transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+        className={cn(
+          "flex w-full items-center justify-between text-sm transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+          bare
+            ? "h-8 gap-0.5 rounded-md bg-transparent px-1.5 hover:bg-secondary/60 focus-visible:ring-1 focus-visible:ring-ring"
+            : "h-10 gap-1 rounded-lg border border-input bg-background px-3 hover:bg-secondary/50 focus-visible:ring-2 focus-visible:ring-ring"
+        )}
       >
         <span className={`min-w-0 flex-1 truncate text-left ${selected ? "text-foreground" : "text-muted-foreground"}`}>
           {selected ? selected.label : placeholder}
