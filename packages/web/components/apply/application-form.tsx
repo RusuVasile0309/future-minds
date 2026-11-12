@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, ExternalLink, Loader2, Pencil, Send } from "lucide-react"
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, ClipboardCheck, ExternalLink, Loader2, Pencil, Send } from "lucide-react"
 import { useMyApplication } from "@/app/network/applications"
 import { useSaveApplication, useSubmitApplication, applicationsApi } from "@/app/network/applications"
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,33 @@ const sections = getFormSchema()
 const REVIEW_STEP = sections.length
 const TOTAL_STEPS = sections.length + 1
 
+// Reținem pasul curent (și dacă a ajuns la verificare) în localStorage, per aplicație,
+// ca utilizatorul să fie readus de unde a rămas la revenirea pe /aplica. E o
+// comoditate per-browser; răspunsurile reale se salvează pe server.
+const PROGRESS_PREFIX = "fm-apply-progress-"
+
+function loadProgress(appId: string): { step: number; reachedReview: boolean } | null {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = window.localStorage.getItem(PROGRESS_PREFIX + appId)
+    if (!raw) return null
+    const p = JSON.parse(raw) as { step?: unknown; reachedReview?: unknown }
+    if (typeof p.step === "number") return { step: p.step, reachedReview: !!p.reachedReview }
+  } catch {
+    /* localStorage indisponibil / JSON corupt → pornim de la zero */
+  }
+  return null
+}
+
+function saveProgress(appId: string, step: number, reachedReview: boolean) {
+  if (typeof window === "undefined") return
+  try {
+    window.localStorage.setItem(PROGRESS_PREFIX + appId, JSON.stringify({ step, reachedReview }))
+  } catch {
+    /* localStorage plin / blocat → ignorăm (convenție, nu date critice) */
+  }
+}
+
 export function ApplicationForm() {
   const appQ = useMyApplication()
   const save = useSaveApplication()
@@ -38,6 +65,8 @@ export function ApplicationForm() {
   const [direction, setDirection] = useState<1 | -1>(1)
   // Afișează erorile de obligativitate pe pasul curent (după o încercare de avansare).
   const [showErrors, setShowErrors] = useState(false)
+  // A ajuns utilizatorul măcar o dată la pasul de verificare? (activează scurtătura „înapoi la verificare").
+  const [reachedReview, setReachedReview] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const initialized = useRef(false)
@@ -49,6 +78,9 @@ export function ApplicationForm() {
   const headingRef = useRef<HTMLHeadingElement>(null)
   // La următoarea aterizare pe un pas, pune focus pe primul câmp invalid (nu pe titlu).
   const focusInvalidOnLand = useRef(false)
+  // Sari peste comportamentul F2 (scroll+focus) la o singură schimbare de pas
+  // (ex.: restaurarea pasului salvat la încărcare — nu vrem un salt al paginii).
+  const skipScrollOnce = useRef(false)
   const mounted = useRef(false)
   // Fișierele într-un ref, ca efectul pe `step` să le citească fără să le adauge în deps.
   const filesRef = useRef<ApplicationFile[]>([])
@@ -72,6 +104,18 @@ export function ApplicationForm() {
       if (isDraft && JSON.stringify(init) !== JSON.stringify(application.answers ?? {})) {
         dirty.current = true
       }
+      // Readu utilizatorul la pasul la care a rămas (doar pentru ciorne).
+      if (isDraft) {
+        const saved = loadProgress(application.id)
+        if (saved) {
+          if (saved.reachedReview) setReachedReview(true)
+          const target = Math.min(Math.max(saved.step, 0), REVIEW_STEP)
+          if (target !== 0) {
+            skipScrollOnce.current = true // nu derula pagina la restaurare
+            setStep(target)
+          }
+        }
+      }
       initialized.current = true
     }
   }, [application, isDraft])
@@ -90,12 +134,28 @@ export function ApplicationForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isDraft])
 
+  // Odată ajuns la pasul de verificare, ține minte (activează scurtătura).
+  useEffect(() => {
+    if (step === REVIEW_STEP) setReachedReview(true)
+  }, [step])
+
+  // Reține progresul (pasul + dacă a ajuns la verificare) per aplicație.
+  useEffect(() => {
+    if (!initialized.current || !application || !isDraft) return
+    saveProgress(application.id, step, reachedReview)
+  }, [step, reachedReview, application, isDraft])
+
   // F2: la schimbarea pasului, derulează sus și pune focus pe titlul pasului
   // (sau pe primul câmp invalid, dacă tocmai am sărit acolo dintr-o validare).
   // Nu rulează la montarea inițială (primul pas apare deja sus).
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true
+      return
+    }
+    // Restaurarea pasului salvat nu trebuie să miște pagina.
+    if (skipScrollOnce.current) {
+      skipScrollOnce.current = false
       return
     }
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -179,6 +239,12 @@ export function ApplicationForm() {
   async function editSection(idx: number) {
     await persist()
     goToStep(idx, idx > step ? 1 : -1)
+  }
+
+  // Scurtătură „înapoi la verificare" (disponibilă după ce a ajuns la pasul final).
+  async function goToReview() {
+    await persist()
+    goToStep(REVIEW_STEP, 1)
   }
 
   async function handleSubmit() {
@@ -268,21 +334,30 @@ export function ApplicationForm() {
         </p>
       ) : null}
 
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" onClick={goPrev} disabled={step === 0}>
           <ArrowLeft className="size-4" /> Înapoi
         </Button>
 
-        {isReview ? (
-          <Button onClick={handleSubmit} disabled={submit.isPending}>
-            {submit.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            Trimite aplicația
-          </Button>
-        ) : (
-          <Button onClick={goNext}>
-            Continuă <ArrowRight className="size-4" />
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Scurtătură spre pasul final, doar după ce a ajuns acolo o dată. */}
+          {reachedReview && !isReview ? (
+            <Button variant="secondary" onClick={goToReview}>
+              <ClipboardCheck className="size-4" /> Mergi la final
+            </Button>
+          ) : null}
+
+          {isReview ? (
+            <Button onClick={handleSubmit} disabled={submit.isPending}>
+              {submit.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+              Trimite aplicația
+            </Button>
+          ) : (
+            <Button onClick={goNext}>
+              Continuă <ArrowRight className="size-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

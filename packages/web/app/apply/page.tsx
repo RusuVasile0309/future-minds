@@ -15,7 +15,7 @@ export default async function ApplyPage() {
   const open = await getApplicationsOpen()
 
   return (
-    <PageLayout>
+    <PageLayout hideApplyCta>
       <div className="container max-w-3xl py-12 md:py-16">
         <p className="eyebrow">Înscriere</p>
         <h1 className="display-title mt-4 text-3xl sm:text-4xl">Formular de înscriere</h1>

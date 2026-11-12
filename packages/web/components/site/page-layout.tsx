@@ -2,13 +2,20 @@ import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
 import { FloatingApplyGate } from "@/components/site/floating-apply-gate"
 
-export function PageLayout({ children }: { children: React.ReactNode }) {
+export function PageLayout({
+  children,
+  hideApplyCta = false,
+}: {
+  children: React.ReactNode
+  /** Ascunde butonul flotant „Vreau bursă" (ex.: chiar pe pagina de aplicare). */
+  hideApplyCta?: boolean
+}) {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      <FloatingApplyGate />
+      {hideApplyCta ? null : <FloatingApplyGate />}
     </div>
   )
 }
