@@ -244,7 +244,7 @@ const SECTIONS: SectionSpec[] = [
         required: true,
         helpText: "Anul în care ești acum (sau în care intri, dacă completezi înainte de începerea facultății).",
         options: [
-          { value: "1", label: "Anul 1 (încep / în curs)" },
+          { value: "1", label: "Anul 1" },
           { value: "2", label: "Anul 2" },
           { value: "3", label: "Anul 3" },
           { value: "4", label: "Anul 4" },
