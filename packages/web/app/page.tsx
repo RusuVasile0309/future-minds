@@ -57,7 +57,8 @@ export default function HomePage() {
                 FutureMinds acoperă integral studiile universitare (taxe,
                 cazare, materiale și laptop) pentru tineri talentați cărora le
                 lipsește sprijinul financiar. În această ediție se acordă 5
-                burse, pentru studenți la UBB și UTCN din Cluj-Napoca.
+                burse, pentru studenți la UBB și UTCN din Cluj-Napoca, din toți
+                anii de studiu.
               </p>
               <div
                 className="mt-9 flex flex-col gap-3 animate-fade-rise sm:flex-row sm:flex-wrap sm:items-center"
@@ -392,7 +393,7 @@ export default function HomePage() {
 const HOME_FAQ = [
   {
     q: "Cine poate aplica?",
-    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență.",
+    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, din toți anii de studiu, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență — din mediul urban sau rural.",
   },
   {
     q: "Ce acoperă bursa?",

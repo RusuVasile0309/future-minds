@@ -49,7 +49,7 @@ export default function BursaPage() {
             O bursă care acoperă <span className="text-primary">tot ce ai nevoie</span>.
           </>
         }
-        lead="Pentru studenții de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca. Nu doar taxele: bursa îți acoperă traiul complet ca student, ca să te poți concentra pe studii și pe viitorul tău."
+        lead="Pentru studenții de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca, din toți anii de studiu. Nu doar taxele: bursa îți acoperă traiul complet ca student, ca să te poți concentra pe studii și pe viitorul tău."
       />
 
       {/* Valoare + ce include */}

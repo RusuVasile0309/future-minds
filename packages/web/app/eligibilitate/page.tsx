@@ -9,6 +9,7 @@ import {
 import { PageLayout, PageHero } from "@/components/site/page-layout";
 import { Reveal } from "@/components/site/reveal";
 import { ApplyCta } from "@/components/site/apply-cta";
+import { EligibleFaculties } from "@/components/site/eligible-faculties";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/seo";
 
@@ -44,7 +45,7 @@ const CRITERIA = [
   {
     icon: MapPin,
     title: "Zona de proveniență",
-    body: "Sprijin suplimentar pentru cei veniți din medii cu acces mai redus la resurse educaționale.",
+    body: "Suntem deschiși studenților din mediul urban și din mediul rural. Ținem cont de contextul fiecăruia, cu o atenție în plus pentru cei veniți din zone cu acces mai redus la resurse educaționale.",
   },
   {
     icon: BadgeCheck,
@@ -70,7 +71,7 @@ export default function EligibilitatePage() {
             <span className="text-primary">motivați și serioși</span>.
           </>
         }
-        lead="Bursa se adresează studenților de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca. Selecția se face în urma unui proces atent, bazat pe recomandările cadrelor didactice, ținând cont de cinci criterii principale."
+        lead="Bursa se adresează studenților de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca, din toți anii de studiu — de la anul I până în anul terminal. Selecția se face în urma unui proces atent, bazat pe recomandările cadrelor didactice, ținând cont de cinci criterii principale."
       />
 
       <section className="container py-16 md:py-20">
@@ -101,6 +102,31 @@ export default function EligibilitatePage() {
             <ApplyCta className="mt-6 w-full" />
           </div>
         </Reveal>
+      </section>
+
+      {/* Facultăți eligibile */}
+      <section className="border-t border-border bg-secondary/30">
+        <div className="container py-16 md:py-20">
+          <Reveal>
+            <p className="eyebrow">Unde poți fi student</p>
+            <h2 className="display-title mt-4 text-3xl sm:text-4xl">Facultățile eligibile</h2>
+            <p className="mt-4 max-w-2xl text-muted-foreground">
+              Poți aplica dacă ești student la una dintre facultățile de IT și inginerie de mai jos, de la
+              Universitatea Babeș-Bolyai sau de la Universitatea Tehnică din Cluj-Napoca —{" "}
+              <strong className="text-foreground">indiferent de anul în care te afli</strong>, din anul I până în anul
+              terminal.
+            </p>
+          </Reveal>
+          <Reveal delay={100} className="mt-10">
+            <EligibleFaculties />
+          </Reveal>
+          <Reveal delay={150}>
+            <p className="mt-6 text-sm text-muted-foreground">
+              Nu îți găsești exact specializarea în formular? Alege varianta „–” la pasul de specializare și continuă
+              înscrierea — o verificăm noi.
+            </p>
+          </Reveal>
+        </div>
       </section>
 
       <section className="border-t border-border">

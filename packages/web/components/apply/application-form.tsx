@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { ArrowLeft, ArrowRight, Check, Loader2, Send } from "lucide-react"
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, ExternalLink, Loader2, Pencil, Send } from "lucide-react"
 import { useMyApplication } from "@/app/network/applications"
-import { useSaveApplication, useSubmitApplication } from "@/app/network/applications"
+import { useSaveApplication, useSubmitApplication, applicationsApi } from "@/app/network/applications"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FieldInput, fieldFloats } from "@/components/apply/field-input"
@@ -23,6 +23,9 @@ import type { AnswerValue, ApplicationFile, ApplicationStatus, FormField, FormSe
 
 // Schema formularului este STATICĂ (definită în @fm/shared).
 const sections = getFormSchema()
+// Pasul suplimentar de la final: „Verifică și trimite" (index = sections.length).
+const REVIEW_STEP = sections.length
+const TOTAL_STEPS = sections.length + 1
 
 export function ApplicationForm() {
   const appQ = useMyApplication()
@@ -33,14 +36,26 @@ export function ApplicationForm() {
   const [step, setStep] = useState(0)
   // Direcția tranziției: 1 = înainte, -1 = înapoi. Reglează sensul de alunecare.
   const [direction, setDirection] = useState<1 | -1>(1)
+  // Afișează erorile de obligativitate pe pasul curent (după o încercare de avansare).
+  const [showErrors, setShowErrors] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const initialized = useRef(false)
   const dirty = useRef(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Ancoră pentru derularea la începutul formularului + titlul pasului (F2).
+  const topRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  // La următoarea aterizare pe un pas, pune focus pe primul câmp invalid (nu pe titlu).
+  const focusInvalidOnLand = useRef(false)
+  const mounted = useRef(false)
+  // Fișierele într-un ref, ca efectul pe `step` să le citească fără să le adauge în deps.
+  const filesRef = useRef<ApplicationFile[]>([])
+
   const application = appQ.data
   const isDraft = application?.status === "draft"
+  filesRef.current = application?.files ?? []
 
   useEffect(() => {
     if (application && !initialized.current) {
@@ -74,6 +89,28 @@ export function ApplicationForm() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isDraft])
+
+  // F2: la schimbarea pasului, derulează sus și pune focus pe titlul pasului
+  // (sau pe primul câmp invalid, dacă tocmai am sărit acolo dintr-o validare).
+  // Nu rulează la montarea inițială (primul pas apare deja sus).
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    if (focusInvalidOnLand.current) {
+      focusInvalidOnLand.current = false
+      const key = step < REVIEW_STEP ? firstInvalidKey(sections[step], answers, filesRef.current) : null
+      if (key) {
+        focusField(key)
+        return
+      }
+    }
+    // Focus pe titlu (preventScroll ca să nu anuleze derularea lină de mai sus).
+    requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
 
   if (appQ.isLoading) {
     return <p className="text-muted-foreground">Se încarcă formularul…</p>
@@ -112,75 +149,117 @@ export function ApplicationForm() {
     }
   }
 
-  async function goNext() {
-    await persist()
-    setDirection(1)
-    setStep((s) => Math.min(s + 1, sections.length - 1))
+  // Trece la un pas dat (resetează semnalarea erorilor — pas „curat").
+  function goToStep(target: number, dir: 1 | -1) {
+    setShowErrors(false)
+    setDirection(dir)
+    setStep(target)
   }
+
+  async function goNext() {
+    if (step >= REVIEW_STEP) return
+    const section = sections[step]
+    // F1: dacă pasul e incomplet, nu avansăm — arătăm erorile și sărim la primul câmp invalid.
+    if (!isStepComplete(section, answers, files)) {
+      setShowErrors(true)
+      const key = firstInvalidKey(section, answers, files)
+      if (key) focusField(key)
+      return
+    }
+    await persist()
+    goToStep(Math.min(step + 1, REVIEW_STEP), 1)
+  }
+
   async function goPrev() {
     await persist()
-    setDirection(-1)
-    setStep((s) => Math.max(s - 1, 0))
+    goToStep(Math.max(step - 1, 0), -1)
+  }
+
+  // „Modifică" din pasul de verificare → sare la secțiunea respectivă.
+  async function editSection(idx: number) {
+    await persist()
+    goToStep(idx, idx > step ? 1 : -1)
   }
 
   async function handleSubmit() {
     setSubmitError(null)
+    // Verifică toate secțiunile; dacă una e incompletă, sari la ea și evidențiază problema.
+    const firstBad = sections.findIndex((s) => !isStepComplete(s, answers, files))
+    if (firstBad !== -1) {
+      await persist()
+      setShowErrors(true)
+      focusInvalidOnLand.current = true
+      setDirection(-1)
+      setStep(firstBad)
+      return
+    }
     await persist()
     const res = await submit.mutateAsync()
     if (!res.success) setSubmitError(res.error)
   }
 
-  const section = sections[step]
-  const isLast = step === sections.length - 1
-  // Nu se poate avansa / trimite până când toate câmpurile obligatorii vizibile
-  // din pasul curent sunt completate și valide.
-  const stepComplete = isStepComplete(section, answers, files)
+  const isReview = step === REVIEW_STEP
+  const section = isReview ? null : sections[step]
 
   return (
     <div>
+      <div ref={topRef} className="scroll-mt-24" aria-hidden />
+
       {/* Progres */}
       <div className="mb-8">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-            Pasul {step + 1} din {sections.length}
+            Pasul {step + 1} din {TOTAL_STEPS}
           </span>
           <SaveIndicator saving={save.isPending} savedAt={savedAt} />
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
           <div
             className="h-full rounded-full bg-primary transition-all"
-            style={{ width: `${((step + 1) / sections.length) * 100}%` }}
+            style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
           />
         </div>
       </div>
 
       <StepCarousel step={step} direction={direction}>
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="font-serif text-2xl font-medium">{section.title}</h2>
-          {section.description ? <p className="mt-1 text-muted-foreground">{section.description}</p> : null}
+        {isReview ? (
+          <ReviewStep
+            sections={sections}
+            answers={answers}
+            files={files}
+            headingRef={headingRef}
+            onEdit={editSection}
+          />
+        ) : (
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <h2 ref={headingRef} tabIndex={-1} className="font-serif text-2xl font-medium outline-none">
+              {section!.title}
+            </h2>
+            {section!.description ? <p className="mt-1 text-muted-foreground">{section!.description}</p> : null}
 
-          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
-            {section.fields
-              .filter((field) => !field.derived && isFieldVisible(field, answers))
-              .map((field) => {
-                const value = answers[field.key] ?? null
-                return (
-                  <FieldRow key={field.id} field={field} error={fieldRowError(field, value, answers)}>
-                    <FieldInput
-                      field={field}
-                      value={value}
-                      onChange={(v) => update(field.key, v)}
-                      files={files}
-                      answers={answers}
-                      disabled={isFieldDisabled(field, answers)}
-                    />
-                  </FieldRow>
-                )
-              })}
+            <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
+              {section!.fields
+                .filter((field) => !field.derived && isFieldVisible(field, answers))
+                .map((field) => {
+                  const value = answers[field.key] ?? null
+                  return (
+                    <FieldRow key={field.id} field={field} error={fieldRowError(field, value, answers, files, showErrors)}>
+                      <FieldInput
+                        field={field}
+                        value={value}
+                        onChange={(v) => update(field.key, v)}
+                        files={files}
+                        answers={answers}
+                        disabled={isFieldDisabled(field, answers)}
+                      />
+                    </FieldRow>
+                  )
+                })}
+            </div>
+
+            {section!.id === "finance" ? <IncomeSummary answers={answers} /> : null}
           </div>
-
-          {section.id === "finance" ? <IncomeSummary answers={answers} /> : null}
-        </div>
+        )}
       </StepCarousel>
 
       {submitError ? (
@@ -194,13 +273,13 @@ export function ApplicationForm() {
           <ArrowLeft className="size-4" /> Înapoi
         </Button>
 
-        {isLast ? (
-          <Button onClick={handleSubmit} disabled={submit.isPending || !stepComplete}>
+        {isReview ? (
+          <Button onClick={handleSubmit} disabled={submit.isPending}>
             {submit.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             Trimite aplicația
           </Button>
         ) : (
-          <Button onClick={goNext} disabled={!stepComplete}>
+          <Button onClick={goNext}>
             Continuă <ArrowRight className="size-4" />
           </Button>
         )}
@@ -211,6 +290,48 @@ export function ApplicationForm() {
 
 // useLayoutEffect pe client, useEffect pe server (evită avertismentul SSR).
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
+
+// Caută primul câmp obligatoriu VIZIBIL necompletat sau completat invalid din
+// secțiune (în ordinea de afișare). Întoarce `field.key` sau null dacă e complet.
+function firstInvalidKey(
+  section: FormSection,
+  answers: Record<string, AnswerValue>,
+  files: ApplicationFile[]
+): string | null {
+  const fileKeys = new Set(files.map((f) => f.fieldKey))
+  for (const field of section.fields) {
+    if (field.derived || !isFieldVisible(field, answers)) continue
+    const value = answers[field.key] ?? null
+    if (field.required) {
+      if (field.type === "file") {
+        if (!fileKeys.has(field.key)) return field.key
+        continue
+      }
+      if (field.requiredTrue) {
+        if (value !== true) return field.key
+        continue
+      }
+      if (isEmpty(field, value)) return field.key
+    }
+    if (validateFieldValue(field, value, answers)) return field.key
+  }
+  // Criteriul de venit peste prag → trimite la primul câmp de venit.
+  if (section.id === "finance") {
+    const perMember = computeIncomePerMember(answers)
+    if (perMember !== null && perMember >= INCOME_PER_MEMBER_THRESHOLD) return "student_income"
+  }
+  return null
+}
+
+// Derulează la câmpul cu cheia dată și pune focus pe input-ul lui (dacă există).
+function focusField(key: string) {
+  if (typeof document === "undefined") return
+  const row = document.getElementById(`field-row-${key}`)
+  const input = document.getElementById(key) as HTMLElement | null
+  const anchor = row ?? input
+  anchor?.scrollIntoView({ behavior: "smooth", block: "center" })
+  if (input) requestAnimationFrame(() => input.focus({ preventScroll: true }))
+}
 
 // Tranziția „carusel" între pași: când `step` se schimbă, panoul care iese și cel
 // care intră alunecă simultan pe orizontală (sensul dat de `direction`), iar
@@ -348,10 +469,23 @@ const INCOME_FIELD_KEYS = new Set(["student_income", "mother_income", "father_in
 function fieldRowError(
   field: FormField,
   value: AnswerValue,
-  answers: Record<string, AnswerValue>
+  answers: Record<string, AnswerValue>,
+  files: ApplicationFile[],
+  showErrors: boolean
 ): string | null {
+  // Veniturile obligatorii goale: mesaj mereu vizibil (comportament existent).
   if (INCOME_FIELD_KEYS.has(field.key) && field.required && isEmpty(field, value)) {
     return "Completează venitul net lunar."
+  }
+  // F1: după o încercare de avansare, semnalează câmpurile obligatorii necompletate.
+  if (showErrors && field.required) {
+    if (field.type === "file") {
+      if (!files.some((f) => f.fieldKey === field.key)) return "Încarcă documentul cerut."
+    } else if (field.requiredTrue) {
+      if (value !== true) return "Bifează pentru a putea continua."
+    } else if (isEmpty(field, value)) {
+      return "Acest câmp este obligatoriu."
+    }
   }
   return validateFieldValue(field, value, answers)
 }
@@ -452,7 +586,10 @@ function FieldRow({
   // deci nu mai punem etichetă deasupra. Textul de ajutor coboară sub input.
   if (fieldFloats(field)) {
     return (
-      <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
+      <div
+        id={`field-row-${field.key}`}
+        className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}
+      >
         {children}
         {field.helpText ? <p className="mt-1.5 text-xs text-muted-foreground">{field.helpText}</p> : null}
         {error ? <p className="mt-1.5 text-xs text-destructive motion-safe:animate-slide-down">{error}</p> : null}
@@ -461,7 +598,10 @@ function FieldRow({
   }
 
   return (
-    <div className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}>
+    <div
+      id={`field-row-${field.key}`}
+      className={`col-span-1 ${spanClass} ${field.align === "center" ? "text-center" : ""}`}
+    >
       <Label htmlFor={field.key}>
         {field.label}
         {field.required ? <span className="ml-1 text-primary">*</span> : null}
@@ -495,6 +635,139 @@ function SaveIndicator({ saving, savedAt }: { saving: boolean; savedAt: number |
       </span>
     )
   return null
+}
+
+// ── Pasul final: „Verifică și trimite" (C4) ───────────────────────────────────
+
+function ReviewStep({
+  sections,
+  answers,
+  files,
+  headingRef,
+  onEdit,
+}: {
+  sections: FormSection[]
+  answers: Record<string, AnswerValue>
+  files: ApplicationFile[]
+  headingRef: React.Ref<HTMLHeadingElement>
+  onEdit: (idx: number) => void
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+      <h2 ref={headingRef} tabIndex={-1} className="font-serif text-2xl font-medium outline-none">
+        Verifică și trimite
+      </h2>
+      <p className="mt-1 text-muted-foreground">
+        Verifică datele de mai jos. Poți modifica orice secțiune înainte de a trimite — după trimitere nu mai poți edita.
+      </p>
+
+      <div className="mt-8 space-y-4">
+        {sections.map((section, idx) => {
+          const complete = isStepComplete(section, answers, files)
+          const visibleFields = section.fields.filter((f) => !f.derived && isFieldVisible(f, answers))
+          return (
+            <div key={section.id} className="rounded-xl border border-border bg-background/60 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <h3 className="font-serif text-lg font-medium">{section.title}</h3>
+                  {complete ? (
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <Check className="size-3" /> Complet
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                      <AlertTriangle className="size-3" /> Incomplet
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onEdit(idx)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                >
+                  <Pencil className="size-3.5" /> Modifică
+                </button>
+              </div>
+
+              <dl className="mt-4 divide-y divide-border/60">
+                {visibleFields.map((field) => (
+                  <div key={field.id} className="grid grid-cols-1 gap-1 py-2.5 sm:grid-cols-3">
+                    <dt className="text-sm text-muted-foreground">{field.label}</dt>
+                    <dd className="text-sm text-foreground sm:col-span-2">
+                      <ReviewValue field={field} value={answers[field.key]} files={files} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// Valoarea unui câmp în rezumat. Pentru fișiere arată numele + buton „Deschide"
+// (URL semnat pe termen scurt), ca elevul să verifice că a încărcat ce trebuie.
+function ReviewValue({
+  field,
+  value,
+  files,
+}: {
+  field: FormField
+  value: AnswerValue
+  files: ApplicationFile[]
+}) {
+  if (field.type === "file") {
+    const mine = files.filter((f) => f.fieldKey === field.key)
+    if (mine.length === 0) return <span className="text-muted-foreground">—</span>
+    return (
+      <ul className="space-y-1.5">
+        {mine.map((f) => (
+          <li key={f.id}>
+            <OpenFileButton id={f.id} name={f.fileName} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  return <span>{formatAnswer(field, value, files)}</span>
+}
+
+function OpenFileButton({ id, name }: { id: string; name: string }) {
+  const [loading, setLoading] = useState(false)
+
+  async function open() {
+    // Deschidem tab-ul sincron (altfel blocantele de pop-up îl opresc după await),
+    // apoi îl direcționăm spre URL-ul semnat.
+    const tab = window.open("", "_blank", "noopener,noreferrer")
+    setLoading(true)
+    try {
+      const res = await applicationsApi.fileUrl(id)
+      if (res.success && res.data?.url) {
+        if (tab) tab.location.href = res.data.url
+        else window.open(res.data.url, "_blank", "noopener,noreferrer")
+      } else {
+        tab?.close()
+      }
+    } catch {
+      tab?.close()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={open}
+      disabled={loading}
+      className="inline-flex max-w-full items-center gap-1.5 text-primary underline-offset-2 hover:underline disabled:opacity-60"
+    >
+      {loading ? <Loader2 className="size-3.5 shrink-0 animate-spin" /> : <ExternalLink className="size-3.5 shrink-0" />}
+      <span className="truncate">{name}</span>
+    </button>
+  )
 }
 
 function SubmittedView({

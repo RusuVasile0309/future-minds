@@ -21,7 +21,11 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Cine poate aplica?",
-    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență.",
+    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, din toți anii de studiu (de la anul I până în anul terminal), care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență — fie că ești din mediul urban, fie din mediul rural.",
+  },
+  {
+    q: "Trebuie să fiu boboc (anul I) ca să aplic?",
+    a: "Nu. Bursa se adresează studenților din toți anii de studiu, de la anul I până în anul terminal. La înscriere îți completezi anul curent și mediile semestrelor deja încheiate, iar evaluarea ține cont corect de anul în care te afli.",
   },
   {
     q: "Ce acoperă bursa?",
