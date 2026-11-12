@@ -40,8 +40,8 @@ export default function ConfidentialitatePage() {
           <p>
             <span className="font-medium text-foreground">Operatorul datelor:</span> Asociația Rotaract Club
             Cluj-Napoca Samus (CUI 35408330, înregistrată în Registrul asociațiilor și fundațiilor sub nr.{" "}
-            [nr. de completat]), Str. Constantin Dobrogeanu Gherea nr. 21, et. 1, ap. 6, Cluj-Napoca, denumită în
-            continuare „Operatorul&rdquo;.
+            220/08.12.2015, prin Încheierea nr. 11754/CC/27.11.2015, dosar nr. 21448/211/2015), Str. Constantin
+            Dobrogeanu Gherea nr. 21, et. 1, ap. 6, Cluj-Napoca, denumită în continuare „Operatorul&rdquo;.
           </p>
           <p>
             <span className="font-medium text-foreground">Website:</span>{" "}
