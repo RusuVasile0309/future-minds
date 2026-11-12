@@ -57,9 +57,13 @@ function client(cfg: R2Config): AwsClient {
   })
 }
 
-// Documentele se acceptă DOAR în format PDF.
+// Documentele se acceptă ca PDF sau poză (JPG/PNG) — un public care fotografiază
+// cu telefonul, nu scanează. HEIC-ul de pe iPhone NU e acceptat (telefonul trebuie
+// setat pe „Cel mai compatibil" / JPG), ca fișierele să fie vizibile peste tot.
 const EXT_BY_TYPE: Record<string, string> = {
   "application/pdf": "pdf",
+  "image/jpeg": "jpg",
+  "image/png": "png",
 }
 
 export const ALLOWED_DOC_TYPES = Object.keys(EXT_BY_TYPE)

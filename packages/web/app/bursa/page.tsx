@@ -5,6 +5,12 @@ import { PageLayout, PageHero } from "@/components/site/page-layout"
 import { Reveal } from "@/components/site/reveal"
 import { Button } from "@/components/ui/button"
 import { ApplyCta } from "@/components/site/apply-cta"
+import { ApplyWindow } from "@/components/site/apply-window"
+import {
+  APPLICATION_LAUNCH_LABEL,
+  APPLICATION_DEADLINE_LABEL,
+  APPLICATION_WINDOW_WEEKS,
+} from "@/lib/content/timeline"
 import { expenseTables, scholarshipIncludes, type Table } from "@/lib/content/budget"
 import { JsonLd } from "@/components/seo/json-ld"
 import { breadcrumbSchema, scholarshipProgramSchema } from "@/lib/seo"
@@ -69,6 +75,25 @@ export default function BursaPage() {
               oportunități de stagiu și angajare la Nova Power&Gas.
             </p>
             <ApplyCta size="lg" className="mt-8 w-full" />
+            <ApplyWindow className="mt-4 justify-center" />
+
+            {/* Calendarul ediției */}
+            <dl className="mt-8 space-y-3 border-t border-border/60 pt-6">
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-sm text-muted-foreground">Lansare înscrieri</dt>
+                <dd className="text-sm font-medium text-foreground">{APPLICATION_LAUNCH_LABEL}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-sm text-muted-foreground">Termen limită</dt>
+                <dd className="text-sm font-medium text-foreground">{APPLICATION_DEADLINE_LABEL}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="text-sm text-muted-foreground">Fereastră de înscriere</dt>
+                <dd className="text-sm font-medium text-foreground">
+                  aproximativ {APPLICATION_WINDOW_WEEKS} săptămâni
+                </dd>
+              </div>
+            </dl>
           </div>
 
           {/* Ce include */}

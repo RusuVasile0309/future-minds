@@ -81,8 +81,8 @@ export default function DesprePage() {
             posibilitățile lor reale de a-și continua studiile.
           </p>
           <p className="mt-4 text-muted-foreground">
-            Deși au capacitatea necesară pentru a urma o facultate, contextul social și economic face ca, după
-            cele 12 clase, accesul la învățământul superior să fie extrem de limitat.
+            Deși au capacitatea necesară pentru a reuși la facultate, contextul social și economic face ca, odată
+            ajunși studenți, continuarea studiilor până la final să devină extrem de greu de susținut.
           </p>
         </article>
 

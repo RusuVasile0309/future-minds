@@ -129,21 +129,12 @@ export const UNIVERSITIES: University[] = [
           { name: "Informatică", languages: ["RO", "EN", "HU", "DE"] },
           { name: "Inteligență Artificială", languages: ["EN"] },
           { name: "Ingineria Informației", languages: ["EN", "HU"] },
-          { name: "Matematică-Informatică", languages: ["RO", "EN", "HU"] },
         ],
       },
       {
         name: "Științe Economice și Gestiunea Afacerilor",
         specializations: [
           { name: "Informatică Economică", languages: ["RO", "HU"] },
-          { name: "Statistică economică și data science", languages: ["RO"] },
-          { name: "Contabilitate și informatică de gestiune", languages: ["RO"] },
-        ],
-      },
-      {
-        name: "Fizică",
-        specializations: [
-          { name: "Fizică Informatică", languages: ["RO", "HU"] },
         ],
       },
     ],

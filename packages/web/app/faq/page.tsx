@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Cine poate aplica?",
-    a: "Elevi și studenți cu potențial real pentru studii de IT sau inginerie, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență.",
+    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență.",
   },
   {
     q: "Ce acoperă bursa?",

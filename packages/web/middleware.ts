@@ -24,9 +24,15 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/contul-meu", nextUrl))
   }
 
-  // Require login for protected pages
+  // Require login for protected pages. Pe `/aplica`, un vizitator nelogat vine
+  // de regulă prima dată („Vreau bursă") — îl ducem la înregistrare, nu la login
+  // (login-ul rămâne pentru cei care revin). Restul rutelor protejate (contul meu)
+  // presupun un cont existent, deci merg la login.
   if (isProtected && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/autentificare/intra", nextUrl))
+    const dest = nextUrl.pathname.startsWith("/aplica")
+      ? "/autentificare/inregistrare"
+      : "/autentificare/intra"
+    return NextResponse.redirect(new URL(dest, nextUrl))
   }
 
   // Require ADMIN or SUPER_USER for /admin

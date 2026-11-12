@@ -79,9 +79,10 @@ interface SectionSpec {
 }
 
 const grade: FieldValidation = { min: 1, max: 10 }
-// Toate documentele se acceptă DOAR în format PDF.
-const docValidation: FieldValidation = { fileTypes: ["pdf"], maxSizeMB: 5 }
-const pdfValidation: FieldValidation = { fileTypes: ["pdf"], maxSizeMB: 5 }
+// Documentele se acceptă ca PDF sau poză (JPG/PNG) — public care fotografiază cu
+// telefonul. Limită 10 MB, ca pozele de pe telefon (adesea > 5 MB) să încapă.
+const docValidation: FieldValidation = { fileTypes: ["pdf", "jpg", "jpeg", "png"], maxSizeMB: 10 }
+const pdfValidation: FieldValidation = { fileTypes: ["pdf", "jpg", "jpeg", "png"], maxSizeMB: 10 }
 
 const SECTIONS: SectionSpec[] = [
   {
@@ -99,7 +100,14 @@ const SECTIONS: SectionSpec[] = [
         helpText: "Cod numeric personal (13 cifre).",
         validation: { minLength: 13, maxLength: 13, regex: "^[0-9]{13}$", inputFilter: "digits" },
       },
-      { key: "birth_date", label: "Data nașterii", type: "date", required: true, colSpan: 6 },
+      {
+        key: "birth_date",
+        label: "Data nașterii",
+        type: "date",
+        required: true,
+        colSpan: 6,
+        helpText: "Se completează automat din CNP.",
+      },
       { key: "county", label: "Județ", type: "select", required: true, colSpan: 6, options: opts(COUNTIES) },
       { key: "city", label: "Localitate", type: "text", required: true, colSpan: 6 },
       { key: "email", label: "Email", type: "email", required: true, helpText: "Prefill din contul tău." },
@@ -184,7 +192,7 @@ const SECTIONS: SectionSpec[] = [
         label: "Diploma de Bacalaureat",
         type: "file",
         required: true,
-        helpText: "Atașează diploma de Bacalaureat în format PDF (scanată).",
+        helpText: "Atașează diploma de Bacalaureat — PDF sau o poză clară (JPG, PNG).",
         validation: docValidation,
       },
     ],
@@ -428,7 +436,6 @@ const SECTIONS: SectionSpec[] = [
       { key: "doc_income", label: "Adeverințe de venit", type: "file", required: true, validation: docValidation, colSpan: 6, multiple: true },
       { key: "doc_transcript", label: "Foaie matricolă / diplomă Bac", type: "file", required: true, validation: docValidation, colSpan: 6 },
       { key: "doc_admission", label: "Dovada admiterii la facultate", type: "file", required: true, validation: docValidation, colSpan: 6 },
-      { key: "doc_id", label: "Copie carte de identitate", type: "file", required: true, validation: docValidation, colSpan: 6 },
       {
         key: "doc_special",
         label: "Documente situații speciale",
@@ -465,23 +472,23 @@ const SECTIONS: SectionSpec[] = [
     id: "letters",
     title: "Scrisori",
     description:
-      "Ultimul pas: încarcă scrisoarea de intenție și scrisoarea de recomandare, ambele în format PDF.",
+      "Ultimul pas: încarcă scrisoarea de intenție și scrisoarea de recomandare, ca PDF sau poză.",
     fields: [
       {
         key: "cover_letter",
-        label: "Scrisoare de intenție (PDF)",
+        label: "Scrisoare de intenție",
         type: "file",
         required: true,
         helpText:
-          "Spune-ne câte ceva despre tine, despre planurile tale de viitor și de ce crezi că ești potrivit/ă pentru această bursă. Un fișier PDF, maxim 5 MB.",
+          "Spune-ne câte ceva despre tine, despre planurile tale de viitor și de ce crezi că ești potrivit/ă pentru această bursă. PDF sau poză (JPG, PNG), maxim 10 MB.",
         validation: pdfValidation,
       },
       {
         key: "recommendation_letter",
-        label: "Scrisoare de recomandare (PDF)",
+        label: "Scrisoare de recomandare",
         type: "file",
         required: true,
-        helpText: "Din partea unui profesor de liceu sau de facultate. Un fișier PDF, maxim 5 MB.",
+        helpText: "Din partea unui profesor de liceu sau de facultate. PDF sau poză (JPG, PNG), maxim 10 MB.",
         validation: pdfValidation,
       },
       // Note manuale (1–3) acordate de SUPER_USER după citirea scrisorilor. NU se
@@ -736,6 +743,19 @@ export function validateFieldValue(
     if (max !== undefined && n > max) return `Valoarea trebuie să fie cel mult ${max}.`
   }
   return null
+}
+
+/**
+ * Completează automat `birth_date` din CNP (câmp read-only în formular). Se
+ * aplică la fiecare editare și la încărcarea draft-ului. Setează data DOAR când
+ * CNP-ul e valid și secolul e determinabil (prima cifră 1–6); pentru CNP-urile
+ * ambigue (7/8/9) sau incomplete lasă câmpul neatins, ca fallback editabil.
+ */
+export function applyCnpBirthDate(answers: Record<string, unknown>): void {
+  const cnp = answers.cnp
+  if (typeof cnp !== "string") return
+  const info = parseCnp(cnp.trim())
+  if (info?.valid && info.birthDate) answers.birth_date = info.birthDate
 }
 
 /**
