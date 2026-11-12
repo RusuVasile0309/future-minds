@@ -27,8 +27,8 @@ const CONTACTS = [
   {
     icon: Mail,
     label: "Email",
-    value: "vasile.rusu@rotaract.ro",
-    href: "mailto:vasile.rusu@rotaract.ro",
+    value: "futuremindsburse@gmail.com",
+    href: "mailto:futuremindsburse@gmail.com",
   },
   {
     icon: Phone,

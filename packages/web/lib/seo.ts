@@ -101,7 +101,7 @@ export function organizationSchema() {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",
-      email: "vasile.rusu@rotaract.ro",
+      email: "futuremindsburse@gmail.com",
       telephone: "+40742043505",
       areaServed: "RO",
       availableLanguage: ["Romanian"],

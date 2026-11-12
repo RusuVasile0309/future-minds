@@ -27,7 +27,7 @@ export function GET() {
 
 ## Contact
 - Persoană de contact: Rusu Vasile
-- Email: vasile.rusu@rotaract.ro
+- Email: futuremindsburse@gmail.com
 - Telefon: +40 742 043 505
 `
   return new Response(body, {

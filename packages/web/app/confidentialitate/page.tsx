@@ -51,8 +51,8 @@ export default function ConfidentialitatePage() {
           </p>
           <p>
             <span className="font-medium text-foreground">Contact:</span>{" "}
-            <a href="mailto:vasile.rusu@rotaract.ro" className="text-primary hover:underline">
-              vasile.rusu@rotaract.ro
+            <a href="mailto:futuremindsburse@gmail.com" className="text-primary hover:underline">
+              futuremindsburse@gmail.com
             </a>
           </p>
         </div>
@@ -216,8 +216,8 @@ export default function ConfidentialitatePage() {
             </p>
             <p className="mt-3">
               Cererile privind exercitarea acestor drepturi se transmit la adresa de e-mail{" "}
-              <a href="mailto:vasile.rusu@rotaract.ro" className="text-primary hover:underline">
-                vasile.rusu@rotaract.ro
+              <a href="mailto:futuremindsburse@gmail.com" className="text-primary hover:underline">
+                futuremindsburse@gmail.com
               </a>{" "}
               și se soluționează gratuit, în termen de o lună de la primire, termen care poate fi prelungit cu două
               luni în condițiile art. 12 alin. (3) din GDPR, cu informarea persoanei vizate.
