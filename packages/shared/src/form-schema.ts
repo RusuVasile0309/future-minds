@@ -86,6 +86,26 @@ const pdfValidation: FieldValidation = { fileTypes: ["pdf", "jpg", "jpeg", "png"
 
 const SECTIONS: SectionSpec[] = [
   {
+    id: "consent",
+    title: "Consimțăminte",
+    fields: [
+      {
+        key: "gdpr_consent",
+        label: "Sunt de acord cu prelucrarea datelor mele cu caracter personal (GDPR)",
+        type: "boolean",
+        required: true,
+        requiredTrue: true,
+      },
+      {
+        key: "declaration",
+        label: "Declar pe propria răspundere că datele furnizate sunt corecte",
+        type: "boolean",
+        required: true,
+        requiredTrue: true,
+      },
+    ],
+  },
+  {
     id: "personal",
     title: "Date personale",
     fields: [
@@ -445,26 +465,6 @@ const SECTIONS: SectionSpec[] = [
         colSpan: 12,
         align: "center",
         multiple: true,
-      },
-    ],
-  },
-  {
-    id: "consent",
-    title: "Consimțăminte",
-    fields: [
-      {
-        key: "gdpr_consent",
-        label: "Sunt de acord cu prelucrarea datelor mele cu caracter personal (GDPR)",
-        type: "boolean",
-        required: true,
-        requiredTrue: true,
-      },
-      {
-        key: "declaration",
-        label: "Declar pe propria răspundere că datele furnizate sunt corecte",
-        type: "boolean",
-        required: true,
-        requiredTrue: true,
       },
     ],
   },
