@@ -303,6 +303,19 @@ export function ApplicationForm() {
             </h2>
             {section!.description ? <p className="mt-1 text-muted-foreground">{section!.description}</p> : null}
 
+            {section!.id === "consent" ? (
+              <a
+                href="/consimtaminte"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 flex items-center gap-2 rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <ExternalLink className="size-4 text-primary" />
+                Vezi detaliile pe care le semnezi
+                <span className="font-normal text-muted-foreground">— se deschide într-o filă nouă</span>
+              </a>
+            ) : null}
+
             <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
               {section!.fields
                 .filter((field) => !field.derived && isFieldVisible(field, answers))
