@@ -7,6 +7,7 @@ import { useSaveApplication, useSubmitApplication, applicationsApi } from "@/app
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FieldInput, fieldFloats } from "@/components/apply/field-input"
+import { ConsentChecklist } from "@/components/apply/consent-checklist"
 import { StatusBadge } from "@/components/apply/status-badge"
 import { clearDependentAnswers } from "@/lib/content/form-options"
 import {
@@ -304,45 +305,33 @@ export function ApplicationForm() {
             {section!.description ? <p className="mt-1 text-muted-foreground">{section!.description}</p> : null}
 
             {section!.id === "consent" ? (
-              <div className="mt-6 flex flex-col gap-2">
-                {[
-                  { href: "/confidentialitate", label: "Politica de confidențialitate (GDPR)" },
-                  { href: "/consimtaminte", label: "Documentul de consimțământ" },
-                ].map((doc) => (
-                  <a
-                    key={doc.href}
-                    href={doc.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-                  >
-                    <ExternalLink className="size-4 text-primary" />
-                    {doc.label}
-                    <span className="font-normal text-muted-foreground">— se deschide într-o filă nouă</span>
-                  </a>
-                ))}
+              <ConsentChecklist
+                fields={section!.fields.filter((f) => isFieldVisible(f, answers))}
+                answers={answers}
+                onChange={update}
+                errorFor={(f) => fieldRowError(f, answers[f.key] ?? null, answers, files, showErrors)}
+              />
+            ) : (
+              <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
+                {section!.fields
+                  .filter((field) => !field.derived && isFieldVisible(field, answers))
+                  .map((field) => {
+                    const value = answers[field.key] ?? null
+                    return (
+                      <FieldRow key={field.id} field={field} error={fieldRowError(field, value, answers, files, showErrors)}>
+                        <FieldInput
+                          field={field}
+                          value={value}
+                          onChange={(v) => update(field.key, v)}
+                          files={files}
+                          answers={answers}
+                          disabled={isFieldDisabled(field, answers)}
+                        />
+                      </FieldRow>
+                    )
+                  })}
               </div>
-            ) : null}
-
-            <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-12 sm:gap-y-7 lg:gap-x-6 lg:gap-y-9">
-              {section!.fields
-                .filter((field) => !field.derived && isFieldVisible(field, answers))
-                .map((field) => {
-                  const value = answers[field.key] ?? null
-                  return (
-                    <FieldRow key={field.id} field={field} error={fieldRowError(field, value, answers, files, showErrors)}>
-                      <FieldInput
-                        field={field}
-                        value={value}
-                        onChange={(v) => update(field.key, v)}
-                        files={files}
-                        answers={answers}
-                        disabled={isFieldDisabled(field, answers)}
-                      />
-                    </FieldRow>
-                  )
-                })}
-            </div>
+            )}
 
             {section!.id === "finance" ? <IncomeSummary answers={answers} /> : null}
           </div>
@@ -919,7 +908,7 @@ function formatAnswer(field: FormField, value: AnswerValue, files: ApplicationFi
     return mine.length ? mine.map((f) => f.fileName).join(", ") : "-"
   }
   if (value === null || value === undefined || value === "") return "-"
-  if (field.type === "boolean") return value ? "Da" : "Nu"
+  if (field.type === "boolean") return field.requiredTrue ? (value ? "Bifat" : "Nebifat") : value ? "Da" : "Nu"
   if (Array.isArray(value)) {
     return value
       .map((v) => field.options?.find((o) => o.value === v)?.label ?? v)
