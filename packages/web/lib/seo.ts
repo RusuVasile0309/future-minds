@@ -135,7 +135,7 @@ export function scholarshipProgramSchema() {
     "@type": "EducationalOccupationalProgram",
     name: "Bursa FutureMinds",
     description:
-      "Bursă integrală (~6.000 € pe an, per bursier) care acoperă taxele de studii, cazarea în cămin, masa zilnică, materialele didactice, un laptop și bani de buzunar. Se acordă 5 burse per ediție, exclusiv studenților de la UBB și UTCN din Cluj-Napoca, la specializări de IT și inginerie.",
+      "Bursă integrală (~6.000 € pe an, per bursier) care acoperă taxele de studii, cazarea în cămin, masa zilnică, materialele didactice, un laptop și bani de buzunar. Se acordă 5 burse per ediție, exclusiv studenților de la UBB și UTCN din Cluj-Napoca, la specializări de IT și inginerie, ciclul de licență.",
     url: absoluteUrl("/bursa"),
     programType: "Bursă integrală de studii",
     educationalProgramMode: "full-time",

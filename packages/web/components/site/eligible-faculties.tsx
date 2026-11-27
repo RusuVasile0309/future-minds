@@ -4,7 +4,7 @@ import { STUDY_LANGUAGE_LABELS, UNIVERSITIES } from "@/lib/content/universities"
 /**
  * Lista facultăților eligibile, grupate pe universitate. Fiecare facultate se
  * poate extinde (accordion nativ `<details>`, fără JS) pentru a arăta toate
- * specializările și limbile de studiu disponibile.
+ * specializările (și limbile de studiu, doar dacă sunt restrânse explicit).
  *
  * Sursa de adevăr este `lib/content/universities.ts` (aceeași care alimentează
  * cascada din formular), deci lista rămâne sincronizată cu opțiunile reale.
@@ -42,17 +42,19 @@ export function EligibleFaculties({ className = "" }: { className?: string }) {
                           <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary/60" />
                           {s.name}
                         </span>
-                        <span className="ml-3.5 flex flex-wrap gap-1">
-                          {s.languages.map((l) => (
-                            <span
-                              key={l}
-                              className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
-                              title={STUDY_LANGUAGE_LABELS[l]}
-                            >
-                              {l}
-                            </span>
-                          ))}
-                        </span>
+                        {s.languages?.length ? (
+                          <span className="ml-3.5 flex flex-wrap gap-1">
+                            {s.languages.map((l) => (
+                              <span
+                                key={l}
+                                className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+                                title={STUDY_LANGUAGE_LABELS[l]}
+                              >
+                                {l}
+                              </span>
+                            ))}
+                          </span>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

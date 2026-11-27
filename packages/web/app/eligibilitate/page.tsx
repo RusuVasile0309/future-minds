@@ -71,7 +71,7 @@ export default function EligibilitatePage() {
             <span className="text-primary">motivați și serioși</span>.
           </>
         }
-        lead="Bursa se adresează studenților de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca, din toți anii de studiu — de la anul I până în anul terminal. Selecția se face în urma unui proces atent, bazat pe recomandările cadrelor didactice, ținând cont de cinci criterii principale."
+        lead="Bursa se adresează studenților de la specializări din IT și inginerie la UBB și UTCN din Cluj-Napoca, din toți anii de studiu, ciclul de licență — de la anul I până în anul terminal. Selecția se face în urma unui proces atent, bazat pe recomandările cadrelor didactice, ținând cont de cinci criterii principale."
       />
 
       <section className="container py-16 md:py-20">
@@ -111,10 +111,10 @@ export default function EligibilitatePage() {
             <p className="eyebrow">Unde poți fi student</p>
             <h2 className="display-title mt-4 text-3xl sm:text-4xl">Facultățile eligibile</h2>
             <p className="mt-4 max-w-2xl text-muted-foreground">
-              Poți aplica dacă ești student la una dintre facultățile de IT și inginerie de mai jos, de la
+              Poți aplica dacă ești student la licență la una dintre facultățile de IT și inginerie de mai jos, de la
               Universitatea Babeș-Bolyai sau de la Universitatea Tehnică din Cluj-Napoca —{" "}
               <strong className="text-foreground">indiferent de anul în care te afli</strong>, din anul I până în anul
-              terminal.
+              terminal de licență. Studenții la master nu sunt eligibili.
             </p>
           </Reveal>
           <Reveal delay={100} className="mt-10">

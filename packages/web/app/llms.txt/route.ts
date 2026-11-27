@@ -20,7 +20,7 @@ export function GET() {
 ## Fapte cheie
 - Bursa valorează aproximativ 6.000 € pe an, per bursier, și acoperă integral costul studiilor universitare.
 - Acoperă: taxe de școlarizare, cazare în cămin, masă zilnică la cantină, materiale didactice, un laptop și bani de buzunar.
-- Se adresează studenților de la specializări din IT și inginerie la Universitatea Babeș-Bolyai (UBB) și Universitatea Tehnică din Cluj-Napoca (UTCN).
+- Se adresează studenților de la specializări din IT și inginerie la Universitatea Babeș-Bolyai (UBB) și Universitatea Tehnică din Cluj-Napoca (UTCN), din toți anii de studiu ai ciclului de licență.
 - Beneficiarii mențin o medie minimă de 8.5 (cu maximum o restanță reportată între ani) și finalizează studiile în termen.
 - Selecția se face transparent, pe baza criteriilor de eligibilitate și a recomandărilor cadrelor didactice de la UBB și UTCN.
 - Program susținut financiar de Nova Power&Gas, cu identificarea și monitorizarea beneficiarilor realizată de Rotaract Cluj-Napoca (SAMVS).

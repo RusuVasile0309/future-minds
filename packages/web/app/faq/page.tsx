@@ -21,11 +21,15 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Cine poate aplica?",
-    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, din toți anii de studiu (de la anul I până în anul terminal), care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență — fie că ești din mediul urban, fie din mediul rural.",
+    a: "Studenți la specializări de IT sau inginerie de la UBB și UTCN din Cluj-Napoca, din toți anii de studiu, ciclul de licență (de la anul I până în anul terminal), care provin din medii defavorizate și au nevoie de sprijin financiar. Contează rezultatele academice, situația financiară, implicarea și zona de proveniență — fie că ești din mediul urban, fie din mediul rural.",
   },
   {
     q: "Trebuie să fiu boboc (anul I) ca să aplic?",
-    a: "Nu. Bursa se adresează studenților din toți anii de studiu, de la anul I până în anul terminal. La înscriere îți completezi anul curent și mediile semestrelor deja încheiate, iar evaluarea ține cont corect de anul în care te afli.",
+    a: "Nu. Bursa se adresează studenților din toți anii de studiu, ciclul de licență, de la anul I până în anul terminal. La înscriere îți completezi anul curent și mediile semestrelor deja încheiate, iar evaluarea ține cont corect de anul în care te afli.",
+  },
+  {
+    q: "Pot aplica dacă sunt student la master?",
+    a: "Nu. Bursa se adresează exclusiv studenților de la ciclul de licență.",
   },
   {
     q: "Ce acoperă bursa?",
@@ -37,7 +41,7 @@ const FAQ = [
   },
   {
     q: "La ce universități se aplică programul?",
-    a: "Programul se adresează studenților de la specializări din IT și inginerie de la Universitatea Babeș-Bolyai (UBB) și de la Universitatea Tehnică din Cluj-Napoca (UTCN), de la Informatică și Inteligență Artificială la specializările tehnice de la Automatică și Calculatoare, Electronică, Construcții și celelalte facultăți de inginerie.",
+    a: "Programul se adresează studenților de la specializări din IT și inginerie de la Universitatea Babeș-Bolyai (UBB) și de la Universitatea Tehnică din Cluj-Napoca (UTCN), de la Informatică, Ingineria Informației, Inteligență Artificială și Matematică-Informatică (Facultatea de Matematică și Informatică, UBB) la specializările tehnice de la Automatică și Calculatoare, Electronică, Construcții și celelalte facultăți de inginerie.",
   },
   {
     q: "Cum se face selecția?",

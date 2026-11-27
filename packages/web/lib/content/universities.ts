@@ -15,8 +15,11 @@ export type StudyLanguage = "RO" | "EN" | "HU" | "DE";
 export interface Specialization {
   /** Denumire afișată (și valoare stocată în răspuns). */
   name: string;
-  /** Limbile de studiu disponibile pentru specializare. */
-  languages: StudyLanguage[];
+  /**
+   * Limbile de studiu disponibile pentru specializare. Lipsă/gol = toate
+   * limbile sunt eligibile (nu le mai listăm, ca să nu omitem vreuna).
+   */
+  languages?: StudyLanguage[];
 }
 
 export interface Faculty {
@@ -40,81 +43,81 @@ export const UNIVERSITIES: University[] = [
       {
         name: "Automatică și Calculatoare",
         specializations: [
-          { name: "Calculatoare", languages: ["RO", "EN"] },
-          { name: "Tehnologia Informației", languages: ["RO"] },
-          { name: "Automatică și Informatică Aplicată", languages: ["RO", "EN"] },
+          { name: "Calculatoare" },
+          { name: "Tehnologia Informației" },
+          { name: "Automatică și Informatică Aplicată" },
         ],
       },
       {
         name: "Construcții",
         specializations: [
-          { name: "Construcții civile, industriale și agricole (CCIA)", languages: ["RO", "EN"] },
-          { name: "Căi ferate, drumuri și poduri (CFDP)", languages: ["RO"] },
-          { name: "Amenajări și construcții hidrotehnice (ACH)", languages: ["RO"] },
-          { name: "Inginerie urbană și dezvoltare regională (IUDR)", languages: ["RO"] },
-          { name: "Inginerie economică în construcții", languages: ["RO"] },
-          { name: "Măsurători terestre și cadastru", languages: ["RO"] },
+          { name: "Construcții civile, industriale și agricole (CCIA)" },
+          { name: "Căi ferate, drumuri și poduri (CFDP)" },
+          { name: "Amenajări și construcții hidrotehnice (ACH)" },
+          { name: "Inginerie urbană și dezvoltare regională (IUDR)" },
+          { name: "Inginerie economică în construcții" },
+          { name: "Măsurători terestre și cadastru" },
         ],
       },
       {
         name: "Electronică, Telecomunicații și Tehnologia Informației",
         specializations: [
-          { name: "Electronică Aplicată", languages: ["RO", "EN"] },
-          { name: "Tehnologii și Sisteme de Telecomunicații", languages: ["RO", "EN"] },
-          { name: "Microelectronică, Optoelectronică și Nanotehnologii", languages: ["RO"] },
-          { name: "Inginerie Economică în Domeniul Electric, Electronic și Energetic", languages: ["RO"] },
+          { name: "Electronică Aplicată" },
+          { name: "Tehnologii și Sisteme de Telecomunicații" },
+          { name: "Microelectronică, Optoelectronică și Nanotehnologii" },
+          { name: "Inginerie Economică în Domeniul Electric, Electronic și Energetic" },
         ],
       },
       {
         name: "Autovehicule Rutiere, Mecatronică și Mecanică",
         specializations: [
-          { name: "Autovehicule Rutiere", languages: ["RO"] },
-          { name: "Ingineria Transporturilor și a Traficului", languages: ["RO"] },
-          { name: "Mecatronică", languages: ["RO"] },
-          { name: "Mașini și Instalații pentru Agricultură și Industria Alimentară", languages: ["RO"] },
-          { name: "Mecanică Fină și Nanotehnologii", languages: ["RO"] },
-          { name: "Sisteme și Echipamente Termice", languages: ["RO"] },
+          { name: "Autovehicule Rutiere" },
+          { name: "Ingineria Transporturilor și a Traficului" },
+          { name: "Mecatronică" },
+          { name: "Mașini și Instalații pentru Agricultură și Industria Alimentară" },
+          { name: "Mecanică Fină și Nanotehnologii" },
+          { name: "Sisteme și Echipamente Termice" },
         ],
       },
       {
         name: "Inginerie Industrială, Robotică și Managementul Producției",
         specializations: [
-          { name: "Tehnologia Construcțiilor de Mașini", languages: ["RO"] },
-          { name: "Design Industrial", languages: ["RO"] },
-          { name: "Robotică", languages: ["RO"] },
-          { name: "Inginerie Economică Industrială", languages: ["RO"] },
+          { name: "Tehnologia Construcțiilor de Mașini" },
+          { name: "Design Industrial" },
+          { name: "Robotică" },
+          { name: "Inginerie Economică Industrială" },
         ],
       },
       {
         name: "Inginerie Electrică",
         specializations: [
-          { name: "Electrotehnică", languages: ["RO"] },
-          { name: "Instrumentație și Achiziția Datelor", languages: ["RO"] },
-          { name: "Electronică de Putere și Acționări Electrice", languages: ["RO"] },
-          { name: "Electromecanică", languages: ["RO"] },
-          { name: "Ingineria Sistemelor Electroenergetice", languages: ["RO"] },
-          { name: "Inginerie Medicală", languages: ["RO"] },
-          { name: "Inginerie Economică în domeniul Electric, Electronic și Energetic", languages: ["RO"] },
+          { name: "Electrotehnică" },
+          { name: "Instrumentație și Achiziția Datelor" },
+          { name: "Electronică de Putere și Acționări Electrice" },
+          { name: "Electromecanică" },
+          { name: "Ingineria Sistemelor Electroenergetice" },
+          { name: "Inginerie Medicală" },
+          { name: "Inginerie Economică în domeniul Electric, Electronic și Energetic" },
         ],
       },
       {
         name: "Ingineria Materialelor și a Mediului",
         specializations: [
-          { name: "Știința Materialelor", languages: ["RO"] },
-          { name: "Ingineria Procesării Materialelor", languages: ["RO"] },
-          { name: "Ingineria și Protecția Mediului în Industrie", languages: ["RO"] },
+          { name: "Știința Materialelor" },
+          { name: "Ingineria Procesării Materialelor" },
+          { name: "Ingineria și Protecția Mediului în Industrie" },
         ],
       },
       {
         name: "Inginerie a Instalațiilor",
         specializations: [
-          { name: "Instalații pentru construcții", languages: ["RO"] },
+          { name: "Instalații pentru construcții" },
         ],
       },
       {
         name: "Arhitectură și Urbanism",
         specializations: [
-          { name: "Arhitectură", languages: ["RO"] },
+          { name: "Arhitectură" },
         ],
       },
     ],
@@ -126,15 +129,16 @@ export const UNIVERSITIES: University[] = [
       {
         name: "Matematică și Informatică",
         specializations: [
-          { name: "Informatică", languages: ["RO", "EN", "HU", "DE"] },
-          { name: "Inteligență Artificială", languages: ["EN"] },
-          { name: "Ingineria Informației", languages: ["EN", "HU"] },
+          { name: "Informatică" },
+          { name: "Inteligență Artificială" },
+          { name: "Ingineria Informației" },
+          { name: "Matematică-Informatică" },
         ],
       },
       {
         name: "Științe Economice și Gestiunea Afacerilor",
         specializations: [
-          { name: "Informatică Economică", languages: ["RO", "HU"] },
+          { name: "Informatică Economică" },
         ],
       },
     ],
@@ -200,5 +204,6 @@ export function languageOptions(
   const fac = uni?.faculties.find((f) => f.name === facultyName);
   const spec = fac?.specializations.find((s) => s.name === specializationName);
   if (!spec) return [];
-  return spec.languages.map((l) => ({ value: l, label: STUDY_LANGUAGE_LABELS[l] }));
+  const langs = spec.languages?.length ? spec.languages : ALL_LANGUAGES;
+  return langs.map((l) => ({ value: l, label: STUDY_LANGUAGE_LABELS[l] }));
 }
