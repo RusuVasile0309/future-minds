@@ -23,6 +23,20 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "rejected", label: "Respinse" },
 ]
 
+// Ferestre de timp pentru filtrul „Perioadă" (în ore; 0 = oricând).
+const PERIODS: { hours: number; label: string }[] = [
+  { hours: 0, label: "Oricând" },
+  { hours: 1, label: "Ultima oră" },
+  { hours: 3, label: "Ultimele 3 ore" },
+  { hours: 7, label: "Ultimele 7 ore" },
+  { hours: 24, label: "Ultimele 24 de ore" },
+  { hours: 48, label: "Ultimele 2 zile" },
+  { hours: 24 * 7, label: "Ultimele 7 zile" },
+  { hours: 24 * 30, label: "Ultimele 30 de zile" },
+]
+
+type PeriodField = "submittedAt" | "createdAt"
+
 // Ordine logică pentru sortarea pe status.
 const STATUS_ORDER: ApplicationStatus[] = ["submitted", "under_review", "waitlist", "accepted", "rejected", "draft"]
 
@@ -51,6 +65,8 @@ export function CandidateTable() {
   const results = useRankingResults("draft")
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
+  const [periodHours, setPeriodHours] = useState(0)
+  const [periodField, setPeriodField] = useState<PeriodField>("submittedAt")
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "submittedAt", dir: "desc" })
 
   // Map applicationId → scor calculat.
@@ -60,15 +76,25 @@ export function CandidateTable() {
     return m
   }, [results.data])
 
+  // Aplicațiile din fereastra de timp aleasă (după trimitere sau după începere).
+  const inPeriod = useMemo(() => {
+    if (!periodHours) return data ?? []
+    const since = Date.now() - periodHours * 3_600_000
+    return (data ?? []).filter((a) => {
+      const t = a[periodField]
+      return t != null && ts(t) >= since
+    })
+  }, [data, periodHours, periodField])
+
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: data?.length ?? 0 }
-    for (const a of data ?? []) c[a.status] = (c[a.status] ?? 0) + 1
+    const c: Record<string, number> = { all: inPeriod.length }
+    for (const a of inPeriod) c[a.status] = (c[a.status] ?? 0) + 1
     return c
-  }, [data])
+  }, [inPeriod])
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const filtered = (data ?? []).filter((a) => {
+    const filtered = inPeriod.filter((a) => {
       if (filter !== "all" && a.status !== filter) return false
       if (!q) return true
       return a.fullName.toLowerCase().includes(q) || (a.applicant.email ?? "").toLowerCase().includes(q)
@@ -102,7 +128,7 @@ export function CandidateTable() {
         }
       }
     })
-  }, [data, query, filter, sort, scoreById])
+  }, [inPeriod, query, filter, sort, scoreById])
 
   function toggleSort(key: SortKey) {
     setSort((s) =>
@@ -152,6 +178,30 @@ export function CandidateTable() {
             className="pl-9"
           />
         </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Perioadă:</span>
+        <select
+          value={periodHours}
+          onChange={(e) => setPeriodHours(Number(e.target.value))}
+          className="h-9 rounded-lg border border-input bg-background px-2 text-sm"
+        >
+          {PERIODS.map((p) => (
+            <option key={p.hours} value={p.hours}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        <span className="text-muted-foreground">după</span>
+        <select
+          value={periodField}
+          onChange={(e) => setPeriodField(e.target.value as PeriodField)}
+          className="h-9 rounded-lg border border-input bg-background px-2 text-sm"
+        >
+          <option value="submittedAt">data trimiterii</option>
+          <option value="createdAt">data începerii</option>
+        </select>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
