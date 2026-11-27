@@ -28,7 +28,17 @@ const STATUS_ORDER: ApplicationStatus[] = ["submitted", "under_review", "waitlis
 
 function formatDate(d: Date | string | null): string {
   if (!d) return "-"
-  return new Date(d).toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "numeric" })
+  return new Date(d).toLocaleDateString("ro-RO", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "Europe/Bucharest",
+  })
+}
+
+function formatTime(d: Date | string | null): string {
+  if (!d) return ""
+  return new Date(d).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" })
 }
 
 function ts(d: Date | string | null): number {
@@ -149,7 +159,7 @@ export function CandidateTable() {
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <SortHeader label="Candidat" sortKey="name" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
-                <SortHeader label="Trimisă" sortKey="submittedAt" sort={sort} onSort={toggleSort} />
+                <SortHeader label="Data și ora" sortKey="submittedAt" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Fișiere" sortKey="fileCount" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Scor ranking" sortKey="score" sort={sort} onSort={toggleSort} />
                 <th className="px-5 py-3" />
@@ -171,7 +181,10 @@ export function CandidateTable() {
                   <td className="px-5 py-4">
                     <StatusBadge status={a.status} />
                   </td>
-                  <td className="px-5 py-4 text-muted-foreground">{formatDate(a.submittedAt)}</td>
+                  <td className="whitespace-nowrap px-5 py-4 text-muted-foreground">
+                    {formatDate(a.submittedAt)}
+                    {a.submittedAt ? <span className="block text-xs">{formatTime(a.submittedAt)}</span> : null}
+                  </td>
                   <td className="px-5 py-4 text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <Paperclip className="size-3.5" />
