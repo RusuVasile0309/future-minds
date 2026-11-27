@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import type { ApplicationStatus, ScoredApplication } from "@fm/shared"
 
 type Filter = ApplicationStatus | "all"
-type SortKey = "name" | "status" | "submittedAt" | "fileCount" | "score"
+type SortKey = "name" | "status" | "createdAt" | "submittedAt" | "fileCount" | "score"
 type SortDir = "asc" | "desc"
 
 const FILTERS: { value: Filter; label: string }[] = [
@@ -86,6 +86,8 @@ export function CandidateTable() {
           return mul * a.fullName.localeCompare(b.fullName, "ro")
         case "status":
           return mul * (STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status))
+        case "createdAt":
+          return mul * (ts(a.createdAt) - ts(b.createdAt))
         case "submittedAt":
           return mul * (ts(a.submittedAt) - ts(b.submittedAt))
         case "fileCount":
@@ -159,7 +161,8 @@ export function CandidateTable() {
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <SortHeader label="Candidat" sortKey="name" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
-                <SortHeader label="Data și ora" sortKey="submittedAt" sort={sort} onSort={toggleSort} />
+                <SortHeader label="Începută" sortKey="createdAt" sort={sort} onSort={toggleSort} />
+                <SortHeader label="Trimisă" sortKey="submittedAt" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Fișiere" sortKey="fileCount" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Scor ranking" sortKey="score" sort={sort} onSort={toggleSort} />
                 <th className="px-5 py-3" />
@@ -181,10 +184,8 @@ export function CandidateTable() {
                   <td className="px-5 py-4">
                     <StatusBadge status={a.status} />
                   </td>
-                  <td className="whitespace-nowrap px-5 py-4 text-muted-foreground">
-                    {formatDate(a.submittedAt)}
-                    {a.submittedAt ? <span className="block text-xs">{formatTime(a.submittedAt)}</span> : null}
-                  </td>
+                  <DateTimeCell value={a.createdAt} />
+                  <DateTimeCell value={a.submittedAt} />
                   <td className="px-5 py-4 text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <Paperclip className="size-3.5" />
@@ -212,6 +213,15 @@ export function CandidateTable() {
         ) : null}
       </div>
     </div>
+  )
+}
+
+function DateTimeCell({ value }: { value: Date | string | null }) {
+  return (
+    <td className="whitespace-nowrap px-5 py-4 text-muted-foreground">
+      {formatDate(value)}
+      {value ? <span className="block text-xs">{formatTime(value)}</span> : null}
+    </td>
   )
 }
 
