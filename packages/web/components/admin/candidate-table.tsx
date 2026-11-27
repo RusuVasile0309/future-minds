@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import type { ApplicationStatus, ScoredApplication } from "@fm/shared"
 
 type Filter = ApplicationStatus | "all"
-type SortKey = "name" | "status" | "createdAt" | "submittedAt" | "fileCount" | "score"
+type SortKey = "name" | "status" | "createdAt" | "submittedAt" | "fileCount" | "score" | "completion"
 type SortDir = "asc" | "desc"
 
 const FILTERS: { value: Filter; label: string }[] = [
@@ -53,6 +53,10 @@ function formatDate(d: Date | string | null): string {
 function formatTime(d: Date | string | null): string {
   if (!d) return ""
   return new Date(d).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" })
+}
+
+function completionPercent(c: { filled: number; total: number }): number {
+  return c.total ? Math.round((c.filled / c.total) * 100) : 0
 }
 
 function ts(d: Date | string | null): number {
@@ -118,6 +122,8 @@ export function CandidateTable() {
           return mul * (ts(a.submittedAt) - ts(b.submittedAt))
         case "fileCount":
           return mul * (a.fileCount - b.fileCount)
+        case "completion":
+          return mul * (completionPercent(a.completion) - completionPercent(b.completion))
         case "score": {
           const sa = scoreOf(a.id)
           const sb = scoreOf(b.id)
@@ -215,6 +221,7 @@ export function CandidateTable() {
                 <SortHeader label="Trimisă" sortKey="submittedAt" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Fișiere" sortKey="fileCount" sort={sort} onSort={toggleSort} />
                 <SortHeader label="Scor ranking" sortKey="score" sort={sort} onSort={toggleSort} />
+                <SortHeader label="Completare" sortKey="completion" sort={sort} onSort={toggleSort} />
                 <th className="px-5 py-3" />
               </tr>
             </thead>
@@ -244,6 +251,9 @@ export function CandidateTable() {
                   </td>
                   <td className="px-5 py-4">
                     <ScoreCell scored={scoreById.get(a.id)} loading={results.isLoading} error={!!results.error} />
+                  </td>
+                  <td className="px-5 py-4">
+                    <CompletionCell completion={a.completion} />
                   </td>
                   <td className="px-5 py-4 text-right">
                     <Link
@@ -325,6 +335,25 @@ function ScoreCell({ scored, loading, error }: { scored?: ScoredApplication; loa
     <span className="inline-flex items-baseline gap-1.5">
       <span className="font-semibold text-foreground">{scored.percent.toFixed(1)}%</span>
       {scored.rank != null ? <span className="text-xs text-muted-foreground">#{scored.rank}</span> : null}
+    </span>
+  )
+}
+
+// Indicator mic de progres: bară + procent; detaliul (x din y câmpuri) în tooltip.
+function CompletionCell({ completion }: { completion: { filled: number; total: number } }) {
+  const pct = completionPercent(completion)
+  return (
+    <span
+      className="inline-flex items-center gap-2"
+      title={`${completion.filled} din ${completion.total} câmpuri completate`}
+    >
+      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-secondary">
+        <span
+          className={cn("block h-full rounded-full", pct === 100 ? "bg-emerald-500" : "bg-primary")}
+          style={{ width: `${pct}%` }}
+        />
+      </span>
+      <span className="font-mono text-xs tabular-nums text-muted-foreground">{pct}%</span>
     </span>
   )
 }

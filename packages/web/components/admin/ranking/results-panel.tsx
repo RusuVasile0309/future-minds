@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { ChevronDown, ChevronRight, AlertTriangle } from "lucide-react"
 import { useRankingResults } from "@/app/network/admin"
+import { Pagination, usePagination } from "@/components/admin/pagination"
 import { cn } from "@/lib/utils"
 import type { ScoredApplication } from "@fm/shared"
 
@@ -15,6 +16,8 @@ function fmtIncome(v: number | null): string {
 export function ResultsPanel({ source }: { source: "draft" | "active" }) {
   const { data, isLoading, error } = useRankingResults(source)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const results = data?.results ?? []
+  const { pageItems, ...pagination } = usePagination(results)
 
   if (isLoading) return <p className="text-muted-foreground">Se calculează clasamentul…</p>
   if (error) {
@@ -27,7 +30,6 @@ export function ResultsPanel({ source }: { source: "draft" | "active" }) {
     )
   }
 
-  const results = data?.results ?? []
   if (results.length === 0) {
     return <p className="text-muted-foreground">Niciun candidat de clasat (nu există aplicații trimise).</p>
   }
@@ -46,7 +48,7 @@ export function ResultsPanel({ source }: { source: "draft" | "active" }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {results.map((r) => {
+            {pageItems.map((r) => {
               const isOpen = expanded === r.applicationId
               return (
                 <RowGroup key={r.applicationId} r={r} isOpen={isOpen} onToggle={() => setExpanded(isOpen ? null : r.applicationId)} />
@@ -55,6 +57,7 @@ export function ResultsPanel({ source }: { source: "draft" | "active" }) {
           </tbody>
         </table>
       </div>
+      <Pagination {...pagination} />
     </div>
   )
 }

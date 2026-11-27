@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { Loader2, Search, Trash2 } from "lucide-react"
 import { useUsers, useSetUserRole, useDeleteUser } from "@/app/network/admin"
 import { Input } from "@/components/ui/input"
+import { Pagination, usePagination } from "@/components/admin/pagination"
 import { cn } from "@/lib/utils"
 import type { User, UserRole } from "@fm/shared"
 
@@ -39,6 +40,7 @@ export function UsersManager({ currentUserId, canManage }: { currentUserId: stri
       (u) => fullName(u).toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q)
     )
   }, [data, query])
+  const { pageItems, ...pagination } = usePagination(rows)
 
   if (isLoading) return <p className="text-muted-foreground">Se încarcă utilizatorii…</p>
   if (error) return <p className="text-destructive">Nu am putut încărca utilizatorii.</p>
@@ -93,7 +95,7 @@ export function UsersManager({ currentUserId, canManage }: { currentUserId: stri
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {rows.map((u) => {
+              {pageItems.map((u) => {
                 const isSelf = u.id === currentUserId
                 const busy = busyId === u.id
                 return (
@@ -151,6 +153,7 @@ export function UsersManager({ currentUserId, canManage }: { currentUserId: stri
         {rows.length === 0 ? (
           <p className="px-5 py-8 text-center text-sm text-muted-foreground">Niciun utilizator găsit.</p>
         ) : null}
+        <Pagination {...pagination} />
       </div>
 
       {!canManage ? (

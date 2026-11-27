@@ -76,6 +76,8 @@ export interface ApplicationSummary {
   fullName: string
   /** Nr. de fișiere atașate — pentru un indicator rapid în tabel. */
   fileCount: number
+  /** Câmpuri vizibile completate din total (pentru indicatorul de progres). */
+  completion: { filled: number; total: number }
 }
 
 /** Aplicație completă pentru ecranul de detaliu admin. */

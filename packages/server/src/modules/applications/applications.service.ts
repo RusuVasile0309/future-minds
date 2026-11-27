@@ -94,6 +94,36 @@ function deriveFullName(answers: Record<string, AnswerValue>, row: Record<string
   return (row.email as string | null) ?? "—"
 }
 
+// Completarea formularului: câmpuri vizibile completate / total câmpuri vizibile
+// (obligatorii și opționale; fără cele derivate sau arhivate). Fișierele contează
+// drept completate dacă există cel puțin un document încărcat pe câmp.
+function computeCompletion(
+  answers: Record<string, AnswerValue>,
+  fileKeys: Set<string>
+): { filled: number; total: number } {
+  let filled = 0
+  let total = 0
+  for (const section of FORM_SCHEMA) {
+    for (const field of section.fields) {
+      if (field.derived || field.archived || !isFieldVisible(field, answers)) continue
+      total++
+      if (field.type === "file") {
+        if (fileKeys.has(field.key)) filled++
+        continue
+      }
+      const v = answers[field.key]
+      const empty =
+        v === undefined ||
+        v === null ||
+        v === "" ||
+        (Array.isArray(v) && v.length === 0) ||
+        (field.type === "boolean" && typeof v !== "boolean")
+      if (!empty) filled++
+    }
+  }
+  return { filled, total }
+}
+
 function toSummary(row: Record<string, unknown>): ApplicationSummary {
   const answers = (row.answers as Record<string, AnswerValue>) ?? {}
   return {
@@ -105,6 +135,7 @@ function toSummary(row: Record<string, unknown>): ApplicationSummary {
     applicant: toApplicant(row),
     fullName: deriveFullName(answers, row),
     fileCount: Number(row.file_count ?? 0),
+    completion: computeCompletion(answers, new Set((row.file_keys as string[] | null) ?? [])),
   }
 }
 
@@ -281,7 +312,8 @@ export class ApplicationsService {
         a.id, a.status, a.cohort, a.submitted_at, a.created_at, a.answers,
         u.id AS u_id, u.email, u.name AS u_name,
         u.first_name AS u_first, u.last_name AS u_last, u.phone,
-        (SELECT COUNT(*) FROM application_files f WHERE f.application_id = a.id) AS file_count
+        (SELECT COUNT(*) FROM application_files f WHERE f.application_id = a.id) AS file_count,
+        (SELECT ARRAY_AGG(DISTINCT f.field_key) FROM application_files f WHERE f.application_id = a.id) AS file_keys
       FROM applications a
       JOIN users u ON u.id = a.user_id
       WHERE a.cohort = ${cohort}
